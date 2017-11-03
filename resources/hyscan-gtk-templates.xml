@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+    <gresource prefix="/org/hyscan/gtk">
+        <file compressed="true">hyscan-gtk-project-viewer.ui</file>
+        <file compressed="true">hyscan-gtk-colorizer.ui</file>
+        <file compressed="true">hyscan-gtk-leveller.ui</file>
+        <file compressed="true">hyscan-gtk-scaler.ui</file>
+        <file compressed="true">hyscan-gtk-automover.ui</file>
+        <file compressed="true">hyscan-gtk-recorder.ui</file>
+        <file compressed="true">hyscan-gtk-tvg-control.ui</file>
+        <file compressed="true">hyscan-gtk-gen-control.ui</file>
+        <file compressed="true">hyscan-gtk-mark-editor.ui</file>
+        <file compressed="true">hyscan-gtk-player.ui</file>
+    </gresource>
+</gresources>

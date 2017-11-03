@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=${prefix}/lib
+includedir=${prefix}/include/hyscan-@HYSCAN_MAJOR_VERSION@/hyscangtk
+
+Name: HyScanGtk
+Version: @HYSCAN_MAJOR_VERSION@.@HYSCAN_GTK_VERSION@
+Description: HyScan gtk library
+
+Requires: gtk+-3.0 hyscancontrol-@HYSCAN_MAJOR_VERSION@
+Libs: -L${libdir} -lhyscangtk-@HYSCAN_MAJOR_VERSION@
+Cflags: -I${includedir}

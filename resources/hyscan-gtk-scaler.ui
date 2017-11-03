@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.18.3 -->
+<!-- Edited with love -->
+<interface>
+  <requires lib="gtk+" version="3.14"/>
+  <template class="HyScanGtkScaler" parent="GtkGrid">
+    <property name="width_request">258</property>
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="column_spacing">4</property>
+    <property name="column_homogeneous">True</property>
+    <child>
+      <object class="GtkLabel" id="scale_caption_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">end</property>
+        <property name="label" translatable="yes">Scale</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkGrid" id="scaler_grid">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="column_spacing">4</property>
+        <child>
+          <object class="GtkButton" id="zoom_out_btn">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="halign">start</property>
+            <property name="always_show_image">True</property>
+            <signal name="clicked" handler="zoom_out_clicked" swapped="yes"/>
+            <child>
+              <object class="GtkImage" id="zoom_out_img">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">zoom-out-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="scale_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="zoom_in_btn">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="halign">end</property>
+            <property name="always_show_image">True</property>
+            <signal name="clicked" handler="zoom_in_clicked" swapped="yes"/>
+            <child>
+              <object class="GtkImage" id="zoom_in_img">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">zoom-in-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">2</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">0</property>
+        <property name="width">2</property>
+      </packing>
+    </child>
+  </template>
+  <object class="GtkSizeGroup" id="btns_sizegroup">
+    <property name="mode">both</property>
+    <widgets>
+      <widget name="zoom_out_btn"/>
+      <widget name="zoom_in_btn"/>
+    </widgets>
+  </object>
+</interface>

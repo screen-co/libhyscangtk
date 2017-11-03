@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade -->
+<!-- Edited with love -->
+<interface>
+  <requires lib="gtk+" version="3.14"/>
+  <object class="GtkAdjustment" id="level_adj">
+    <property name="lower">0</property>
+    <property name="upper">1</property>
+    <property name="step_increment">0.1</property>
+    <property name="page_increment">0.1</property>
+    <signal name="value-changed" handler="level_changed" swapped="yes"/>
+  </object>
+  <object class="GtkAdjustment" id="lin_gain_adj">
+    <property name="lower">-20</property>
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">1</property>
+    <signal name="value-changed" handler="lin_gain_changed" swapped="yes"/>
+  </object>
+  <object class="GtkAdjustment" id="lin_step_adj">
+    <property name="lower">0</property>
+    <property name="upper">40</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">1</property>
+    <signal name="value-changed" handler="lin_step_changed" swapped="yes"/>
+  </object>
+  <object class="GtkAdjustment" id="log_alpha_adj">
+    <property name="lower">-1</property>
+    <property name="upper">1</property>
+    <property name="step_increment">0.1</property>
+    <property name="page_increment">0.1</property>
+    <signal name="value-changed" handler="log_alpha_changed" swapped="yes"/>
+  </object>
+  <object class="GtkAdjustment" id="log_beta_adj">
+    <property name="lower">0</property>
+    <property name="upper">40</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">1</property>
+    <signal name="value-changed" handler="log_beta_changed" swapped="yes"/>
+  </object>
+  <object class="GtkAdjustment" id="log_gain_adj">
+    <property name="lower">-20</property>
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">1</property>
+    <signal name="value-changed" handler="log_gain_changed" swapped="yes"/>
+  </object>
+  <object class="GtkAdjustment" id="sensitivity_adj">
+    <property name="lower">0</property>
+    <property name="upper">1</property>
+    <property name="step_increment">0.1</property>
+    <property name="page_increment">0.1</property>
+    <signal name="value-changed" handler="sensitivity_changed" swapped="yes"/>
+  </object>
+  <template class="HyScanGtkTVGControl" parent="GtkGrid">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="row_spacing">4</property>
+    <property name="column_spacing">4</property>
+    <property name="column_homogeneous">True</property>
+    <child>
+      <object class="GtkComboBoxText" id="tvg_mode_cbt">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <signal name="changed" handler="tvg_mode_changed" swapped="yes"/>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">0</property>
+        <property name="width">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkStack" id="tvg_control_stack">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="homogeneous">False</property>
+        <child>
+          <object class="GtkGrid" id="auto_tvg_grid">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="row_spacing">4</property>
+            <property name="column_spacing">4</property>
+            <property name="column_homogeneous">True</property>
+            <child>
+              <object class="GtkLabel" id="level_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Level</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="sensitivity_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Sensitivity</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="sensitivity_spinbtn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="adjustment">sensitivity_adj</property>
+                <property name="digits">2</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">1</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="level_spinbtn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="adjustment">level_adj</property>
+                <property name="digits">2</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="name">page0</property>
+            <property name="title" translatable="yes">page0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkGrid" id="lin_tvg_grid">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="row_spacing">4</property>
+            <property name="column_spacing">4</property>
+            <property name="column_homogeneous">True</property>
+            <child>
+              <object class="GtkLabel" id="lin_gain_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Start gain</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="lin_step_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Gain step</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="lin_gain_spinbtn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="adjustment">lin_gain_adj</property>
+                <property name="digits">4</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="lin_step_spinbtn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="adjustment">lin_step_adj</property>
+                <property name="digits">4</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">1</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="name">page1</property>
+            <property name="title" translatable="yes">page1</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkGrid" id="log_tvg_grid">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="row_spacing">4</property>
+            <property name="column_spacing">4</property>
+            <property name="column_homogeneous">True</property>
+            <child>
+              <object class="GtkLabel" id="log_gain_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Start gain</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="log_beta_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Beta</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="log_alpha_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Alpha</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="log_gain_spinbtn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="adjustment">log_gain_adj</property>
+                <property name="digits">4</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="log_beta_spinbtn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="adjustment">log_beta_adj</property>
+                <property name="digits">2</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">1</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="log_alpha_spinbtn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="adjustment">log_alpha_adj</property>
+                <property name="digits">2</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">2</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="name">page2</property>
+            <property name="title" translatable="yes">page2</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">1</property>
+        <property name="width">3</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="tvg_type_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">end</property>
+        <property name="label" translatable="yes">Type</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">0</property>
+      </packing>
+    </child>
+  </template>
+</interface>

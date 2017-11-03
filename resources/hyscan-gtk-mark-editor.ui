@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade -->
+<!-- Edited with love -->
+<interface>
+  <requires lib="gtk+" version="3.14"/>
+  <object class="GtkTextBuffer" id="descr_textbuf">
+    <signal name="changed" handler="descr_changed" swapped="yes"/>
+  </object>
+  <object class="GtkEntryBuffer" id="operator_entrybuf">
+    <property name="max_length">31</property>
+    <signal name="notify::text" handler="operator_changed" swapped="yes"/>
+  </object>
+  <object class="GtkEntryBuffer" id="title_entrybuf">
+    <property name="max_length">31</property>
+    <signal name="notify::text" handler="title_changed" swapped="yes"/>
+  </object>
+  <template class="HyScanGtkMarkEditor" parent="GtkGrid">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="row_spacing">4</property>
+    <property name="column_spacing">4</property>
+    <property name="column_homogeneous">True</property>
+    <child>
+      <object class="GtkLabel" id="title_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">end</property>
+        <property name="label" translatable="yes">Title</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="operator_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">end</property>
+        <property name="label" translatable="yes">Operator</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="descr_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">end</property>
+        <property name="valign">start</property>
+        <property name="label" translatable="yes">Description</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkScrolledWindow" id="descr_textview_scrolled_window">
+        <property name="width_request">60</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="shadow_type">in</property>
+        <property name="min_content_height">60</property>
+        <child>
+          <object class="GtkTextView" id="descr_textview">
+            <property name="height_request">60</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="valign">start</property>
+            <property name="wrap_mode">word</property>
+            <property name="left_margin">8</property>
+            <property name="right_margin">4</property>
+            <property name="buffer">descr_textbuf</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">2</property>
+        <property name="width">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkEntry" id="title_textentry">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="buffer">title_entrybuf</property>
+        <property name="max_length">31</property>
+        <property name="width_chars">15</property>
+        <property name="max_width_chars">15</property>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">0</property>
+        <property name="width">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkEntry" id="operator_textentry">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="buffer">operator_entrybuf</property>
+        <property name="max_length">31</property>
+        <property name="width_chars">15</property>
+        <property name="max_width_chars">15</property>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">1</property>
+        <property name="width">2</property>
+      </packing>
+    </child>
+  </template>
+</interface>
