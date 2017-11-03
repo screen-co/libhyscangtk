@@ -1,3 +1,13 @@
+/**
+ * \file hyscan-gtk-automover.c
+ *
+ * \brief Исходный файл виджета управления автосдвижкой.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ */
+
 #include "hyscan-gtk-automover.h"
 
 enum

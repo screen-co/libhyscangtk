@@ -1,3 +1,15 @@
+/**
+ * \file hyscan-gtk-recorder.h
+ *
+ * \brief Заголовочный файл виджета управления записью.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ * \defgroup HyScanGtkRecorder HyScanGtkRecorder - виджет управления записью.
+ *
+ */
+
 #ifndef __HYSCAN_GTK_RECORDER_H__
 #define __HYSCAN_GTK_RECORDER_H__
 

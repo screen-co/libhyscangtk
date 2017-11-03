@@ -1,3 +1,15 @@
+/**
+ * \file hyscan-gtk-gen-control.h
+ *
+ * \brief Заголовочный файл виджета управления генератором.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ * \defgroup HyScanGtkGenControl HyScanGtkGenControl - виджет управления генератором.
+ *
+ */
+
 #ifndef __HYSCAN_GTK_GEN_CONTROL_H__
 #define __HYSCAN_GTK_GEN_CONTROL_H__
 

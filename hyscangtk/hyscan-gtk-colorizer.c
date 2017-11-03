@@ -1,3 +1,13 @@
+/**
+ * \file hyscan-gtk-colorizer.c
+ *
+ * \brief Исходный файл виджета управления цветовыми схемами.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ */
+
 #include "hyscan-gtk-colorizer.h"
 
 enum

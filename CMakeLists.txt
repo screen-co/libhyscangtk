@@ -61,6 +61,7 @@ else ()
   include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../libhyscandb/hyscandb")
   include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../libhyscancore/hyscancore")
   include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../libhyscancontrol/hyscancontrol")
+  include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../libhyscanmodel/hyscanmodel")
 
   link_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../libhyscantypes/bin")
   link_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../libhyscancache/bin")
@@ -68,12 +69,14 @@ else ()
   link_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../libhyscandb/bin")
   link_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../libhyscancore/bin")
   link_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../libhyscancontrol/bin")
+  link_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../libhyscanmodel/bin")
 
   set (HYSCAN_LIBRARIES "hyscantypes-${HYSCAN_MAJOR_VERSION}"
                         "hyscancache-${HYSCAN_MAJOR_VERSION}"
                         "hyscanmath-${HYSCAN_MAJOR_VERSION}"
                         "hyscandb-${HYSCAN_MAJOR_VERSION}"
                         "hyscancore-${HYSCAN_MAJOR_VERSION}"
+                        "hyscanmodel-${HYSCAN_MAJOR_VERSION}"
                         "hyscancontrol-${HYSCAN_MAJOR_VERSION}")
 
   include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../urpc/urpc")

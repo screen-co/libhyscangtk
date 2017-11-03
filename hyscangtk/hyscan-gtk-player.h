@@ -1,3 +1,15 @@
+/**
+ * \file hyscan-gtk-player.h
+ *
+ * \brief Заголовочный файл виджет плеера.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ * \defgroup HyScanGtkPlayer HyScanGtkPlayer - виджет плеера.
+ *
+ */
+
 #ifndef __HYSCAN_GTK_PLAYER_H__
 #define __HYSCAN_GTK_PLAYER_H__
 

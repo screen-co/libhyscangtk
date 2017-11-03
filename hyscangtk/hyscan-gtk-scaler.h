@@ -2,9 +2,12 @@
  * \file hyscan-gtk-scaler.h
  *
  * \brief Заголовочный файл виджета управления масштабом.
- * \author Andrei Fadeev (vmakxs@gmail.com)
- * \date 2017
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
  * \license Проприетарная лицензия ООО "Экран"
+ *
+ * \defgroup HyScanGtkScaler HyScanGtkScaler - виджет управления масштабом.
+ *
  */
 
 #ifndef __HYSCAN_GTK_SCALER_H__

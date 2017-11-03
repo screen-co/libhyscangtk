@@ -1,3 +1,13 @@
+/**
+ * \file hyscan-gtk-player.h
+ *
+ * \brief Исходный файл виджета плеера.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ */
+
 #include "hyscan-gtk-player.h"
 
 enum

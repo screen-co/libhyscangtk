@@ -1,3 +1,13 @@
+/**
+ * \file hyscan-gtk-project-viewer.c
+ *
+ * \brief Исходный файл виджета просмотра проекта.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ */
+
 #include "hyscan-gtk-project-viewer.h"
 
 enum

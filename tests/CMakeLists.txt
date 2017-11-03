@@ -4,11 +4,11 @@ set (TEST_LIBRARIES ${GTK3_LIBRARIES}
                     ${HYSCAN_LIBRARIES}
                     ${HYSCAN_GTK_LIBRARY})
 
-add_executable (gtk-pane-test gtk-pane-test.c)
+add_executable (hyscan-gtk-views-test hyscan-gtk-views-test.c)
 
-target_link_libraries (gtk-pane-test ${TEST_LIBRARIES})
+target_link_libraries (hyscan-gtk-views-test ${TEST_LIBRARIES})
 
-install (TARGETS gtk-pane-test
+install (TARGETS hyscan-gtk-views-test
          COMPONENT test
          RUNTIME DESTINATION bin
          LIBRARY DESTINATION lib

@@ -1,3 +1,15 @@
+/**
+ * \file hyscan-gtk-pane.h
+ *
+ * \brief Заголовочный файл виджета панели.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ * \defgroup HyScanGtkPane HyScanGtkPane - виджет панель
+ *
+ */
+
 #ifndef __HYSCAN_GTK_PANE_H__
 #define __HYSCAN_GTK_PANE_H__
 
@@ -34,22 +46,21 @@ struct _HyScanGtkPaneClass
 };
 
 HYSCAN_API
-GType        hyscan_gtk_pane_style_get_type   (void);
+GType       hyscan_gtk_pane_style_get_type  (void);
 
 HYSCAN_API
-GType        hyscan_gtk_pane_get_type         (void);
+GType       hyscan_gtk_pane_get_type        (void);
 
 HYSCAN_API
-GtkWidget*   hyscan_gtk_pane_new              (const gchar          *title,
-                                               GtkWidget            *body,
-                                               gboolean              bold,
-                                               HyScanGtkPaneStyle    style);
+GtkWidget*  hyscan_gtk_pane_new             (const gchar         *title,
+                                             GtkWidget           *body,
+                                             gboolean             bold,
+                                             HyScanGtkPaneStyle   style);
 
 HYSCAN_API
-void         hyscan_gtk_pane_set_expanded     (HyScanGtkPane        *pane,
-                                               gboolean              expanded);
+void        hyscan_gtk_pane_set_expanded    (HyScanGtkPane       *pane,
+                                             gboolean             expanded);
 
 G_END_DECLS
 
 #endif /* __HYSCAN_GTK_PANE_H__ */
-

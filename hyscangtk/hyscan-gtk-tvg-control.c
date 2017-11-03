@@ -1,3 +1,13 @@
+/**
+ * \file hyscan-gtk-tvg-control.c
+ *
+ * \brief Виджет управления системой ВАРУ.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ */
+
 #include "hyscan-gtk-tvg-control.h"
 
 enum

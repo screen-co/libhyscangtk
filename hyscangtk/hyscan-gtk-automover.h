@@ -1,3 +1,15 @@
+/**
+ * \file hyscan-gtk-automover.h
+ *
+ * \brief Заголовочный файл виджета управления автосдвижкой.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ * \defgroup HyScanGtkAutomover HyScanGtkAutomover - виджет управления автосдвижкой.
+ *
+ */
+
 #ifndef __HYSCAN_GTK_AUTOMOVER_H__
 #define __HYSCAN_GTK_AUTOMOVER_H__
 

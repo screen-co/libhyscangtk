@@ -1,3 +1,13 @@
+/**
+ * \file hyscan-gtk-views-test.c
+ *
+ * \brief Тест виджетов.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ */
+
 #include <stdlib.h>
 #include <hyscan-gtk-pane.h>
 #include <hyscan-gtk-colorizer.h>
@@ -9,9 +19,74 @@
 #include <hyscan-gtk-tvg-control.h>
 #include <hyscan-gtk-gen-control.h>
 #include <hyscan-gtk-mark-editor.h>
+#include <hyscan-gtk-project-creator.h>
+#include <hyscan-gtk-sensor-control.h>
+#include <hyscan-sensors-data.h>
+
+static HyScanDataSchemaEnumValue *
+make_data_schema_enum_value (gint64  value,
+                             gchar  *name,
+                             gchar  *description)
+{
+  HyScanDataSchemaEnumValue *ev = g_new (HyScanDataSchemaEnumValue, 1);
+  ev->value = value;
+  ev->description = g_strdup(description);
+  ev->name = g_strdup (name);
+  return ev;
+}
+
+static HyScanDataSchemaEnumValue **
+make_devices (void)
+{
+  HyScanDataSchemaEnumValue **devices = g_malloc0 (sizeof (HyScanDataSchemaEnumValue *) * 4);
+  devices[0] = make_data_schema_enum_value (0, "device1", "device1");
+  devices[1] = make_data_schema_enum_value (1, "device2", "device2");
+  devices[2] = make_data_schema_enum_value (2, "device3", "device3");
+
+  return devices;
+}
+
+static HyScanDataSchemaEnumValue **
+make_modes (void)
+{
+  HyScanDataSchemaEnumValue **modes = g_malloc0 (sizeof (HyScanDataSchemaEnumValue *) * 4);
+  modes[0] = make_data_schema_enum_value (0, "mode1", "mode1");
+  modes[1] = make_data_schema_enum_value (1, "mode2", "mode2");
+  modes[2] = make_data_schema_enum_value (2, "mode3", "mode3");
+
+  return modes;
+}
+
+static HyScanDataSchemaEnumValue **
+make_addresses (void)
+{
+  HyScanDataSchemaEnumValue **addresses = g_malloc0 (sizeof (HyScanDataSchemaEnumValue *) * 4);
+  addresses[0] = make_data_schema_enum_value (0, "address1", "address1");
+  addresses[1] = make_data_schema_enum_value (1, "address2", "address2");
+  addresses[2] = make_data_schema_enum_value (2, "address3", "address3");
+
+  return addresses;
+}
+
+static void
+show_project_creator (GtkButton               *btn,
+                      HyScanGtkProjectCreator *project_creator)
+{
+  hyscan_gtk_project_creator_set_project (project_creator, "");
+  gtk_widget_show_all (GTK_WIDGET (project_creator));
+}
+
+static void
+project_creator_create (HyScanGtkProjectCreator *project_creator,
+                        gpointer                 unused)
+{
+  (void) unused;
+  g_message ("Project: %s", hyscan_gtk_project_creator_get_project (project_creator));
+  gtk_widget_hide (GTK_WIDGET (project_creator));
+}
 
 static GtkWidget *
-create_content(void)
+create_content (void)
 {
   GtkWidget *colorizer;
   GtkWidget *scaler;
@@ -41,6 +116,27 @@ create_content(void)
   gtk_widget_set_margin_bottom (GTK_WIDGET (body), 4);
 
   return GTK_WIDGET (body);
+}
+
+static void
+init_sensors (GHashTable *sensors)
+{
+  HyScanDataSchemaEnumValue **addresses;
+  HyScanDataSchemaEnumValue **modes;
+  HyScanDataSchemaEnumValue **devices;
+
+  addresses = make_addresses ();
+  modes = make_modes ();
+  devices = make_devices ();
+
+  hyscan_sensors_data_set_virtual_sensor (sensors, "virtual", 1, 200);
+  hyscan_sensors_data_set_state (sensors, "virtual", FALSE);
+
+  hyscan_sensors_data_set_udp_sensor (sensors, "udp", 2, 400, HYSCAN_SENSOR_PROTOCOL_SAS, 0, 2345, addresses);
+  hyscan_sensors_data_set_state (sensors, "udp", TRUE);
+
+  hyscan_sensors_data_set_uart_sensor (sensors, "uart", 4, 800, HYSCAN_SENSOR_PROTOCOL_NMEA_0183, 1, 2, devices, modes);
+  hyscan_sensors_data_set_state (sensors, "uart", TRUE);
 }
 
 static void
@@ -102,15 +198,22 @@ main (int argc, char **argv)
   GtkWidget *tvgc_pane;
   GtkWidget *genc_pane;
   GtkWidget *recorder_pane;
+  GtkWidget *sensorc_pane;
 
   GtkWidget *genc;
   GtkWidget *tvgc;
   GtkWidget *recorder;
+  GtkWidget *sensorc;
+  GHashTable *sensors = NULL;
 
   GtkWidget *tracks_viewer;
 
   GtkWidget *mark_editor;
   GtkWidget *mark_editor_pane;
+
+  GtkWidget *project_creator;
+  GtkWidget *project_creator_btn;
+  int row = 0;
 
   gtk_init (&argc, &argv);
 
@@ -155,9 +258,28 @@ main (int argc, char **argv)
   gtk_widget_set_margin_top (recorder, 4);
   gtk_widget_set_margin_bottom (recorder, 4);
 
+  sensorc = hyscan_gtk_sensor_control_new ();
+  sensors = hyscan_gtk_sensor_control_get_sensors (HYSCAN_GTK_SENSOR_CONTROL (sensorc));
+  init_sensors (sensors);
+  g_hash_table_unref (sensors);
+  hyscan_gtk_sensor_control_update (HYSCAN_GTK_SENSOR_CONTROL (sensorc));
+
+  gtk_widget_set_margin_start (sensorc, 24);
+  gtk_widget_set_margin_end (sensorc, 4);
+  gtk_widget_set_margin_top (sensorc, 4);
+  gtk_widget_set_margin_bottom (sensorc, 4);
+
   tvgc_pane = hyscan_gtk_pane_new ("TVG", tvgc, TRUE, HYSCAN_GTK_PANE_ARROW);
+  hyscan_gtk_pane_set_expanded (HYSCAN_GTK_PANE (tvgc_pane), FALSE);
+
   genc_pane = hyscan_gtk_pane_new ("Generator", genc, TRUE, HYSCAN_GTK_PANE_ARROW);
+  hyscan_gtk_pane_set_expanded (HYSCAN_GTK_PANE (genc_pane), FALSE);
+
   recorder_pane = hyscan_gtk_pane_new ("Record", recorder, TRUE, HYSCAN_GTK_PANE_ARROW);
+  hyscan_gtk_pane_set_expanded (HYSCAN_GTK_PANE (recorder_pane), TRUE);
+
+  sensorc_pane = hyscan_gtk_pane_new ("Sensors", sensorc, TRUE, HYSCAN_GTK_PANE_ARROW);
+  hyscan_gtk_pane_set_expanded (HYSCAN_GTK_PANE (sensorc_pane), TRUE);
 
   tracks_viewer = hyscan_gtk_project_viewer_new ();
   init_project_viewer (HYSCAN_GTK_PROJECT_VIEWER (tracks_viewer), "Track", 30);
@@ -168,23 +290,32 @@ main (int argc, char **argv)
   gtk_widget_set_margin_top (tracks_viewer, 4);
   gtk_widget_set_margin_bottom (tracks_viewer, 4);
 
-  tracks_pane = hyscan_gtk_pane_new ("Tracks", tracks_viewer, FALSE, HYSCAN_GTK_PANE_ARROW);
-  wf_pane = hyscan_gtk_pane_new ("Waterfall settings", create_content (), FALSE, HYSCAN_GTK_PANE_ARROW);
+  tracks_pane = hyscan_gtk_pane_new ("Tracks", tracks_viewer, FALSE, HYSCAN_GTK_PANE_TEXT);
+  hyscan_gtk_pane_set_expanded (HYSCAN_GTK_PANE (tracks_pane), FALSE);
+  wf_pane = hyscan_gtk_pane_new ("Image", create_content (), FALSE, HYSCAN_GTK_PANE_TEXT);
+  hyscan_gtk_pane_set_expanded (HYSCAN_GTK_PANE (wf_pane), FALSE);
 
   mark_editor = hyscan_gtk_mark_editor_new ();
   gtk_widget_set_margin_start (GTK_WIDGET (mark_editor), 4);
   gtk_widget_set_margin_end (GTK_WIDGET (mark_editor), 4);
   gtk_widget_set_margin_top (GTK_WIDGET (mark_editor), 4);
   gtk_widget_set_margin_bottom (GTK_WIDGET (mark_editor), 4);
-  mark_editor_pane = hyscan_gtk_pane_new ("Mark editor", mark_editor, FALSE, HYSCAN_GTK_PANE_ARROW);  
+  mark_editor_pane = hyscan_gtk_pane_new ("Mark editor", mark_editor, FALSE, HYSCAN_GTK_PANE_ARROW);
+
+  project_creator_btn = gtk_button_new_with_label ("New project");
+  project_creator = hyscan_gtk_project_creator_new (project_creator_btn);
+  g_signal_connect (project_creator_btn, "clicked", G_CALLBACK (show_project_creator), project_creator);
+  g_signal_connect (project_creator, "create", G_CALLBACK (project_creator_create), project_creator);
 
   grid = gtk_grid_new ();
-  gtk_grid_attach (GTK_GRID (grid), tracks_pane, 0, 0, 1, 1);
-  gtk_grid_attach (GTK_GRID (grid), wf_pane, 0, 1, 1, 1);
-  gtk_grid_attach (GTK_GRID (grid), genc_pane, 0, 2, 1, 1);
-  gtk_grid_attach (GTK_GRID (grid), tvgc_pane, 0, 3, 1, 1);
-  gtk_grid_attach (GTK_GRID (grid), recorder_pane, 0, 4, 1, 1);
-  gtk_grid_attach (GTK_GRID (grid), mark_editor_pane, 0, 5, 1, 1);
+  gtk_grid_attach (GTK_GRID (grid), project_creator_btn, 0, row++, 1, 1);
+  gtk_grid_attach (GTK_GRID (grid), tracks_pane, 0, row++, 1, 1);
+  gtk_grid_attach (GTK_GRID (grid), wf_pane, 0, row++, 1, 1);
+  gtk_grid_attach (GTK_GRID (grid), genc_pane, 0, row++, 1, 1);
+  gtk_grid_attach (GTK_GRID (grid), tvgc_pane, 0, row++, 1, 1);
+  gtk_grid_attach (GTK_GRID (grid), recorder_pane, 0, row++, 1, 1);
+  gtk_grid_attach (GTK_GRID (grid), sensorc_pane, 0, row++, 1, 1);
+  gtk_grid_attach (GTK_GRID (grid), mark_editor_pane, 0, row++, 1, 1);
 
   gtk_container_add (GTK_CONTAINER (window), grid);
   g_signal_connect (G_OBJECT (window), "destroy", G_CALLBACK (gtk_main_quit), NULL);

@@ -1,3 +1,13 @@
+/**
+ * \file hyscan-colormap-spec.c
+ *
+ * \brief Исходный файл для работы со спецификациями цветовых схем.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ */
+
 #include "hyscan-colormap-spec.h"
 #include <string.h>
 

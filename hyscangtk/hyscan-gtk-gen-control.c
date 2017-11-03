@@ -1,3 +1,13 @@
+/**
+ * \file hyscan-gtk-gen-control.c
+ *
+ * \brief Исходный файл виджета управления генератором.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ */
+
 #include "hyscan-gtk-gen-control.h"
 
 enum

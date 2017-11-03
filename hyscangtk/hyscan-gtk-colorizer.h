@@ -1,3 +1,15 @@
+/**
+ * \file hyscan-gtk-colorizer.h
+ *
+ * \brief Заголовочный файл виджета управления цветовыми схемами.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ * \defgroup HyScanGtkColorizer HyScanGtkColorizer - управление цветовыми схемами.
+ *
+ */
+
 #ifndef __HYSCAN_GTK_COLORIZER_H__
 #define __HYSCAN_GTK_COLORIZER_H__
 

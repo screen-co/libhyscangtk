@@ -1,3 +1,15 @@
+/**
+ * \file hyscan-gtk-project-viewer.h
+ *
+ * \brief Заголовочный файл виджета просмотра проекта.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ * \defgroup HyScanGtkProjectViewer HyScanGtkProjectViewer - виджет просмотра проекта
+ *
+ */
+
 #ifndef __HYSCAN_GTK_PROJECT_VIEWER_H__
 #define __HYSCAN_GTK_PROJECT_VIEWER_H__
 

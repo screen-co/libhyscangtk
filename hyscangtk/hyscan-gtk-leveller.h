@@ -1,3 +1,15 @@
+/**
+ * \file hyscan-gtk-leveller.h
+ *
+ * \brief Заголовочный файл виджета управления уровнями.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ * \defgroup HyScanGtkLeveller HyScanGtkLeveller - виджет управления уровнями.
+ *
+ */
+
 #ifndef __HYSCAN_GTK_LEVELLER_H__
 #define __HYSCAN_GTK_LEVELLER_H__
 

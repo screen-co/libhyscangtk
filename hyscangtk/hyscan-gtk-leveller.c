@@ -1,3 +1,13 @@
+/**
+ * \file hyscan-gtk-leveller.c
+ *
+ * \brief Исходный файл виджета управления уровнями.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ */
+
 #include "hyscan-gtk-leveller.h"
 
 enum

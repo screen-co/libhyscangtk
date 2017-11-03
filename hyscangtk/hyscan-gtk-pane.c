@@ -1,19 +1,33 @@
+/**
+ * \file hyscan-gtk-pane.c
+ *
+ * \brief Заголовочный файл виджета панели.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ */
+
 #include <string.h>
 #include "hyscan-gtk-pane.h"
+
+#define HYSCAN_GTK_PANE_HIDE_TEXT "Hide"
+#define HYSCAN_GTK_PANE_SHOW_TEXT "Show"
 
 GType
 hyscan_gtk_pane_style_get_type (void)
 {
-    static GType etype = 0;
-    if (G_UNLIKELY (etype == 0)) {
-        static const GEnumValue values[] = {
-            { HYSCAN_GTK_PANE_TEXT, "HYSCAN_GTK_PANE_TEXT", "text" },
-            { HYSCAN_GTK_PANE_ARROW, "HYSCAN_GTK_PANE_ARROW", "arrow" },
-            { 0, NULL, NULL }
-        };
-        etype = g_enum_register_static (g_intern_static_string ("HyScanGtkPaneStyle"), values);
+  static GType etype = 0;
+  if (G_UNLIKELY (etype == 0))
+    {
+      static const GEnumValue values[] = {
+        { HYSCAN_GTK_PANE_TEXT, "HYSCAN_GTK_PANE_TEXT", "text" },
+        { HYSCAN_GTK_PANE_ARROW, "HYSCAN_GTK_PANE_ARROW", "arrow" },
+        { 0, NULL, NULL }
+      };
+      etype = g_enum_register_static (g_intern_static_string ("HyScanGtkPaneStyle"), values);
     }
-    return etype;
+  return etype;
 }
 
 #define DEFAULT_HEADER_STYLE HYSCAN_GTK_PANE_TEXT
@@ -29,35 +43,36 @@ enum
 
 struct _HyScanGtkPane
 {
-  GtkGrid               parent_instance;
+  GtkGrid              parent_instance;
 
-  gchar                *title;
-  GtkWidget            *body;
-  gboolean              bold;
-  HyScanGtkPaneStyle    header_style;
+  gchar               *title;
+  GtkWidget           *body;
+  gboolean             bold;
+  HyScanGtkPaneStyle   header_style;
 
-  GtkWidget            *ebox;
-  GtkWidget            *expander;
-  GtkWidget            *revealer;
+  GtkWidget           *header_ebox;
+  GtkWidget           *header_grid;
+  GtkWidget           *expander;
+  GtkWidget           *revealer;
 };
 
-static void         hyscan_gtk_pane_set_property        (GObject         *object,
-                                                         guint            prop_id,
-                                                         const GValue    *value,
-                                                         GParamSpec      *pspec);
-static void         hyscan_gtk_pane_constructed         (GObject         *object);
-static void         hyscan_gtk_pane_finalize            (GObject         *object);
-static void         hyscan_gtk_pane_setup               (HyScanGtkPane   *pane);
-static GtkWidget*   hyscan_gtk_pane_make_text_header    (HyScanGtkPane   *pane);
-static GtkWidget*   hyscan_gtk_pane_make_arrow_header   (HyScanGtkPane   *pane);
-static gboolean     hyscan_gtk_pane_expand_text         (HyScanGtkPane   *pane,
-                                                         GdkEvent        *event,
-                                                         GtkWidget       *ebox);
-static gboolean     hyscan_gtk_pane_expand_arrow        (HyScanGtkPane   *pane,
-                                                         GdkEvent        *event,
-                                                         GtkWidget       *ebox);
-static GtkWidget   *hyscan_gtk_pane_make_right_arrow    (void);
-static GtkWidget   *hyscan_gtk_pane_make_down_arrow     (void);
+static void        hyscan_gtk_pane_set_property         (GObject        *object,
+                                                         guint           prop_id,
+                                                         const GValue   *value,
+                                                         GParamSpec     *pspec);
+static void        hyscan_gtk_pane_constructed          (GObject        *object);
+static void        hyscan_gtk_pane_finalize             (GObject        *object);
+static void        hyscan_gtk_pane_setup                (HyScanGtkPane  *pane);
+static void        hyscan_gtk_pane_text_header_create   (HyScanGtkPane  *pane);
+static void        hyscan_gtk_pane_arrow_header_create  (HyScanGtkPane  *pane);
+static gboolean    hyscan_gtk_pane_expand_text          (HyScanGtkPane  *pane,
+                                                         GdkEvent       *event,
+                                                         GtkWidget      *ebox);
+static gboolean    hyscan_gtk_pane_expand_arrow         (HyScanGtkPane  *pane,
+                                                         GdkEvent       *event,
+                                                         GtkWidget      *ebox);
+static GtkWidget*  hyscan_gtk_pane_make_right_arrow     (void);
+static GtkWidget*  hyscan_gtk_pane_make_down_arrow      (void);
 
 G_DEFINE_TYPE (HyScanGtkPane, hyscan_gtk_pane, GTK_TYPE_GRID)
 
@@ -158,17 +173,15 @@ hyscan_gtk_pane_finalize (GObject *object)
 static void
 hyscan_gtk_pane_setup (HyScanGtkPane *pane)
 {
-  GtkWidget *header = NULL;
-
   if (pane->body == NULL || !strlen (pane->title))
     return;
 
   if (pane->header_style == HYSCAN_GTK_PANE_TEXT)
-    header = hyscan_gtk_pane_make_text_header (pane);
+    hyscan_gtk_pane_text_header_create (pane);
   else if (pane->header_style == HYSCAN_GTK_PANE_ARROW)
-    header = hyscan_gtk_pane_make_arrow_header (pane);
+    hyscan_gtk_pane_arrow_header_create (pane);
 
-  if (header == NULL)
+  if (pane->header_ebox == NULL)
     return;
 
   pane->revealer = gtk_revealer_new ();
@@ -176,25 +189,18 @@ hyscan_gtk_pane_setup (HyScanGtkPane *pane)
   gtk_revealer_set_reveal_child (GTK_REVEALER (pane->revealer), TRUE);
   gtk_container_add (GTK_CONTAINER (pane->revealer), pane->body);
 
-  gtk_grid_attach (GTK_GRID (pane), header, 0, 0, 1, 1);
+  gtk_grid_attach (GTK_GRID (pane), pane->header_ebox, 0, 0, 1, 1);
   gtk_grid_attach (GTK_GRID (pane), pane->revealer, 0, 1, 1, 1);
-  /*gtk_grid_attach (GTK_GRID (pane), gtk_separator_new (GTK_ORIENTATION_HORIZONTAL), 0, 2, 1, 1);*/
 }
 
-static GtkWidget *
-hyscan_gtk_pane_make_text_header (HyScanGtkPane *pane)
+static void
+hyscan_gtk_pane_text_header_create (HyScanGtkPane *pane)
 {
   GtkWidget *label;
-  GtkWidget *header;
   gchar *markup;
 
-  pane->ebox = gtk_event_box_new ();
-  gtk_widget_set_halign (pane->ebox, GTK_ALIGN_END);
-  g_signal_connect_swapped (pane->ebox, "button-press-event",
-                            G_CALLBACK(hyscan_gtk_pane_expand_text), pane);
-
-  pane->expander = gtk_label_new ("hide");
-  gtk_container_add (GTK_CONTAINER (pane->ebox), pane->expander);
+  pane->expander = gtk_label_new (HYSCAN_GTK_PANE_HIDE_TEXT);
+  gtk_widget_set_halign (pane->expander, GTK_ALIGN_END);
 
   label = gtk_label_new (NULL);
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -203,31 +209,28 @@ hyscan_gtk_pane_make_text_header (HyScanGtkPane *pane)
   gtk_label_set_markup (GTK_LABEL (label), markup);
   g_free (markup);
 
-  header = gtk_grid_new ();
-  gtk_grid_attach (GTK_GRID (header), label, 0, 0, 1, 1);
-  gtk_grid_attach (GTK_GRID (header), pane->ebox, 1, 0, 1, 1);
-  gtk_widget_set_margin_start (header, 4);
-  gtk_widget_set_margin_top (header, 4);
-  gtk_widget_set_margin_end (header, 4);
-  gtk_widget_set_margin_bottom (header, 4);
+  pane->header_grid = gtk_grid_new ();
+  gtk_grid_attach (GTK_GRID (pane->header_grid), label, 0, 0, 1, 1);
+  gtk_grid_attach (GTK_GRID (pane->header_grid), pane->expander, 1, 0, 1, 1);
+  gtk_widget_set_margin_start (pane->header_grid, 4);
+  gtk_widget_set_margin_top (pane->header_grid, 4);
+  gtk_widget_set_margin_end (pane->header_grid, 4);
+  gtk_widget_set_margin_bottom (pane->header_grid, 4);
 
-  return header;
+  pane->header_ebox = gtk_event_box_new ();
+  g_signal_connect_swapped (pane->header_ebox, "button-press-event",
+                            G_CALLBACK (hyscan_gtk_pane_expand_text), pane);
+  gtk_container_add (GTK_CONTAINER (pane->header_ebox), pane->header_grid);
 }
 
-static GtkWidget *
-hyscan_gtk_pane_make_arrow_header (HyScanGtkPane *pane)
+static void
+hyscan_gtk_pane_arrow_header_create (HyScanGtkPane *pane)
 {
   GtkWidget *label;
-  GtkWidget *header;
   gchar *markup;
 
-  pane->ebox = gtk_event_box_new ();
-  g_signal_connect_swapped (pane->ebox, "button-press-event",
-                            G_CALLBACK(hyscan_gtk_pane_expand_arrow), pane);
-
-  gtk_widget_set_halign (pane->ebox, GTK_ALIGN_START);
   pane->expander = hyscan_gtk_pane_make_down_arrow();
-  gtk_container_add (GTK_CONTAINER (pane->ebox), pane->expander);
+  gtk_widget_set_halign (pane->expander, GTK_ALIGN_START);
 
   label = gtk_label_new (NULL);
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -236,16 +239,19 @@ hyscan_gtk_pane_make_arrow_header (HyScanGtkPane *pane)
   gtk_label_set_markup (GTK_LABEL (label), markup);
   g_free (markup);
 
-  header = gtk_grid_new ();
-  gtk_grid_attach (GTK_GRID (header), pane->ebox, 0, 0, 1, 1);
-  gtk_grid_attach (GTK_GRID (header), label, 1, 0, 1, 1);
-  gtk_grid_set_column_spacing (GTK_GRID (header), 4);
-  gtk_widget_set_margin_start (header, 4);
-  gtk_widget_set_margin_top (header, 4);
-  gtk_widget_set_margin_end (header, 4);
-  gtk_widget_set_margin_bottom (header, 4);
+  pane->header_grid = gtk_grid_new ();
+  gtk_grid_attach (GTK_GRID (pane->header_grid), pane->expander, 0, 0, 1, 1);
+  gtk_grid_attach (GTK_GRID (pane->header_grid), label, 1, 0, 1, 1);
+  gtk_grid_set_column_spacing (GTK_GRID (pane->header_grid), 4);
+  gtk_widget_set_margin_start (pane->header_grid, 4);
+  gtk_widget_set_margin_top (pane->header_grid, 4);
+  gtk_widget_set_margin_end (pane->header_grid, 4);
+  gtk_widget_set_margin_bottom (pane->header_grid, 4);
 
-  return header;
+  pane->header_ebox = gtk_event_box_new ();
+  g_signal_connect_swapped (pane->header_ebox, "button-press-event",
+                            G_CALLBACK (hyscan_gtk_pane_expand_arrow), pane);
+  gtk_container_add (GTK_CONTAINER (pane->header_ebox), pane->header_grid);
 }
 
 static gboolean
@@ -253,10 +259,15 @@ hyscan_gtk_pane_expand_text (HyScanGtkPane *pane,
                              GdkEvent      *event,
                              GtkWidget     *ebox)
 {
-  gboolean revealed = gtk_revealer_get_reveal_child (GTK_REVEALER (pane->revealer));
+  gboolean revealed;
+
+  (void) event;
+  (void) ebox;
+
+  revealed = gtk_revealer_get_reveal_child (GTK_REVEALER (pane->revealer));
   gtk_revealer_set_reveal_child (GTK_REVEALER (pane->revealer), !revealed);
 
-  gtk_label_set_text (GTK_LABEL (pane->expander), revealed ? "show" : "hide");
+  gtk_label_set_text (GTK_LABEL (pane->expander), revealed ? HYSCAN_GTK_PANE_SHOW_TEXT : HYSCAN_GTK_PANE_HIDE_TEXT);
   gtk_widget_set_visible (pane->revealer, !revealed);
 
   return TRUE;
@@ -267,28 +278,31 @@ hyscan_gtk_pane_expand_arrow (HyScanGtkPane *pane,
                               GdkEvent      *event,
                               GtkWidget     *ebox)
 {
-  gboolean revealed = gtk_revealer_get_reveal_child (GTK_REVEALER (pane->revealer));
+  gboolean revealed;
+
+  (void) event;
+  (void) ebox;
+
+  revealed = gtk_revealer_get_reveal_child (GTK_REVEALER (pane->revealer));
   gtk_revealer_set_reveal_child (GTK_REVEALER (pane->revealer), !revealed);
 
-  gtk_container_remove (GTK_CONTAINER (pane->ebox),
-                        gtk_bin_get_child (GTK_BIN (pane->ebox)));
+  gtk_container_remove (GTK_CONTAINER (pane->header_grid), pane->expander);
 
-  pane->expander = revealed ? hyscan_gtk_pane_make_right_arrow ()
-                            : hyscan_gtk_pane_make_down_arrow ();
-  gtk_container_add (GTK_CONTAINER (pane->ebox), pane->expander);
-  gtk_widget_show_all (GTK_WIDGET (pane->ebox));
+  pane->expander = revealed ? hyscan_gtk_pane_make_right_arrow () : hyscan_gtk_pane_make_down_arrow ();
+  gtk_grid_attach (GTK_GRID (pane->header_grid), pane->expander, 0, 0, 1, 1);
+  gtk_widget_show_all (GTK_WIDGET (pane->header_grid));
 
   return TRUE;
 }
 
-/* Возвращает изображение со стрелкой вправо. */
+/* Создаёт изображение со стрелкой вправо. */
 static GtkWidget *
 hyscan_gtk_pane_make_right_arrow (void)
 {
   return gtk_image_new_from_icon_name ("pan-end-symbolic", GTK_ICON_SIZE_SMALL_TOOLBAR);
 }
 
-/* Возвращает изображение со стрелкой вниз. */
+/* Создаёт изображение со стрелкой вниз. */
 static GtkWidget *
 hyscan_gtk_pane_make_down_arrow (void)
 {
@@ -296,10 +310,10 @@ hyscan_gtk_pane_make_down_arrow (void)
 }
 
 GtkWidget *
-hyscan_gtk_pane_new (const gchar          *title,
-                     GtkWidget            *body,
-                     gboolean              bold,
-                     HyScanGtkPaneStyle    style)
+hyscan_gtk_pane_new (const gchar        *title,
+                     GtkWidget          *body,
+                     gboolean            bold,
+                     HyScanGtkPaneStyle  style)
 {
   return g_object_new (HYSCAN_TYPE_GTK_PANE,
                        "title", title,
@@ -318,13 +332,8 @@ hyscan_gtk_pane_set_expanded (HyScanGtkPane *pane,
   if (expanded == gtk_revealer_get_reveal_child (GTK_REVEALER (pane->revealer)))
     return;
 
-  switch (pane->header_style)
-    {
-      case HYSCAN_GTK_PANE_ARROW:
-        hyscan_gtk_pane_expand_arrow (pane, NULL, pane->ebox);
-        break;
-      case HYSCAN_GTK_PANE_TEXT:
-        hyscan_gtk_pane_expand_text (pane, NULL, pane->ebox);
-        break;
-    }
+  if (pane->header_style == HYSCAN_GTK_PANE_ARROW)
+    hyscan_gtk_pane_expand_arrow (pane, NULL, pane->header_ebox);
+  else if (pane->header_style == HYSCAN_GTK_PANE_TEXT)
+    hyscan_gtk_pane_expand_text (pane, NULL, pane->header_ebox);
 }

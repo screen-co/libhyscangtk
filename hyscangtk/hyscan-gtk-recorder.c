@@ -1,3 +1,13 @@
+/**
+ * \file hyscan-gtk-recorder.h
+ *
+ * \brief Исходный файл виджета управления записью.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ */
+
 #include "hyscan-gtk-recorder.h"
 
 #define HYSCAN_GTK_RECORDER_TRACK_ID_SURVEY        "survey"

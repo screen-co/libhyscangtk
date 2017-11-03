@@ -1,3 +1,15 @@
+/**
+ * \file hyscan-gtk-mark-editor.h
+ *
+ * \brief Заголовочный файл виджета редактора меток.
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ * \defgroup HyScanGtkMarkEditor HyScanGtkMarkEditor - виджет редактора меток
+ *
+ */
+
 #ifndef __HYSCAN_GTK_MARK_EDITOR_H__
 #define __HYSCAN_GTK_MARK_EDITOR_H__
 

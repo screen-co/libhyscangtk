@@ -1,3 +1,15 @@
+/**
+ * \file hyscan-gtk-tvg-control.h
+ *
+ * \brief Исходный файл виджета управления системой ВАРУ
+ * \author Vladimir Maximov (vmakxs@gmail.com)
+ * \date 2018
+ * \license Проприетарная лицензия ООО "Экран"
+ *
+ * \defgroup HyScanGtkTVGControl HyScanGtkTVGControl - виджет управления системой ВАРУ.
+ *
+ */
+
 #ifndef __HYSCAN_GTK_TVG_CONTROL_H__
 #define __HYSCAN_GTK_TVG_CONTROL_H__
 
@@ -84,7 +96,6 @@ void                hyscan_gtk_tvg_control_set_logarithmic_alpha   (HyScanGtkTVG
                                                                     gdouble                alpha);
 
 HYSCAN_API
-
 HyScanTVGModeType   hyscan_gtk_tvg_control_get_mode                (HyScanGtkTVGControl   *tvgc);
 
 HYSCAN_API
