@@ -244,6 +244,9 @@ hyscan_gtk_sensor_control_set_sensor (HyScanGtkSensorControl *gtk_sensor_control
 
   priv = gtk_sensor_control->priv;
 
+  if (sensor == NULL)
+    return;
+
   sensor_prm = g_hash_table_lookup (priv->sensors, sensor);
   if (sensor_prm == NULL)
     return;
@@ -253,6 +256,8 @@ hyscan_gtk_sensor_control_set_sensor (HyScanGtkSensorControl *gtk_sensor_control
   /* Задание текущего датчика - этот датчик будет отправлен в качестве параметра сигнала changed. */
   g_free (priv->current_sensor);
   priv->current_sensor = g_strdup (sensor);
+
+  gtk_combo_box_set_active_id (GTK_COMBO_BOX (priv->ports_cbt), priv->current_sensor);
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->enable_checkbtn), sensor_prm->state);
 
@@ -349,6 +354,23 @@ static void
 hyscan_gtk_sensor_control_virtual_channel_changed (HyScanGtkSensorControl *gtk_sensor_control,
                                                    GtkAdjustment          *adj)
 {
+  HyScanSensorPrm *sensor_prm;
+  HyScanGtkSensorControlPrivate *priv;
+
+  priv = gtk_sensor_control->priv;
+
+  if (priv->update)
+    return;
+
+  if (priv->current_sensor == NULL)
+    return;
+
+  sensor_prm = g_hash_table_lookup (priv->sensors, priv->current_sensor);
+  if (sensor_prm == NULL)
+    return;
+
+  ((HyScanVirtualPortPrm *) sensor_prm->port_prm)->channel = (guint) gtk_adjustment_get_value (adj);
+
   hyscan_gtk_sensor_control_emit_changed (gtk_sensor_control);
 }
 
@@ -356,6 +378,23 @@ static void
 hyscan_gtk_sensor_control_virtual_time_offset_changed (HyScanGtkSensorControl *gtk_sensor_control,
                                                        GtkAdjustment          *adj)
 {
+  HyScanSensorPrm *sensor_prm;
+  HyScanGtkSensorControlPrivate *priv;
+
+  priv = gtk_sensor_control->priv;
+
+  if (priv->update)
+    return;
+
+  if (priv->current_sensor == NULL)
+    return;
+
+  sensor_prm = g_hash_table_lookup (priv->sensors, priv->current_sensor);
+  if (sensor_prm == NULL)
+    return;
+
+  ((HyScanVirtualPortPrm *) sensor_prm->port_prm)->time_offset = (guint) gtk_adjustment_get_value (adj);
+
   hyscan_gtk_sensor_control_emit_changed (gtk_sensor_control);
 }
 
@@ -363,6 +402,23 @@ static void
 hyscan_gtk_sensor_control_uart_channel_changed (HyScanGtkSensorControl *gtk_sensor_control,
                                                 GtkAdjustment          *adj)
 {
+  HyScanSensorPrm *sensor_prm;
+  HyScanGtkSensorControlPrivate *priv;
+
+  priv = gtk_sensor_control->priv;
+
+  if (priv->update)
+    return;
+
+  if (priv->current_sensor == NULL)
+    return;
+
+  sensor_prm = g_hash_table_lookup (priv->sensors, priv->current_sensor);
+  if (sensor_prm == NULL)
+    return;
+
+  ((HyScanUARTPortPrm *) sensor_prm->port_prm)->channel = (guint) gtk_adjustment_get_value (adj);
+
   hyscan_gtk_sensor_control_emit_changed (gtk_sensor_control);
 }
 
@@ -370,6 +426,23 @@ static void
 hyscan_gtk_sensor_control_uart_time_offset_changed (HyScanGtkSensorControl *gtk_sensor_control,
                                                     GtkAdjustment          *adj)
 {
+  HyScanSensorPrm *sensor_prm;
+  HyScanGtkSensorControlPrivate *priv;
+
+  priv = gtk_sensor_control->priv;
+
+  if (priv->update)
+    return;
+
+  if (priv->current_sensor == NULL)
+    return;
+
+  sensor_prm = g_hash_table_lookup (priv->sensors, priv->current_sensor);
+  if (sensor_prm == NULL)
+    return;
+
+  ((HyScanUARTPortPrm *) sensor_prm->port_prm)->time_offset = (guint) gtk_adjustment_get_value (adj);
+
   hyscan_gtk_sensor_control_emit_changed (gtk_sensor_control);
 }
 
@@ -377,6 +450,23 @@ static void
 hyscan_gtk_sensor_control_udp_channel_changed (HyScanGtkSensorControl *gtk_sensor_control,
                                                GtkAdjustment          *adj)
 {
+  HyScanSensorPrm *sensor_prm;
+  HyScanGtkSensorControlPrivate *priv;
+
+  priv = gtk_sensor_control->priv;
+
+  if (priv->update)
+    return;
+
+  if (priv->current_sensor == NULL)
+    return;
+
+  sensor_prm = g_hash_table_lookup (priv->sensors, priv->current_sensor);
+  if (sensor_prm == NULL)
+    return;
+
+  ((HyScanUDPPortPrm *) sensor_prm->port_prm)->channel = (guint) gtk_adjustment_get_value (adj);
+
   hyscan_gtk_sensor_control_emit_changed (gtk_sensor_control);
 }
 
@@ -384,6 +474,23 @@ static void
 hyscan_gtk_sensor_control_udp_time_offset_changed (HyScanGtkSensorControl *gtk_sensor_control,
                                                    GtkAdjustment          *adj)
 {
+  HyScanSensorPrm *sensor_prm;
+  HyScanGtkSensorControlPrivate *priv;
+
+  priv = gtk_sensor_control->priv;
+
+  if (priv->update)
+    return;
+
+  if (priv->current_sensor == NULL)
+    return;
+
+  sensor_prm = g_hash_table_lookup (priv->sensors, priv->current_sensor);
+  if (sensor_prm == NULL)
+    return;
+
+  ((HyScanUDPPortPrm *) sensor_prm->port_prm)->time_offset = (guint) gtk_adjustment_get_value (adj);
+
   hyscan_gtk_sensor_control_emit_changed (gtk_sensor_control);
 }
 
@@ -391,6 +498,23 @@ static void
 hyscan_gtk_sensor_control_udp_port_changed (HyScanGtkSensorControl *gtk_sensor_control,
                                             GtkAdjustment          *adj)
 {
+  HyScanSensorPrm *sensor_prm;
+  HyScanGtkSensorControlPrivate *priv;
+
+  priv = gtk_sensor_control->priv;
+
+  if (priv->update)
+    return;
+
+  if (priv->current_sensor == NULL)
+    return;
+
+  sensor_prm = g_hash_table_lookup (priv->sensors, priv->current_sensor);
+  if (sensor_prm == NULL)
+    return;
+
+  ((HyScanUDPPortPrm *) sensor_prm->port_prm)->port = (guint16) gtk_adjustment_get_value (adj);
+
   hyscan_gtk_sensor_control_emit_changed (gtk_sensor_control);
 }
 
@@ -399,7 +523,8 @@ hyscan_gtk_sensor_control_port_changed (HyScanGtkSensorControl *gtk_sensor_contr
                                         GtkComboBoxText        *cbt)
 {
   const gchar *sensor = gtk_combo_box_get_active_id (GTK_COMBO_BOX (cbt));
-  hyscan_gtk_sensor_control_set_sensor (gtk_sensor_control, sensor);
+  if (!gtk_sensor_control->priv->update)
+    hyscan_gtk_sensor_control_set_sensor (gtk_sensor_control, sensor);
 }
 
 static void
@@ -586,6 +711,7 @@ hyscan_gtk_sensor_control_enable_toggled (HyScanGtkSensorControl *gtk_sensor_con
 {
   HyScanSensorPrm *sensor_prm;
   HyScanGtkSensorControlPrivate *priv;
+  gchar *sensor;
 
   priv = gtk_sensor_control->priv;
   
@@ -598,7 +724,9 @@ hyscan_gtk_sensor_control_enable_toggled (HyScanGtkSensorControl *gtk_sensor_con
 
   sensor_prm->state = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (checkbtn));
 
-  hyscan_gtk_sensor_control_set_sensor (gtk_sensor_control, priv->current_sensor);
+  sensor = g_strdup (priv->current_sensor);
+  hyscan_gtk_sensor_control_set_sensor (gtk_sensor_control, sensor);
+  g_free (sensor);
 
   hyscan_gtk_sensor_control_emit_changed (gtk_sensor_control);
 }
