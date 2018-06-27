@@ -195,7 +195,9 @@ hyscan_gtk_sensor_control_constructed (GObject *object)
 
   gtk_builder_connect_signals (priv->builder, gtk_sensor_control);
 
-  gtk_container_add (GTK_CONTAINER (gtk_sensor_control), priv->sensor_control_view);
+  gtk_grid_attach(GTK_GRID (gtk_sensor_control), priv->sensor_control_view, 0, 0, 1, 1);
+  gtk_widget_set_hexpand (GTK_WIDGET (priv->sensor_control_view), TRUE);
+  gtk_widget_set_halign (GTK_WIDGET (priv->sensor_control_view), GTK_ALIGN_FILL);
 
   priv->sensors = hyscan_sensors_data_new ();
 }
