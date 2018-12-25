@@ -54,8 +54,8 @@ struct _HyScanGtkGenControlPrivate
   GtkAdjustment               *extended_duration_adj;
 
   /* Capabilities. */
-  HyScanGeneratorModeType      capabilities;
-  HyScanGeneratorSignalType    signals;
+  HyScanSonarGeneratorModeType      capabilities;
+  HyScanSonarGeneratorSignalType    signals;
   HyScanDataSchemaEnumValue  **presets;
 
   /* Helpers. */
@@ -63,9 +63,9 @@ struct _HyScanGtkGenControlPrivate
   GHashTable                  *durations_dict;
 
   /* Generator data. */
-  HyScanGeneratorModeType      mode;
+  HyScanSonarGeneratorModeType      mode;
   guint                        preset;
-  HyScanGeneratorSignalType    signal_type;
+  HyScanSonarGeneratorSignalType    signal_type;
   gdouble                      power;
   gdouble                      duration;
 };
@@ -95,15 +95,15 @@ static void           hyscan_gtk_gen_control_extended_duration_changed   (HyScan
                                                                           GtkAdjustment               *adj);
 
 static void           hyscan_gtk_gen_control_switch_stack                (HyScanGtkGenControl         *genc,
-                                                                          HyScanGeneratorModeType      mode);
+                                                                          HyScanSonarGeneratorModeType      mode);
 
-static HyScanGeneratorModeType
+static HyScanSonarGeneratorModeType
                       hyscan_gtk_gen_control_mode_by_id                  (const gchar                 *id);
-static const gchar*   hyscan_gtk_gen_control_id_by_mode                  (HyScanGeneratorModeType      mode);
+static const gchar*   hyscan_gtk_gen_control_id_by_mode                  (HyScanSonarGeneratorModeType      mode);
 
-static HyScanGeneratorSignalType
+static HyScanSonarGeneratorSignalType
                       hyscan_gtk_gen_control_signal_by_id                (const gchar                 *id);
-static const gchar*   hyscan_gtk_gen_control_id_by_signal                (HyScanGeneratorSignalType    mode);
+static const gchar*   hyscan_gtk_gen_control_id_by_signal                (HyScanSonarGeneratorSignalType    mode);
 
 static void           hyscan_gtk_gen_control_make_signals_cbt            (HyScanGtkGenControl         *genc,
                                                                           GtkComboBoxText             *cbt);
@@ -261,12 +261,12 @@ hyscan_gtk_gen_control_constructed (GObject *object)
       return;
     }
 
-  if (priv->capabilities & HYSCAN_GENERATOR_MODE_PRESET && priv->presets != NULL)
+  if (priv->capabilities & HYSCAN_SONAR_GENERATOR_MODE_PRESET && priv->presets != NULL)
     {
       HyScanDataSchemaEnumValue **presets = priv->presets;
 
       gtk_combo_box_text_append (GTK_COMBO_BOX_TEXT (priv->mode_cbt),
-                                 hyscan_gtk_gen_control_id_by_mode (HYSCAN_GENERATOR_MODE_PRESET),
+                                 hyscan_gtk_gen_control_id_by_mode (HYSCAN_SONAR_GENERATOR_MODE_PRESET),
                                  "Presets");
 
       priv->presets_dict = g_hash_table_new_full (g_str_hash, g_str_equal,
@@ -284,7 +284,7 @@ hyscan_gtk_gen_control_constructed (GObject *object)
 
           /* Ключ преднастройки - строковое представление значения преднастройки. */
           gchar *id = g_strdup_printf ("%u", (guint) preset->value);
-          
+
           /* Добавить ассоциацию ключа и значения преднастройки. */
           g_hash_table_insert (priv->presets_dict, id, preset);
 
@@ -300,10 +300,10 @@ hyscan_gtk_gen_control_constructed (GObject *object)
       gtk_container_remove (GTK_CONTAINER (priv->control_stack), priv->preset_grid);
     }
 
-  if (priv->capabilities & HYSCAN_GENERATOR_MODE_AUTO && priv->signals)
+  if (priv->capabilities & HYSCAN_SONAR_GENERATOR_MODE_AUTO && priv->signals)
     {
       gtk_combo_box_text_append (GTK_COMBO_BOX_TEXT (priv->mode_cbt),
-                                 hyscan_gtk_gen_control_id_by_mode (HYSCAN_GENERATOR_MODE_AUTO),
+                                 hyscan_gtk_gen_control_id_by_mode (HYSCAN_SONAR_GENERATOR_MODE_AUTO),
                                  "Auto");
 
       /* Наполнение выпадающего списка сигналов. */
@@ -314,10 +314,10 @@ hyscan_gtk_gen_control_constructed (GObject *object)
       gtk_container_remove (GTK_CONTAINER (priv->control_stack), priv->auto_grid);
     }
 
-  if (priv->capabilities & HYSCAN_GENERATOR_MODE_SIMPLE && priv->signals)
+  if (priv->capabilities & HYSCAN_SONAR_GENERATOR_MODE_SIMPLE && priv->signals)
     {
       gtk_combo_box_text_append (GTK_COMBO_BOX_TEXT (priv->mode_cbt),
-                                 hyscan_gtk_gen_control_id_by_mode (HYSCAN_GENERATOR_MODE_SIMPLE),
+                                 hyscan_gtk_gen_control_id_by_mode (HYSCAN_SONAR_GENERATOR_MODE_SIMPLE),
                                  "Simple");
 
       /* Наполнение выпадающего списка сигналов. */
@@ -327,11 +327,11 @@ hyscan_gtk_gen_control_constructed (GObject *object)
     {
       gtk_container_remove (GTK_CONTAINER (priv->control_stack), priv->simple_grid);
     }
-  
-  if (priv->capabilities & HYSCAN_GENERATOR_MODE_EXTENDED && priv->signals)
+
+  if (priv->capabilities & HYSCAN_SONAR_GENERATOR_MODE_EXTENDED && priv->signals)
     {
       gtk_combo_box_text_append (GTK_COMBO_BOX_TEXT (priv->mode_cbt),
-                                 hyscan_gtk_gen_control_id_by_mode (HYSCAN_GENERATOR_MODE_EXTENDED),
+                                 hyscan_gtk_gen_control_id_by_mode (HYSCAN_SONAR_GENERATOR_MODE_EXTENDED),
                                  "Extended");
 
       /* Наполнение выпадающего списка сигналов. */
@@ -360,7 +360,7 @@ hyscan_gtk_gen_control_mode_changed (HyScanGtkGenControl *genc,
                                      GtkComboBoxText     *cbt)
 {
   const gchar *id;
-  HyScanGeneratorModeType mode;
+  HyScanSonarGeneratorModeType mode;
 
   id = gtk_combo_box_get_active_id (GTK_COMBO_BOX (cbt));
   mode = hyscan_gtk_gen_control_mode_by_id (id);
@@ -405,7 +405,7 @@ hyscan_gtk_gen_control_auto_signal_changed (HyScanGtkGenControl *genc,
                                             GtkComboBoxText     *cbt)
 {
   const gchar *id;
-  HyScanGeneratorSignalType signal_type;
+  HyScanSonarGeneratorSignalType signal_type;
 
   id = gtk_combo_box_get_active_id (GTK_COMBO_BOX (cbt));
   signal_type = hyscan_gtk_gen_control_signal_by_id (id);
@@ -423,7 +423,7 @@ hyscan_gtk_gen_control_simple_signal_changed (HyScanGtkGenControl *genc,
                                               GtkComboBoxText     *cbt)
 {
   const gchar *id;
-  HyScanGeneratorSignalType signal_type;
+  HyScanSonarGeneratorSignalType signal_type;
 
   id = gtk_combo_box_get_active_id (GTK_COMBO_BOX (cbt));
   signal_type = hyscan_gtk_gen_control_signal_by_id (id);
@@ -441,7 +441,7 @@ hyscan_gtk_gen_control_extended_signal_changed (HyScanGtkGenControl *genc,
                                                 GtkComboBoxText     *cbt)
 {
   const gchar *id;
-  HyScanGeneratorSignalType signal_type;
+  HyScanSonarGeneratorSignalType signal_type;
 
   id = gtk_combo_box_get_active_id (GTK_COMBO_BOX (cbt));
   signal_type = hyscan_gtk_gen_control_signal_by_id (id);
@@ -477,22 +477,22 @@ hyscan_gtk_gen_control_extended_duration_changed (HyScanGtkGenControl *genc,
 
 static void
 hyscan_gtk_gen_control_switch_stack (HyScanGtkGenControl     *genc,
-                                     HyScanGeneratorModeType  mode)
+                                     HyScanSonarGeneratorModeType  mode)
 {
   HyScanGtkGenControlPrivate *priv = genc->priv;
 
   switch (mode)
     {
-    case HYSCAN_GENERATOR_MODE_PRESET:
+    case HYSCAN_SONAR_GENERATOR_MODE_PRESET:
       gtk_stack_set_visible_child (GTK_STACK (priv->control_stack), priv->preset_grid);
       break;
-    case HYSCAN_GENERATOR_MODE_AUTO:
+    case HYSCAN_SONAR_GENERATOR_MODE_AUTO:
       gtk_stack_set_visible_child (GTK_STACK (priv->control_stack), priv->auto_grid);
       break;
-    case HYSCAN_GENERATOR_MODE_SIMPLE:
+    case HYSCAN_SONAR_GENERATOR_MODE_SIMPLE:
       gtk_stack_set_visible_child (GTK_STACK (priv->control_stack), priv->simple_grid);
       break;
-    case HYSCAN_GENERATOR_MODE_EXTENDED:
+    case HYSCAN_SONAR_GENERATOR_MODE_EXTENDED:
       gtk_stack_set_visible_child (GTK_STACK (priv->control_stack), priv->extended_grid);
       break;
     default:
@@ -500,45 +500,45 @@ hyscan_gtk_gen_control_switch_stack (HyScanGtkGenControl     *genc,
     }
 }
 
-static HyScanGeneratorModeType
+static HyScanSonarGeneratorModeType
 hyscan_gtk_gen_control_mode_by_id (const gchar *id)
 {
-  HyScanGeneratorModeType mode;
+  HyScanSonarGeneratorModeType mode;
 
   if (id == NULL)
-    return HYSCAN_GENERATOR_MODE_INVALID;
+    return HYSCAN_SONAR_GENERATOR_MODE_NONE;
 
   if (g_str_equal (id, "preset"))
-    mode = HYSCAN_GENERATOR_MODE_PRESET;
+    mode = HYSCAN_SONAR_GENERATOR_MODE_PRESET;
   else if (g_str_equal (id, "auto"))
-    mode = HYSCAN_GENERATOR_MODE_AUTO;
+    mode = HYSCAN_SONAR_GENERATOR_MODE_AUTO;
   else if (g_str_equal (id, "simple"))
-    mode = HYSCAN_GENERATOR_MODE_SIMPLE;
+    mode = HYSCAN_SONAR_GENERATOR_MODE_SIMPLE;
   else if (g_str_equal (id, "extended"))
-    mode = HYSCAN_GENERATOR_MODE_EXTENDED;
+    mode = HYSCAN_SONAR_GENERATOR_MODE_EXTENDED;
   else
-    mode = HYSCAN_GENERATOR_MODE_INVALID;
+    mode = HYSCAN_SONAR_GENERATOR_MODE_NONE;
 
   return mode;
 }
 
 static const gchar*
-hyscan_gtk_gen_control_id_by_mode (HyScanGeneratorModeType mode)
+hyscan_gtk_gen_control_id_by_mode (HyScanSonarGeneratorModeType mode)
 {
   const gchar *id;
 
   switch (mode)
     {
-    case HYSCAN_GENERATOR_MODE_PRESET:
+    case HYSCAN_SONAR_GENERATOR_MODE_PRESET:
       id = "preset";
       break;
-    case HYSCAN_GENERATOR_MODE_AUTO:
+    case HYSCAN_SONAR_GENERATOR_MODE_AUTO:
       id = "auto";
       break;
-    case HYSCAN_GENERATOR_MODE_SIMPLE:
+    case HYSCAN_SONAR_GENERATOR_MODE_SIMPLE:
       id = "simple";
       break;
-    case HYSCAN_GENERATOR_MODE_EXTENDED:
+    case HYSCAN_SONAR_GENERATOR_MODE_EXTENDED:
       id = "extended";
       break;
     default:
@@ -549,50 +549,45 @@ hyscan_gtk_gen_control_id_by_mode (HyScanGeneratorModeType mode)
   return id;
 }
 
-static HyScanGeneratorSignalType
+static HyScanSonarGeneratorSignalType
 hyscan_gtk_gen_control_signal_by_id (const gchar *id)
 {
-  HyScanGeneratorSignalType signal_type;
+  HyScanSonarGeneratorSignalType signal_type;
 
   if (id == NULL)
-    return HYSCAN_GENERATOR_SIGNAL_INVALID;
+    return HYSCAN_SONAR_GENERATOR_SIGNAL_NONE;
 
   if (g_str_equal (id, "auto"))
-    signal_type = HYSCAN_GENERATOR_SIGNAL_AUTO;
+    signal_type = HYSCAN_SONAR_GENERATOR_SIGNAL_AUTO;
   else if (g_str_equal (id, "tone"))
-    signal_type = HYSCAN_GENERATOR_SIGNAL_TONE;
+    signal_type = HYSCAN_SONAR_GENERATOR_SIGNAL_TONE;
   else if (g_str_equal (id, "lfm"))
-    signal_type = HYSCAN_GENERATOR_SIGNAL_LFM;
-  else if (g_str_equal (id, "lfmd"))
-    signal_type = HYSCAN_GENERATOR_SIGNAL_LFMD;
+    signal_type = HYSCAN_SONAR_GENERATOR_SIGNAL_LFM;
   else
-    signal_type = HYSCAN_GENERATOR_SIGNAL_INVALID;
+    signal_type = HYSCAN_SONAR_GENERATOR_SIGNAL_NONE;
 
   return signal_type;
 }
 
 static const gchar*
-hyscan_gtk_gen_control_id_by_signal (HyScanGeneratorSignalType signal_type)
+hyscan_gtk_gen_control_id_by_signal (HyScanSonarGeneratorSignalType signal_type)
 {
   const gchar *id;
 
   switch (signal_type)
     {
-    case HYSCAN_GENERATOR_SIGNAL_AUTO:
+    case HYSCAN_SONAR_GENERATOR_SIGNAL_AUTO:
       id = "auto";
       break;
-    case HYSCAN_GENERATOR_SIGNAL_TONE:
+    case HYSCAN_SONAR_GENERATOR_SIGNAL_TONE:
       id = "tone";
       break;
-    case HYSCAN_GENERATOR_SIGNAL_LFM:
+    case HYSCAN_SONAR_GENERATOR_SIGNAL_LFM:
       id = "lfm";
-      break;
-    case HYSCAN_GENERATOR_SIGNAL_LFMD:
-      id = "lfmd";
       break;
     default:
       id = NULL;
-      break; 
+      break;
     }
 
   return id;
@@ -604,33 +599,25 @@ hyscan_gtk_gen_control_make_signals_cbt (HyScanGtkGenControl *genc,
 {
   HyScanGtkGenControlPrivate *priv = genc->priv;
 
-  if (priv->signals & HYSCAN_GENERATOR_SIGNAL_AUTO)
+  if (priv->signals & HYSCAN_SONAR_GENERATOR_SIGNAL_AUTO)
     {
       gtk_combo_box_text_append (cbt,
-                                 hyscan_gtk_gen_control_id_by_signal (HYSCAN_GENERATOR_SIGNAL_AUTO),
+                                 hyscan_gtk_gen_control_id_by_signal (HYSCAN_SONAR_GENERATOR_SIGNAL_AUTO),
                                  "Auto");
     }
 
-  if (priv->signals & HYSCAN_GENERATOR_SIGNAL_TONE)
+  if (priv->signals & HYSCAN_SONAR_GENERATOR_SIGNAL_TONE)
     {
       gtk_combo_box_text_append (cbt,
-                                 hyscan_gtk_gen_control_id_by_signal (HYSCAN_GENERATOR_SIGNAL_TONE),
+                                 hyscan_gtk_gen_control_id_by_signal (HYSCAN_SONAR_GENERATOR_SIGNAL_TONE),
                                  "Tone");
     }
 
-   if (priv->signals & HYSCAN_GENERATOR_SIGNAL_LFM)
+   if (priv->signals & HYSCAN_SONAR_GENERATOR_SIGNAL_LFM)
     {
       gtk_combo_box_text_append (cbt,
-                                 hyscan_gtk_gen_control_id_by_signal (HYSCAN_GENERATOR_SIGNAL_LFM),
+                                 hyscan_gtk_gen_control_id_by_signal (HYSCAN_SONAR_GENERATOR_SIGNAL_LFM),
                                  "LFM");
-    }
-
-
-  if (priv->signals & HYSCAN_GENERATOR_SIGNAL_LFMD)
-    {
-      gtk_combo_box_text_append (cbt,
-                                 hyscan_gtk_gen_control_id_by_signal (HYSCAN_GENERATOR_SIGNAL_LFMD),
-                                 "LFMD");
     }
 }
 
@@ -643,8 +630,8 @@ hyscan_gtk_gen_control_free_preset (HyScanDataSchemaEnumValue *preset)
 }
 
 GtkWidget *
-hyscan_gtk_gen_control_new (HyScanGeneratorModeType     capabilities,
-                            HyScanGeneratorSignalType   signals,
+hyscan_gtk_gen_control_new (HyScanSonarGeneratorModeType     capabilities,
+                            HyScanSonarGeneratorSignalType   signals,
                             HyScanDataSchemaEnumValue **presets)
 {
   return g_object_new (HYSCAN_TYPE_GTK_GEN_CONTROL,
@@ -665,12 +652,12 @@ hyscan_gtk_gen_control_set_durations (HyScanGtkGenControl *genc,
 
 void
 hyscan_gtk_gen_control_set_mode (HyScanGtkGenControl     *genc,
-                                 HyScanGeneratorModeType  mode)
+                                 HyScanSonarGeneratorModeType  mode)
 {
   HyScanGtkGenControlPrivate *priv;
 
   g_return_if_fail (HYSCAN_IS_GTK_GEN_CONTROL (genc));
-  
+
   priv = genc->priv;
 
   if (priv->capabilities & mode)
@@ -694,7 +681,7 @@ hyscan_gtk_gen_control_set_preset (HyScanGtkGenControl *genc,
   HyScanGtkGenControlPrivate *priv;
 
   g_return_if_fail (HYSCAN_IS_GTK_GEN_CONTROL (genc));
-  
+
   priv = genc->priv;
 
   if (priv->preset != preset)
@@ -723,12 +710,12 @@ hyscan_gtk_gen_control_set_preset (HyScanGtkGenControl *genc,
 
 void
 hyscan_gtk_gen_control_set_signal (HyScanGtkGenControl       *genc,
-                                   HyScanGeneratorSignalType  signal_type)
+                                   HyScanSonarGeneratorSignalType  signal_type)
 {
   HyScanGtkGenControlPrivate *priv;
 
   g_return_if_fail (HYSCAN_IS_GTK_GEN_CONTROL (genc));
-  
+
   priv = genc->priv;
 
   if (priv->signals & signal_type)
@@ -766,13 +753,13 @@ hyscan_gtk_gen_control_set_duration (HyScanGtkGenControl *genc,
 {
   g_return_if_fail (HYSCAN_IS_GTK_GEN_CONTROL (genc));
 
-  g_warning ("Not implemented");  
+  g_warning ("Not implemented");
 }
 
-HyScanGeneratorModeType
+HyScanSonarGeneratorModeType
 hyscan_gtk_gen_control_get_mode (HyScanGtkGenControl *genc)
 {
-  g_return_val_if_fail (HYSCAN_IS_GTK_GEN_CONTROL (genc), HYSCAN_GENERATOR_MODE_INVALID);
+  g_return_val_if_fail (HYSCAN_IS_GTK_GEN_CONTROL (genc), HYSCAN_SONAR_GENERATOR_MODE_NONE);
 
   return genc->priv->mode;
 }
@@ -785,10 +772,10 @@ hyscan_gtk_gen_control_get_preset (HyScanGtkGenControl *genc)
   return genc->priv->preset;
 }
 
-HyScanGeneratorSignalType
+HyScanSonarGeneratorSignalType
 hyscan_gtk_gen_control_get_signal (HyScanGtkGenControl *genc)
 {
-  g_return_val_if_fail (HYSCAN_IS_GTK_GEN_CONTROL (genc), HYSCAN_GENERATOR_SIGNAL_INVALID);
+  g_return_val_if_fail (HYSCAN_IS_GTK_GEN_CONTROL (genc), HYSCAN_SONAR_GENERATOR_SIGNAL_NONE);
 
   return genc->priv->signal_type;
 }

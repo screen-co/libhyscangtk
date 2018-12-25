@@ -9,7 +9,7 @@ add_library (${HYSCAN_GTK_LIBRARY} SHARED
              hyscan-gtk-player.c
              hyscan-gtk-project-creator.c
              hyscan-gtk-project-viewer.c
-             hyscan-gtk-sensor-control.c
+             # hyscan-gtk-sensor-control.c
              hyscan-gtk-scaler.c
              hyscan-gtk-recorder.c
              hyscan-gtk-tvg-control.c
@@ -47,7 +47,7 @@ install (FILES hyscan-colormap-spec.h
                hyscan-gtk-project-creator.h
                hyscan-gtk-project-viewer.h
                hyscan-gtk-recorder.h
-               hyscan-gtk-sensor-control.h
+               # hyscan-gtk-sensor-control.h
                hyscan-gtk-scaler.h
                hyscan-gtk-tvg-control.h
          COMPONENT development

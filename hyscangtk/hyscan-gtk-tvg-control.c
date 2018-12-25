@@ -57,7 +57,7 @@ struct _HyScanGtkTVGControlPrivate
   gdouble                 level;
   gdouble                 sensitivity;
 
-  HyScanTVGModeType       tvg_mode;
+  HyScanSonarTVGModeType       tvg_mode;
 };
 
 static void                hyscan_gtk_tvg_control_set_property          (GObject               *object,
@@ -85,10 +85,10 @@ static void                hyscan_gtk_tvg_control_log_alpha_changed     (HyScanG
                                                                          GtkAdjustment         *adj);
 
 static void                hyscan_gtk_tvg_control_switch_stack          (HyScanGtkTVGControl   *tvgc,
-                                                                         HyScanTVGModeType      mode);
+                                                                         HyScanSonarTVGModeType      mode);
 
-static HyScanTVGModeType   hyscan_gtk_tvg_control_mode_by_id            (const gchar           *id);
-static const gchar*        hyscan_gtk_tvg_control_id_by_mode            (HyScanTVGModeType      mode);
+static HyScanSonarTVGModeType   hyscan_gtk_tvg_control_mode_by_id            (const gchar           *id);
+static const gchar*        hyscan_gtk_tvg_control_id_by_mode            (HyScanSonarTVGModeType      mode);
 
 G_DEFINE_TYPE_WITH_PRIVATE (HyScanGtkTVGControl, hyscan_gtk_tvg_control, GTK_TYPE_GRID)
 
@@ -185,10 +185,10 @@ hyscan_gtk_tvg_control_constructed (GObject *object)
 
   if (priv->capabilities)
     {
-      if (priv->capabilities & HYSCAN_TVG_MODE_AUTO)
+      if (priv->capabilities & HYSCAN_SONAR_TVG_MODE_AUTO)
         {
           gtk_combo_box_text_append (GTK_COMBO_BOX_TEXT (priv->tvg_mode_cbt),
-                                     hyscan_gtk_tvg_control_id_by_mode (HYSCAN_TVG_MODE_AUTO),
+                                     hyscan_gtk_tvg_control_id_by_mode (HYSCAN_SONAR_TVG_MODE_AUTO),
                                      "Auto");
         }
       else
@@ -196,10 +196,10 @@ hyscan_gtk_tvg_control_constructed (GObject *object)
           gtk_container_remove (GTK_CONTAINER (priv->tvg_control_stack), priv->auto_tvg_grid);
         }
 
-      if (priv->capabilities & HYSCAN_TVG_MODE_LINEAR_DB)
+      if (priv->capabilities & HYSCAN_SONAR_TVG_MODE_LINEAR_DB)
         {
           gtk_combo_box_text_append (GTK_COMBO_BOX_TEXT (priv->tvg_mode_cbt),
-                                     hyscan_gtk_tvg_control_id_by_mode (HYSCAN_TVG_MODE_LINEAR_DB),
+                                     hyscan_gtk_tvg_control_id_by_mode (HYSCAN_SONAR_TVG_MODE_LINEAR_DB),
                                      "Linear DB");
         }
       else
@@ -207,10 +207,10 @@ hyscan_gtk_tvg_control_constructed (GObject *object)
           gtk_container_remove (GTK_CONTAINER (priv->tvg_control_stack), priv->lin_tvg_grid);
         }
 
-      if (priv->capabilities & HYSCAN_TVG_MODE_LOGARITHMIC)
+      if (priv->capabilities & HYSCAN_SONAR_TVG_MODE_LOGARITHMIC)
         {
           gtk_combo_box_text_append (GTK_COMBO_BOX_TEXT (priv->tvg_mode_cbt),
-                                     hyscan_gtk_tvg_control_id_by_mode (HYSCAN_TVG_MODE_LOGARITHMIC),
+                                     hyscan_gtk_tvg_control_id_by_mode (HYSCAN_SONAR_TVG_MODE_LOGARITHMIC),
                                      "Logarithmic");
         }
       else
@@ -235,7 +235,7 @@ hyscan_gtk_tvg_control_tvg_mode_changed (HyScanGtkTVGControl *tvgc,
                                          GtkComboBoxText     *cbt)
 {
   const gchar *id;
-  HyScanTVGModeType mode;
+  HyScanSonarTVGModeType mode;
 
   id = gtk_combo_box_get_active_id (GTK_COMBO_BOX (cbt));
   mode = hyscan_gtk_tvg_control_mode_by_id (id);
@@ -335,19 +335,19 @@ hyscan_gtk_tvg_control_log_alpha_changed (HyScanGtkTVGControl *tvgc,
 
 static void
 hyscan_gtk_tvg_control_switch_stack (HyScanGtkTVGControl *tvgc,
-                                     HyScanTVGModeType    mode)
+                                     HyScanSonarTVGModeType    mode)
 {
   HyScanGtkTVGControlPrivate *priv = tvgc->priv;
 
   switch (mode)
   {
-  case HYSCAN_TVG_MODE_AUTO:
+  case HYSCAN_SONAR_TVG_MODE_AUTO:
     gtk_stack_set_visible_child (GTK_STACK (priv->tvg_control_stack), priv->auto_tvg_grid);
     break;
-  case HYSCAN_TVG_MODE_LINEAR_DB:
+  case HYSCAN_SONAR_TVG_MODE_LINEAR_DB:
     gtk_stack_set_visible_child (GTK_STACK (priv->tvg_control_stack), priv->lin_tvg_grid);
     break;
-  case HYSCAN_TVG_MODE_LOGARITHMIC:
+  case HYSCAN_SONAR_TVG_MODE_LOGARITHMIC:
     gtk_stack_set_visible_child (GTK_STACK (priv->tvg_control_stack), priv->log_tvg_grid);
     break;
   default:
@@ -356,47 +356,47 @@ hyscan_gtk_tvg_control_switch_stack (HyScanGtkTVGControl *tvgc,
 }
 
 
-static HyScanTVGModeType
+static HyScanSonarTVGModeType
 hyscan_gtk_tvg_control_mode_by_id (const gchar *id)
 {
   if (id == NULL)
-    return HYSCAN_TVG_MODE_INVALID;
+    return HYSCAN_SONAR_TVG_MODE_NONE;
 
   if (g_str_equal (id, "auto"))
-    return HYSCAN_TVG_MODE_AUTO;
+    return HYSCAN_SONAR_TVG_MODE_AUTO;
   else if (g_str_equal (id, "lin"))
-    return HYSCAN_TVG_MODE_LINEAR_DB;
+    return HYSCAN_SONAR_TVG_MODE_LINEAR_DB;
   else if (g_str_equal (id, "log"))
-    return HYSCAN_TVG_MODE_LOGARITHMIC;
+    return HYSCAN_SONAR_TVG_MODE_LOGARITHMIC;
 
-  return HYSCAN_TVG_MODE_INVALID;
+  return HYSCAN_SONAR_TVG_MODE_NONE;
 }
 
 static const gchar*
-hyscan_gtk_tvg_control_id_by_mode (HyScanTVGModeType mode)
+hyscan_gtk_tvg_control_id_by_mode (HyScanSonarTVGModeType mode)
 {
   const gchar *id;
 
   switch (mode)
     {
-    case HYSCAN_TVG_MODE_AUTO:
+    case HYSCAN_SONAR_TVG_MODE_AUTO:
       id = "auto";
       break;
-    case HYSCAN_TVG_MODE_LINEAR_DB:
+    case HYSCAN_SONAR_TVG_MODE_LINEAR_DB:
       id = "lin";
       break;
-    case HYSCAN_TVG_MODE_LOGARITHMIC:
+    case HYSCAN_SONAR_TVG_MODE_LOGARITHMIC:
       id = "log";
       break;
     default:
-      id = NULL; 
+      id = NULL;
     }
 
   return id;
 }
 
 GtkWidget *
-hyscan_gtk_tvg_control_new (HyScanTVGModeType capabilities)
+hyscan_gtk_tvg_control_new (HyScanSonarTVGModeType capabilities)
 {
   return g_object_new (HYSCAN_TYPE_GTK_TVG_CONTROL,
                        "capabilities", (int) capabilities,
@@ -405,7 +405,7 @@ hyscan_gtk_tvg_control_new (HyScanTVGModeType capabilities)
 
 void
 hyscan_gtk_tvg_control_set_mode (HyScanGtkTVGControl *tvgc,
-                                 HyScanTVGModeType    mode)
+                                 HyScanSonarTVGModeType    mode)
 {
   HyScanGtkTVGControlPrivate *priv;
 
@@ -568,11 +568,11 @@ hyscan_gtk_tvg_control_set_logarithmic_alpha (HyScanGtkTVGControl *tvgc,
 }
 
 
-HyScanTVGModeType
+HyScanSonarTVGModeType
 hyscan_gtk_tvg_control_get_mode (HyScanGtkTVGControl *tvgc)
 {
-  g_return_val_if_fail (HYSCAN_IS_GTK_TVG_CONTROL (tvgc), HYSCAN_TVG_MODE_INVALID);
-  
+  g_return_val_if_fail (HYSCAN_IS_GTK_TVG_CONTROL (tvgc), HYSCAN_SONAR_TVG_MODE_NONE);
+
   return tvgc->priv->tvg_mode;
 }
 
@@ -580,7 +580,7 @@ gdouble
 hyscan_gtk_tvg_control_get_level (HyScanGtkTVGControl *tvgc)
 {
   g_return_val_if_fail (HYSCAN_IS_GTK_TVG_CONTROL (tvgc), -G_MAXDOUBLE);
-  
+
   return tvgc->priv->level;
 }
 
@@ -588,7 +588,7 @@ gdouble
 hyscan_gtk_tvg_control_get_sensitivity (HyScanGtkTVGControl *tvgc)
 {
   g_return_val_if_fail (HYSCAN_IS_GTK_TVG_CONTROL (tvgc), -G_MAXDOUBLE);
-  
+
   return tvgc->priv->sensitivity;
 }
 
@@ -596,7 +596,7 @@ gdouble
 hyscan_gtk_tvg_control_get_linear_db_gain (HyScanGtkTVGControl *tvgc)
 {
   g_return_val_if_fail (HYSCAN_IS_GTK_TVG_CONTROL (tvgc), -G_MAXDOUBLE);
-  
+
   return tvgc->priv->lin_gain;
 }
 
@@ -604,7 +604,7 @@ gdouble
 hyscan_gtk_tvg_control_get_linear_db_step (HyScanGtkTVGControl *tvgc)
 {
   g_return_val_if_fail (HYSCAN_IS_GTK_TVG_CONTROL (tvgc), -G_MAXDOUBLE);
-  
+
   return tvgc->priv->lin_step;
 }
 
@@ -612,7 +612,7 @@ gdouble
 hyscan_gtk_tvg_control_get_logarithmic_gain (HyScanGtkTVGControl *tvgc)
 {
   g_return_val_if_fail (HYSCAN_IS_GTK_TVG_CONTROL (tvgc), -G_MAXDOUBLE);
-  
+
   return tvgc->priv->log_gain;
 }
 
@@ -620,7 +620,7 @@ gdouble
 hyscan_gtk_tvg_control_get_logarithmic_beta (HyScanGtkTVGControl *tvgc)
 {
   g_return_val_if_fail (HYSCAN_IS_GTK_TVG_CONTROL (tvgc), -G_MAXDOUBLE);
-  
+
   return tvgc->priv->log_beta;
 }
 

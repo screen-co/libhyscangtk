@@ -21,7 +21,7 @@
 #include <hyscan-gtk-mark-editor.h>
 #include <hyscan-gtk-project-creator.h>
 #include <hyscan-gtk-sensor-control.h>
-#include <hyscan-sensors-data.h>
+// #include <hyscan-sensors-data.h>
 
 static HyScanDataSchemaEnumValue *
 make_data_schema_enum_value (gint64  value,
@@ -128,7 +128,7 @@ init_sensors (GHashTable *sensors)
   addresses = make_addresses ();
   modes = make_modes ();
   devices = make_devices ();
-
+  /*
   hyscan_sensors_data_set_virtual_sensor (sensors, "virtual", 1, 200);
   hyscan_sensors_data_set_state (sensors, "virtual", FALSE);
 
@@ -137,6 +137,7 @@ init_sensors (GHashTable *sensors)
 
   hyscan_sensors_data_set_uart_sensor (sensors, "uart", 4, 800, HYSCAN_SENSOR_PROTOCOL_NMEA_0183, 1, 2, devices, modes);
   hyscan_sensors_data_set_state (sensors, "uart", TRUE);
+  */
 }
 
 static void
@@ -219,32 +220,32 @@ main (int argc, char **argv)
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
-  tvgc = hyscan_gtk_tvg_control_new (HYSCAN_TVG_MODE_AUTO | HYSCAN_TVG_MODE_LINEAR_DB);
+  tvgc = hyscan_gtk_tvg_control_new (HYSCAN_SONAR_TVG_MODE_AUTO | HYSCAN_SONAR_TVG_MODE_LINEAR_DB);
   gtk_widget_set_margin_start (tvgc, 24);
   gtk_widget_set_margin_end (tvgc, 4);
   gtk_widget_set_margin_top (tvgc, 4);
   gtk_widget_set_margin_bottom (tvgc, 4);
 
   presets = g_malloc0 (sizeof (HyScanDataSchemaEnumValue *) * 4);
-  
+
   presets[0] = g_malloc (sizeof (HyScanDataSchemaEnumValue));
   presets[0]->value = 0;
   presets[0]->name = g_strdup ("TONE-100");
   presets[0]->description = g_strdup ("TONE-100");
-  
+
   presets[1] = g_malloc (sizeof (HyScanDataSchemaEnumValue));
   presets[1]->value = 1;
   presets[1]->name = g_strdup ("LMF-1");
   presets[1]->description = g_strdup ("LFM-1");
-  
+
   presets[2] = g_malloc (sizeof (HyScanDataSchemaEnumValue));
   presets[2]->value = 2;
   presets[2]->name = g_strdup ("LFM-16");
   presets[2]->description = g_strdup ("LFM-16");
-  
+
   genc = hyscan_gtk_gen_control_new (
-    HYSCAN_GENERATOR_MODE_PRESET | HYSCAN_GENERATOR_MODE_AUTO | HYSCAN_GENERATOR_MODE_SIMPLE,
-    HYSCAN_GENERATOR_SIGNAL_TONE | HYSCAN_GENERATOR_SIGNAL_LFMD,
+    HYSCAN_SONAR_GENERATOR_MODE_PRESET | HYSCAN_SONAR_GENERATOR_MODE_AUTO | HYSCAN_SONAR_GENERATOR_MODE_SIMPLE,
+    HYSCAN_SONAR_GENERATOR_SIGNAL_TONE,
     presets
   );
   gtk_widget_set_margin_start (genc, 24);
@@ -258,6 +259,7 @@ main (int argc, char **argv)
   gtk_widget_set_margin_top (recorder, 4);
   gtk_widget_set_margin_bottom (recorder, 4);
 
+  /*
   sensorc = hyscan_gtk_sensor_control_new ();
   sensors = hyscan_gtk_sensor_control_get_sensors (HYSCAN_GTK_SENSOR_CONTROL (sensorc));
   init_sensors (sensors);
@@ -268,6 +270,8 @@ main (int argc, char **argv)
   gtk_widget_set_margin_end (sensorc, 4);
   gtk_widget_set_margin_top (sensorc, 4);
   gtk_widget_set_margin_bottom (sensorc, 4);
+  */
+  sensorc = gtk_label_new ("Not implemented");
 
   tvgc_pane = hyscan_gtk_pane_new ("TVG", tvgc, TRUE, HYSCAN_GTK_PANE_ARROW);
   hyscan_gtk_pane_set_expanded (HYSCAN_GTK_PANE (tvgc_pane), FALSE);

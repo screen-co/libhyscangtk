@@ -9,7 +9,6 @@
  */
 
 #include "hyscan-gtk-sensor-control.h"
-#include <hyscan-sensors-data.h>
 
 enum
 {
@@ -714,7 +713,7 @@ hyscan_gtk_sensor_control_enable_toggled (HyScanGtkSensorControl *gtk_sensor_con
   gchar *sensor;
 
   priv = gtk_sensor_control->priv;
-  
+
   if (priv->update)
     return;
 

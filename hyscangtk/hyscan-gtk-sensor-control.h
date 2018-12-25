@@ -15,7 +15,7 @@
 
 #include <gtk/gtk.h>
 #include <hyscan-api.h>
-#include <hyscan-sensor-control.h>
+#include <hyscan-sensor.h>
 
 G_BEGIN_DECLS
 

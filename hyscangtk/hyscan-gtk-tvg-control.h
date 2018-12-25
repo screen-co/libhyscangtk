@@ -14,7 +14,7 @@
 #define __HYSCAN_GTK_TVG_CONTROL_H__
 
 #include <gtk/gtk.h>
-#include <hyscan-tvg-control.h>
+#include <hyscan-sonar.h>
 
 G_BEGIN_DECLS
 
@@ -56,11 +56,11 @@ HYSCAN_API
 GType               hyscan_gtk_tvg_control_get_type                (void);
 
 HYSCAN_API
-GtkWidget*          hyscan_gtk_tvg_control_new                     (HyScanTVGModeType      capabilities);
+GtkWidget*          hyscan_gtk_tvg_control_new                     (HyScanSonarTVGModeType      capabilities);
 
 HYSCAN_API
 void                hyscan_gtk_tvg_control_set_mode                (HyScanGtkTVGControl   *tvgc,
-                                                                    HyScanTVGModeType      mode);
+                                                                    HyScanSonarTVGModeType      mode);
 
 HYSCAN_API
 void                hyscan_gtk_tvg_control_set_gain_range          (HyScanGtkTVGControl   *tvgc,
@@ -96,7 +96,8 @@ void                hyscan_gtk_tvg_control_set_logarithmic_alpha   (HyScanGtkTVG
                                                                     gdouble                alpha);
 
 HYSCAN_API
-HyScanTVGModeType   hyscan_gtk_tvg_control_get_mode                (HyScanGtkTVGControl   *tvgc);
+
+HyScanSonarTVGModeType   hyscan_gtk_tvg_control_get_mode                (HyScanGtkTVGControl   *tvgc);
 
 HYSCAN_API
 gdouble             hyscan_gtk_tvg_control_get_level               (HyScanGtkTVGControl   *tvgc);

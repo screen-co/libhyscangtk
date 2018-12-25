@@ -14,12 +14,13 @@
 #define __HYSCAN_GTK_GEN_CONTROL_H__
 
 #include <gtk/gtk.h>
-#include <hyscan-generator-control.h>
+#include <hyscan-sonar.h>
+#include <hyscan-data-schema.h>
 
 G_BEGIN_DECLS
 
 typedef struct {
-  HyScanGeneratorSignalType  signal;
+  HyScanSonarGeneratorSignalType  signal;
   gdouble                    duration_min;
   gdouble                    duration_max;
 } HyScanSignalDurationSpec;
@@ -62,8 +63,8 @@ HYSCAN_API
 GType        hyscan_gtk_gen_control_get_type             (void);
 
 HYSCAN_API
-GtkWidget*   hyscan_gtk_gen_control_new                  (HyScanGeneratorModeType       capabilities,
-                                                          HyScanGeneratorSignalType     singals,
+GtkWidget*   hyscan_gtk_gen_control_new                  (HyScanSonarGeneratorModeType       capabilities,
+                                                          HyScanSonarGeneratorSignalType     singals,
                                                           HyScanDataSchemaEnumValue   **presets);
 
 HYSCAN_API
@@ -72,7 +73,7 @@ void         hyscan_gtk_gen_control_set_durations        (HyScanGtkGenControl   
 
 HYSCAN_API
 void         hyscan_gtk_gen_control_set_mode             (HyScanGtkGenControl          *genc,
-                                                          HyScanGeneratorModeType       mode);
+                                                          HyScanSonarGeneratorModeType       mode);
 
 HYSCAN_API
 void         hyscan_gtk_gen_control_set_preset           (HyScanGtkGenControl          *genc,
@@ -80,7 +81,7 @@ void         hyscan_gtk_gen_control_set_preset           (HyScanGtkGenControl   
 
 HYSCAN_API
 void         hyscan_gtk_gen_control_set_signal           (HyScanGtkGenControl          *genc,
-                                                          HyScanGeneratorSignalType     signal_type);
+                                                          HyScanSonarGeneratorSignalType     signal_type);
 
 HYSCAN_API
 void         hyscan_gtk_gen_control_set_power            (HyScanGtkGenControl          *genc,
@@ -91,14 +92,14 @@ void         hyscan_gtk_gen_control_set_duration         (HyScanGtkGenControl   
                                                           gdouble                       duration);
 
 HYSCAN_API
-HyScanGeneratorModeType
+HyScanSonarGeneratorModeType
              hyscan_gtk_gen_control_get_mode             (HyScanGtkGenControl          *genc);
 
 HYSCAN_API
 gint64       hyscan_gtk_gen_control_get_preset           (HyScanGtkGenControl          *genc);
 
 HYSCAN_API
-HyScanGeneratorSignalType
+HyScanSonarGeneratorSignalType
              hyscan_gtk_gen_control_get_signal           (HyScanGtkGenControl          *genc);
 
 HYSCAN_API
