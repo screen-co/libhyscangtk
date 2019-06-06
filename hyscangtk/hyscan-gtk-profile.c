@@ -87,7 +87,9 @@ static void    hyscan_gtk_profile_selection_changed        (GtkTreeSelection    
 
 static guint   hyscan_gtk_profile_signals[SIGNAL_LAST] = {0};
 
-G_DEFINE_TYPE_WITH_PRIVATE (HyScanGtkProfile, hyscan_gtk_profile, GTK_TYPE_TREE_VIEW);
+// G_DEFINE_TYPE_WITH_PRIVATE (HyScanGtkProfile, hyscan_gtk_profile, GTK_TYPE_TREE_VIEW);
+G_DEFINE_ABSTRACT_TYPE_WITH_CODE (HyScanGtkProfile, hyscan_gtk_profile, GTK_TYPE_TREE_VIEW,
+                                  G_ADD_PRIVATE (HyScanGtkProfile));
 
 static void
 hyscan_gtk_profile_class_init (HyScanGtkProfileClass *klass)
