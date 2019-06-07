@@ -72,12 +72,13 @@ struct _HyScanGtkConnectorPrivate
 
   gint           offset_page;
   gint           connect_page;
+  gint           previous_page;
 
   HyScanAsync   *async;
   HyScanDB      *db;
   HyScanControl *control;
 
-  gint           previous_page;
+  gboolean       result;
 };
 
 static void    hyscan_gtk_connector_set_property             (GObject               *object,
@@ -472,6 +473,8 @@ hyscan_gtk_connector_finished (HyScanGtkConnector *self,
     gtk_label_set_text (label, _("Connection completed. HyScan is ready to launch. "));
   else
     gtk_label_set_text (label, _("Connection failed. "));
+
+  self->priv->result = success;
 }
 
 GtkWidget *
@@ -480,6 +483,14 @@ hyscan_gtk_connector_new (void)
   return g_object_new (HYSCAN_TYPE_GTK_CONNECTOR,
                        "use-header-bar", TRUE,
                        NULL);
+}
+
+gboolean
+hyscan_gtk_connector_get_result (HyScanGtkConnector *self)
+{
+  g_return_val_if_fail (HYSCAN_IS_GTK_CONNECTOR (self), NULL);
+
+  return self->priv->result;
 }
 
 HyScanDB *

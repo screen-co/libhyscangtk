@@ -72,6 +72,9 @@ HYSCAN_API
 GtkWidget *            hyscan_gtk_connector_new              (void);
 
 HYSCAN_API
+gboolean               hyscan_gtk_connector_get_result       (HyScanGtkConnector *self);
+
+HYSCAN_API
 HyScanDB *             hyscan_gtk_connector_get_db           (HyScanGtkConnector *self);
 
 HYSCAN_API
