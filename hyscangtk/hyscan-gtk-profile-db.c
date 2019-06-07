@@ -34,7 +34,7 @@
 
 #include "hyscan-gtk-profile-db.h"
 
-#define HYSCAN_DB_PROFILES_PATH "db-profiles"
+#define HYSCAN_GTK_PROFILE_DB_PATH "db-profiles"
 
 static HyScanProfile * hyscan_gtk_profile_db_new_profile (HyScanGtkProfile *parent,
                                                           const gchar      *filename);
@@ -46,7 +46,7 @@ hyscan_gtk_profile_db_class_init (HyScanGtkProfileDBClass *klass)
 {
   HyScanGtkProfileClass *pklass = HYSCAN_GTK_PROFILE_CLASS (klass);
 
-  pklass->subfolder = HYSCAN_DB_PROFILES_PATH;
+  pklass->subfolder = HYSCAN_GTK_PROFILE_DB_PATH;
   pklass->new_profile = hyscan_gtk_profile_db_new_profile;
 }
 
@@ -59,7 +59,7 @@ static HyScanProfile *
 hyscan_gtk_profile_db_new_profile (HyScanGtkProfile *parent,
                                    const gchar      *filename)
 {
-  return HYSCAN_PROFILE (hyscan_db_profile_new (filename));
+  return HYSCAN_PROFILE (hyscan_profile_db_new (filename));
 }
 
 GtkWidget *

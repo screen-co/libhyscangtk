@@ -1,6 +1,6 @@
-#include <hyscan-hw-profile.h>
-#include <hyscan-db-profile.h>
-#include <hyscan-offset-profile.h>
+#include <hyscan-profile-hw.h>
+#include <hyscan-profile-db.h>
+#include <hyscan-profile-offset.h>
 #include <hyscan-gtk-profile-db.h>
 #include <hyscan-gtk-profile-hw.h>
 #include <hyscan-gtk-profile-offset.h>

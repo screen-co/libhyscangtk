@@ -34,7 +34,7 @@
 
 #include "hyscan-gtk-profile-hw.h"
 
-#define HYSCAN_HW_PROFILES_PATH "hw-profiles"
+#define HYSCAN_GTK_PROFILE_HW_PATH "hw-profiles"
 
 enum
 {
@@ -67,7 +67,7 @@ hyscan_gtk_profile_hw_class_init (HyScanGtkProfileHWClass *klass)
   oclass->set_property = hyscan_gtk_profile_hw_set_property;
   oclass->finalize = hyscan_gtk_profile_hw_object_finalize;
 
-  pklass->subfolder = HYSCAN_HW_PROFILES_PATH;
+  pklass->subfolder = HYSCAN_GTK_PROFILE_HW_PATH;
   pklass->new_profile = hyscan_gtk_profile_hw_new_profile;
 
   g_object_class_install_property (oclass, PROP_DRIVERS,
@@ -116,10 +116,10 @@ hyscan_gtk_profile_hw_new_profile (HyScanGtkProfile *parent,
                                    const gchar      *filename)
 {
   HyScanGtkProfileHW *self = HYSCAN_GTK_PROFILE_HW (parent);
-  HyScanHWProfile *profile;
+  HyScanProfileHW *profile;
 
-  profile = hyscan_hw_profile_new (filename);
-  hyscan_hw_profile_set_driver_paths (profile, self->priv->drivers);
+  profile = hyscan_profile_hw_new (filename);
+  hyscan_profile_hw_set_driver_paths (profile, self->priv->drivers);
 
   return HYSCAN_PROFILE (profile);
 }

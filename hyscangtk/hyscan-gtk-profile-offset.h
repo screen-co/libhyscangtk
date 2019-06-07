@@ -36,7 +36,7 @@
 #define __HYSCAN_GTK_PROFILE_OFFSET_H__
 
 #include "hyscan-gtk-profile.h"
-#include <hyscan-offset-profile.h>
+#include <hyscan-profile-offset.h>
 
 G_BEGIN_DECLS
 

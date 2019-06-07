@@ -59,7 +59,7 @@ static HyScanProfile *
 hyscan_gtk_profile_offset_new_profile (HyScanGtkProfile *parent,
                                        const gchar      *filename)
 {
-  return HYSCAN_PROFILE (hyscan_offset_profile_new (filename));
+  return HYSCAN_PROFILE (hyscan_profile_offset_new (filename));
 }
 
 GtkWidget *

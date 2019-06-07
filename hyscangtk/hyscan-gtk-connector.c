@@ -370,7 +370,7 @@ hyscan_gtk_connector_apply (HyScanGtkConnector *self)
   g_signal_connect (priv->async, "ready::" HYSCAN_GTK_CONNECTOR_DB,
                     G_CALLBACK (hyscan_gtk_connector_done_db), self);
   hyscan_async_append (priv->async, HYSCAN_GTK_CONNECTOR_DB,
-                       (HyScanAsyncCommand)hyscan_db_profile_connect,
+                       (HyScanAsyncCommand)hyscan_profile_db_connect,
                        priv->db_profile, NULL, 0);
 }
 
@@ -392,7 +392,7 @@ hyscan_gtk_connector_done_db (HyScanAsync        *async,
   g_signal_connect (async, "ready::" HYSCAN_GTK_CONNECTOR_HW_CHK,
                     G_CALLBACK (hyscan_gtk_connector_done_hw_check), self);
   hyscan_async_append (async, HYSCAN_GTK_CONNECTOR_HW_CHK,
-                       (HyScanAsyncCommand)hyscan_hw_profile_check,
+                       (HyScanAsyncCommand)hyscan_profile_hw_check,
                        self->priv->hw_profile, NULL, 0);
 }
 
@@ -416,7 +416,7 @@ hyscan_gtk_connector_done_hw_check (HyScanAsync        *async,
   g_signal_connect (async, "ready::" HYSCAN_GTK_CONNECTOR_HW,
                     G_CALLBACK (hyscan_gtk_connector_done_hw), self);
   hyscan_async_append (async, HYSCAN_GTK_CONNECTOR_HW,
-                       (HyScanAsyncCommand)hyscan_hw_profile_connect,
+                       (HyScanAsyncCommand)hyscan_profile_hw_connect,
                        self->priv->hw_profile, NULL, 0);
 }
 
@@ -432,7 +432,7 @@ hyscan_gtk_connector_done_hw (HyScanAsync        *async,
   g_signal_connect (async, "ready::" HYSCAN_GTK_CONNECTOR_OF,
                     G_CALLBACK (hyscan_gtk_connector_done_of), self);
   hyscan_async_append (async, HYSCAN_GTK_CONNECTOR_OF,
-                       (HyScanAsyncCommand)hyscan_offset_profile_apply,
+                       (HyScanAsyncCommand)hyscan_profile_offset_apply,
                        self->priv->of_profile,
                        self->priv->control, sizeof (GObject*));
 }
@@ -446,7 +446,7 @@ hyscan_gtk_connector_done_of (HyScanAsync        *async,
 
   if (!check)
     {
-      g_warning ("OffsetProfile apply failed");
+      g_warning ("ProfileOffset apply failed");
       hyscan_gtk_connector_finished (self, FALSE);
     }
   else

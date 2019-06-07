@@ -36,7 +36,7 @@
 #define __HYSCAN_GTK_PROFILE_DB_H__
 
 #include "hyscan-gtk-profile.h"
-#include <hyscan-db-profile.h>
+#include <hyscan-profile-db.h>
 
 G_BEGIN_DECLS
 
