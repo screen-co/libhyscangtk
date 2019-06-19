@@ -390,7 +390,16 @@ hyscan_gtk_connector_done_db (HyScanAsync        *async,
                               gpointer            res,
                               HyScanGtkConnector *self)
 {
-  self->priv->db = res;
+  HyScanDB *db = HYSCAN_DB (res);
+
+  if (db == NULL)
+    {
+      g_warning ("DBProfile connection failed");
+      hyscan_gtk_connector_finished (self, FALSE);
+      return;
+    }
+
+  self->priv->db = db;
   gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (self->priv->progress.bar), 0.3);
 
   if (self->priv->hw_profile == NULL)
