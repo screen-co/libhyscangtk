@@ -16,7 +16,7 @@ main (int argc, char **argv)
 {
   gtk_init (&argc, &argv);
 
-  window = hyscan_gtk_connector_new ();
+  window = hyscan_gtk_connector_new (NULL, NULL);
   g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
   g_signal_connect (window, "cancel", G_CALLBACK (cancel_close), "Cancel");
   g_signal_connect (window, "close", G_CALLBACK (cancel_close), "Close");

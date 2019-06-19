@@ -69,7 +69,8 @@ HYSCAN_API
 GType                  hyscan_gtk_connector_get_type         (void);
 
 HYSCAN_API
-GtkWidget *            hyscan_gtk_connector_new              (void);
+GtkWidget *            hyscan_gtk_connector_new              (const gchar  *sysfolder,
+                                                              gchar       **drivers);
 
 HYSCAN_API
 gboolean               hyscan_gtk_connector_get_result       (HyScanGtkConnector *self);
