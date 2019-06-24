@@ -40,8 +40,9 @@
 #include <glib/gi18n.h>
 
 #define HYSCAN_GTK_CONNECTOR_DB "db"
-#define HYSCAN_GTK_CONNECTOR_HW "hw"
 #define HYSCAN_GTK_CONNECTOR_HW_CHK "hw_check"
+#define HYSCAN_GTK_CONNECTOR_HW "hw"
+#define HYSCAN_GTK_CONNECTOR_BIND "bind"
 #define HYSCAN_GTK_CONNECTOR_OF "offset"
 enum
 {
@@ -118,6 +119,9 @@ static void    hyscan_gtk_connector_done_hw_check            (HyScanAsync       
                                                               gpointer               res,
                                                               HyScanGtkConnector    *self);
 static void    hyscan_gtk_connector_done_hw                  (HyScanAsync           *async,
+                                                              gpointer               res,
+                                                              HyScanGtkConnector    *self);
+static void    hyscan_gtk_connector_done_bind                (HyScanAsync           *async,
                                                               gpointer               res,
                                                               HyScanGtkConnector    *self);
 static void    hyscan_gtk_connector_done_of                  (HyScanAsync           *async,
@@ -380,6 +384,7 @@ hyscan_gtk_connector_apply (HyScanGtkConnector *self)
 
   g_signal_connect (priv->async, "ready::" HYSCAN_GTK_CONNECTOR_DB,
                     G_CALLBACK (hyscan_gtk_connector_done_db), self);
+
   hyscan_async_append (priv->async, HYSCAN_GTK_CONNECTOR_DB,
                        (HyScanAsyncCommand)hyscan_profile_db_connect,
                        priv->db_profile, NULL, 0);
@@ -445,7 +450,48 @@ hyscan_gtk_connector_done_hw (HyScanAsync        *async,
                               gpointer            res,
                               HyScanGtkConnector *self)
 {
-  self->priv->control = res;
+  HyScanControl *control = HYSCAN_CONTROL (res);
+
+  if (control == NULL)
+    {
+      g_warning ("HWProfile connection failed");
+      hyscan_gtk_connector_finished (self, FALSE);
+      return;
+    }
+
+  self->priv->control = control;
+
+  gtk_label_set_text (GTK_LABEL (self->priv->progress.label), _("Connecting to sonars..."));
+  gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (self->priv->progress.bar), 0.5);
+
+  g_signal_connect (async, "ready::" HYSCAN_GTK_CONNECTOR_BIND,
+                    G_CALLBACK (hyscan_gtk_connector_done_bind), self);
+  hyscan_async_append (async, HYSCAN_GTK_CONNECTOR_BIND,
+                       (HyScanAsyncCommand)hyscan_control_device_bind,
+                       self->priv->control, NULL, 0);
+}
+
+
+static void
+hyscan_gtk_connector_done_bind (HyScanAsync        *async,
+                                gpointer            res,
+                                HyScanGtkConnector *self)
+{
+  gboolean check = GPOINTER_TO_INT (res);
+
+  if (!check)
+    {
+      g_warning ("HWProfile binding failed");
+      hyscan_gtk_connector_finished (self, FALSE);
+      return;
+    }
+
+  if (self->priv->of_profile == NULL)
+    {
+      hyscan_gtk_connector_finished (self, TRUE);
+      return;
+    }
+
   gtk_label_set_text (GTK_LABEL (self->priv->progress.label), _("Setting up offsets..."));
   gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (self->priv->progress.bar), 0.9);
 
@@ -454,7 +500,7 @@ hyscan_gtk_connector_done_hw (HyScanAsync        *async,
   hyscan_async_append (async, HYSCAN_GTK_CONNECTOR_OF,
                        (HyScanAsyncCommand)hyscan_profile_offset_apply,
                        self->priv->of_profile,
-                       self->priv->control, sizeof (GObject*));
+                       &self->priv->control, sizeof (GObject*));
 }
 
 static void
