@@ -67,7 +67,7 @@ HYSCAN_API
 GType                  hyscan_gtk_profile_db_get_type         (void);
 
 HYSCAN_API
-GtkWidget *            hyscan_gtk_profile_db_new              (const gchar *sys);
+GtkWidget *            hyscan_gtk_profile_db_new              (gchar **folders);
 
 G_END_DECLS
 

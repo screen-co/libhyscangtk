@@ -63,9 +63,9 @@ hyscan_gtk_profile_offset_new_profile (HyScanGtkProfile *parent,
 }
 
 GtkWidget *
-hyscan_gtk_profile_offset_new (const gchar *sys)
+hyscan_gtk_profile_offset_new (gchar **folders)
 {
   return g_object_new (HYSCAN_TYPE_GTK_PROFILE_OFFSET,
-                       "sysfolder", sys,
+                       "folders", folders,
                        NULL);
 }
