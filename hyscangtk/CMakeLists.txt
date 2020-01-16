@@ -36,6 +36,7 @@ add_library (${HYSCAN_GTK_LIBRARY} SHARED
              hyscan-gtk-profile-hw.c
              hyscan-gtk-profile-offset.c
              hyscan-gtk-connector.c
+             hyscan-gtk-paned.c
              ${CMAKE_BINARY_DIR}/resources/hyscan-gtk-templates.c
              ${CMAKE_BINARY_DIR}/marshallers/hyscan-gtk-marshallers.c)
 
