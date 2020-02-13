@@ -10,13 +10,13 @@ void cancel_close (HyScanGtkConnector *con,
                    const gchar        *text);
 
 GtkWidget *window;
-
+const gchar *paths[]={"./"};
 int
 main (int argc, char **argv)
 {
   gtk_init (&argc, &argv);
 
-  window = hyscan_gtk_connector_new (NULL, NULL);
+  window = hyscan_gtk_connector_new (NULL, (gchar**)paths);
   g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
   g_signal_connect (window, "cancel", G_CALLBACK (cancel_close), "Cancel");
   g_signal_connect (window, "close", G_CALLBACK (cancel_close), "Close");

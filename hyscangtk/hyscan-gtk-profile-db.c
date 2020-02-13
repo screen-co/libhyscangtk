@@ -32,12 +32,21 @@
  * лицензии. Для этого свяжитесь с ООО Экран - <info@screen-co.ru>.
  */
 
+/**
+ * SECTION: hyscan-gtk-profile-db
+ * @Title: HyScanGtkProfileDB
+ * @Short_description: Виджет профиля баз данных.
+ */
+
 #include "hyscan-gtk-profile-db.h"
 
 #define HYSCAN_GTK_PROFILE_DB_PATH "db-profiles"
 
 static HyScanProfile * hyscan_gtk_profile_db_new_profile (HyScanGtkProfile *parent,
                                                           const gchar      *filename);
+static GtkWidget *     hyscan_gtk_profile_db_editor      (HyScanGtkProfile *parent,
+                                                          HyScanProfile    *profile);
+
 
 G_DEFINE_TYPE (HyScanGtkProfileDB, hyscan_gtk_profile_db, HYSCAN_TYPE_GTK_PROFILE);
 
@@ -48,6 +57,7 @@ hyscan_gtk_profile_db_class_init (HyScanGtkProfileDBClass *klass)
 
   pklass->subfolder = HYSCAN_GTK_PROFILE_DB_PATH;
   pklass->new_profile = hyscan_gtk_profile_db_new_profile;
+  pklass->make_editor = hyscan_gtk_profile_db_editor;
 }
 
 static void
@@ -62,6 +72,18 @@ hyscan_gtk_profile_db_new_profile (HyScanGtkProfile *parent,
   return HYSCAN_PROFILE (hyscan_profile_db_new (filename));
 }
 
+static GtkWidget *
+hyscan_gtk_profile_db_editor (HyScanGtkProfile *parent,
+                              HyScanProfile    *profile)
+{
+  return hyscan_gtk_profile_db_editor_new (profile);
+}
+/*
+ * hyscan_gtk_profile_db_new:
+ * @sys: путь к системной папке профилей
+ *
+ * Returns: (transfer full) виджет профилей БД.
+ */
 GtkWidget *
 hyscan_gtk_profile_db_new (const gchar *sys)
 {

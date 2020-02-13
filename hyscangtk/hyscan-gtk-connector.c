@@ -32,6 +32,14 @@
  * лицензии. Для этого свяжитесь с ООО Экран - <info@screen-co.ru>.
  */
 
+/**
+ * SECTION: hyscan-gtk-connector
+ * @Title: HyScanGtkConnector
+ * @Short_description: Виджет подключения к профилям.
+ *
+ * Имеет ряд недостатков. Увы.
+ */
+
 #include "hyscan-gtk-connector.h"
 #include "hyscan-gtk-profile-db.h"
 #include "hyscan-gtk-profile-hw.h"
@@ -112,21 +120,16 @@ static void    hyscan_gtk_connector_selected_offset          (HyScanGtkProfile  
                                                               HyScanGtkConnector    *self);
 
 static void    hyscan_gtk_connector_apply                    (HyScanGtkConnector    *self);
-static void    hyscan_gtk_connector_done_db                  (HyScanAsync           *async,
-                                                              gpointer               res,
-                                                              HyScanGtkConnector    *self);
-static void    hyscan_gtk_connector_done_hw_check            (HyScanAsync           *async,
-                                                              gpointer               res,
-                                                              HyScanGtkConnector    *self);
-static void    hyscan_gtk_connector_done_hw                  (HyScanAsync           *async,
-                                                              gpointer               res,
-                                                              HyScanGtkConnector    *self);
-static void    hyscan_gtk_connector_done_bind                (HyScanAsync           *async,
-                                                              gpointer               res,
-                                                              HyScanGtkConnector    *self);
-static void    hyscan_gtk_connector_done_of                  (HyScanAsync           *async,
-                                                              gpointer               res,
-                                                              HyScanGtkConnector    *self);
+static void    hyscan_gtk_connector_done_db                  (HyScanGtkConnector    *self,
+                                                              gpointer               res);
+static void    hyscan_gtk_connector_done_hw_check            (HyScanGtkConnector    *self,
+                                                              gpointer               res);
+static void    hyscan_gtk_connector_done_hw                  (HyScanGtkConnector    *self,
+                                                              gpointer               res);
+static void    hyscan_gtk_connector_done_bind                (HyScanGtkConnector    *self,
+                                                              gpointer               res);
+static void    hyscan_gtk_connector_done_of                  (HyScanGtkConnector    *self,
+                                                              gpointer               res);
 static void    hyscan_gtk_connector_finished                 (HyScanGtkConnector    *self,
                                                               gboolean               success);
 
@@ -379,23 +382,21 @@ hyscan_gtk_connector_apply (HyScanGtkConnector *self)
 {
   HyScanGtkConnectorPrivate *priv = self->priv;
 
-  gtk_label_set_text (GTK_LABEL (self->priv->progress.label), _("Connecting to database..."));
-  gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (self->priv->progress.bar), 0.0);
+  gtk_label_set_text (GTK_LABEL (priv->progress.label), _("Connecting to database..."));
+  gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (priv->progress.bar), 0.0);
 
-  g_signal_connect (priv->async, "ready::" HYSCAN_GTK_CONNECTOR_DB,
-                    G_CALLBACK (hyscan_gtk_connector_done_db), self);
-
-  hyscan_async_append (priv->async, HYSCAN_GTK_CONNECTOR_DB,
+  hyscan_async_append (priv->async,
                        (HyScanAsyncCommand)hyscan_profile_db_connect,
-                       priv->db_profile, NULL, 0);
+                       priv->db_profile, NULL,
+                       (HyScanAsyncResult)hyscan_gtk_connector_done_db, self);
 }
 
 static void
-hyscan_gtk_connector_done_db (HyScanAsync        *async,
-                              gpointer            res,
-                              HyScanGtkConnector *self)
+hyscan_gtk_connector_done_db (HyScanGtkConnector *self,
+                              gpointer            res)
 {
   HyScanDB *db = HYSCAN_DB (res);
+  HyScanGtkConnectorPrivate *priv = self->priv;
 
   if (db == NULL)
     {
@@ -404,29 +405,28 @@ hyscan_gtk_connector_done_db (HyScanAsync        *async,
       return;
     }
 
-  self->priv->db = db;
-  gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (self->priv->progress.bar), 0.3);
+  priv->db = db;
+  gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (priv->progress.bar), 0.3);
 
-  if (self->priv->hw_profile == NULL)
+  if (priv->hw_profile == NULL)
     {
       hyscan_gtk_connector_finished (self, TRUE);
       return;
     }
 
-  gtk_label_set_text (GTK_LABEL (self->priv->progress.label), _("Checking sonars..."));
-  g_signal_connect (async, "ready::" HYSCAN_GTK_CONNECTOR_HW_CHK,
-                    G_CALLBACK (hyscan_gtk_connector_done_hw_check), self);
-  hyscan_async_append (async, HYSCAN_GTK_CONNECTOR_HW_CHK,
+  gtk_label_set_text (GTK_LABEL (priv->progress.label), _("Checking sonars..."));
+  hyscan_async_append (priv->async,
                        (HyScanAsyncCommand)hyscan_profile_hw_check,
-                       self->priv->hw_profile, NULL, 0);
+                       priv->hw_profile, NULL,
+                       (HyScanAsyncResult)hyscan_gtk_connector_done_hw_check, self);
 }
 
 static void
-hyscan_gtk_connector_done_hw_check (HyScanAsync        *async,
-                                    gpointer            res,
-                                    HyScanGtkConnector *self)
+hyscan_gtk_connector_done_hw_check (HyScanGtkConnector *self,
+                                    gpointer            res)
 {
   gboolean check = GPOINTER_TO_INT (res);
+  HyScanGtkConnectorPrivate *priv = self->priv;
 
   if (!check)
     {
@@ -438,19 +438,18 @@ hyscan_gtk_connector_done_hw_check (HyScanAsync        *async,
   gtk_label_set_text (GTK_LABEL (self->priv->progress.label), _("Connecting to sonars..."));
   gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (self->priv->progress.bar), 0.5);
 
-  g_signal_connect (async, "ready::" HYSCAN_GTK_CONNECTOR_HW,
-                    G_CALLBACK (hyscan_gtk_connector_done_hw), self);
-  hyscan_async_append (async, HYSCAN_GTK_CONNECTOR_HW,
+  hyscan_async_append (priv->async,
                        (HyScanAsyncCommand)hyscan_profile_hw_connect,
-                       self->priv->hw_profile, NULL, 0);
+                       self->priv->hw_profile, NULL,
+                       (HyScanAsyncResult)hyscan_gtk_connector_done_hw, self);
 }
 
 static void
-hyscan_gtk_connector_done_hw (HyScanAsync        *async,
-                              gpointer            res,
-                              HyScanGtkConnector *self)
+hyscan_gtk_connector_done_hw (HyScanGtkConnector *self,
+                              gpointer            res)
 {
   HyScanControl *control = HYSCAN_CONTROL (res);
+  HyScanGtkConnectorPrivate *priv = self->priv;
 
   if (control == NULL)
     {
@@ -459,25 +458,24 @@ hyscan_gtk_connector_done_hw (HyScanAsync        *async,
       return;
     }
 
-  self->priv->control = control;
+  priv->control = control;
 
-  gtk_label_set_text (GTK_LABEL (self->priv->progress.label), _("Connecting to sonars..."));
-  gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (self->priv->progress.bar), 0.5);
+  gtk_label_set_text (GTK_LABEL (priv->progress.label), _("Connecting to sonars..."));
+  gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (priv->progress.bar), 0.5);
 
-  g_signal_connect (async, "ready::" HYSCAN_GTK_CONNECTOR_BIND,
-                    G_CALLBACK (hyscan_gtk_connector_done_bind), self);
-  hyscan_async_append (async, HYSCAN_GTK_CONNECTOR_BIND,
+  hyscan_async_append (priv->async,
                        (HyScanAsyncCommand)hyscan_control_device_bind,
-                       self->priv->control, NULL, 0);
+                       priv->control, NULL,
+                       (HyScanAsyncResult)hyscan_gtk_connector_done_bind, self);
 }
 
 
 static void
-hyscan_gtk_connector_done_bind (HyScanAsync        *async,
-                                gpointer            res,
-                                HyScanGtkConnector *self)
+hyscan_gtk_connector_done_bind (HyScanGtkConnector *self,
+                                gpointer            res)
 {
   gboolean check = GPOINTER_TO_INT (res);
+  HyScanGtkConnectorPrivate *priv = self->priv;
 
   if (!check)
     {
@@ -486,27 +484,24 @@ hyscan_gtk_connector_done_bind (HyScanAsync        *async,
       return;
     }
 
-  if (self->priv->of_profile == NULL)
+  if (priv->of_profile == NULL)
     {
       hyscan_gtk_connector_finished (self, TRUE);
       return;
     }
 
-  gtk_label_set_text (GTK_LABEL (self->priv->progress.label), _("Setting up offsets..."));
-  gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (self->priv->progress.bar), 0.9);
+  gtk_label_set_text (GTK_LABEL (priv->progress.label), _("Setting up offsets..."));
+  gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (priv->progress.bar), 0.9);
 
-  g_signal_connect (async, "ready::" HYSCAN_GTK_CONNECTOR_OF,
-                    G_CALLBACK (hyscan_gtk_connector_done_of), self);
-  hyscan_async_append (async, HYSCAN_GTK_CONNECTOR_OF,
+  hyscan_async_append (priv->async,
                        (HyScanAsyncCommand)hyscan_profile_offset_apply,
-                       self->priv->of_profile,
-                       &self->priv->control, sizeof (GObject*));
+                       priv->of_profile, priv->control,
+                       (HyScanAsyncResult)hyscan_gtk_connector_done_of, self);
 }
 
 static void
-hyscan_gtk_connector_done_of (HyScanAsync        *async,
-                              gpointer            res,
-                              HyScanGtkConnector *self)
+hyscan_gtk_connector_done_of (HyScanGtkConnector *self,
+                              gpointer            res)
 {
   gboolean check = GPOINTER_TO_INT (res);
 
@@ -556,7 +551,7 @@ hyscan_gtk_connector_new (const gchar  *sysfolder,
 gboolean
 hyscan_gtk_connector_get_result (HyScanGtkConnector *self)
 {
-  g_return_val_if_fail (HYSCAN_IS_GTK_CONNECTOR (self), NULL);
+  g_return_val_if_fail (HYSCAN_IS_GTK_CONNECTOR (self), FALSE);
 
   return self->priv->result;
 }

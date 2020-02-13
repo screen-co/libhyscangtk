@@ -59,6 +59,14 @@ struct _HyScanGtkProfile
   HyScanGtkProfilePrivate *priv;
 };
 
+/**
+ * HyScanGtkProfileClass:
+ * @g_iface: Базовый интерфейс.
+ * @subfolder: папка, в которой лежат профили.
+ * @new_profile: фабричный метод создания новых объектов профилей.
+ * @make_model: метод создания модели для виджета.
+ * @make_tree: метод создания #GtkTreeView с профилями.
+ */
 struct _HyScanGtkProfileClass
 {
   GtkTreeViewClass parent_class;
@@ -71,6 +79,10 @@ struct _HyScanGtkProfileClass
   void            (*make_model)  (HyScanGtkProfile *self,
                                   GHashTable       *profiles);
   void            (*make_tree)   (HyScanGtkProfile *self);
+  void            (*update_tree) (HyScanGtkProfile *self);
+
+  GtkWidget *     (*make_editor) (HyScanGtkProfile *self,
+                                  HyScanProfile    *profile);
 };
 
 HYSCAN_API

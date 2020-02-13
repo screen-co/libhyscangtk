@@ -32,6 +32,14 @@
  * лицензии. Для этого свяжитесь с ООО Экран - <info@screen-co.ru>.
  */
 
+/**
+ * SECTION: hyscan-gtk-profile-hw
+ * @Title: HyScanGtkProfileHW
+ * @Short_description: Виджет профиля оборудрования.
+ *
+ * Особенностью является необходимость задать путь к драйверам.
+ */
+
 #include "hyscan-gtk-profile-hw.h"
 
 #define HYSCAN_GTK_PROFILE_HW_PATH "hw-profiles"
@@ -124,6 +132,13 @@ hyscan_gtk_profile_hw_new_profile (HyScanGtkProfile *parent,
   return HYSCAN_PROFILE (profile);
 }
 
+/*
+ * hyscan_gtk_profile_offset_new:
+ * @sys: путь к системной папке профилей
+ * @drivers: нуль-терминированный список путей с драйверами
+ *
+ * Returns: (transfer full) виджет профилей оборудования.
+ */
 GtkWidget *
 hyscan_gtk_profile_hw_new (const gchar  *sys,
                            gchar       **drivers)

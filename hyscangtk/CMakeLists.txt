@@ -1,5 +1,7 @@
 add_library (${HYSCAN_GTK_LIBRARY} SHARED
+             hyscan-cell-renderer-pixbuf.c
              hyscan-gtk-profile.c
+             hyscan-gtk-profile-db-editor.c
              hyscan-gtk-profile-db.c
              hyscan-gtk-profile-hw.c
              hyscan-gtk-profile-offset.c

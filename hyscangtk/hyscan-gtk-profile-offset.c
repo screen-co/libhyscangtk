@@ -32,6 +32,12 @@
  * лицензии. Для этого свяжитесь с ООО Экран - <info@screen-co.ru>.
  */
 
+/**
+ * SECTION: hyscan-gtk-profile-offset
+ * @Title: HyScanGtkProfileOffset
+ * @Short_description: Виджет профиля местоположения антенн.
+ */
+
 #include "hyscan-gtk-profile-offset.h"
 
 #define HYSCAN_OFFSET_PROFILES_PATH "offset-profiles"
@@ -62,6 +68,12 @@ hyscan_gtk_profile_offset_new_profile (HyScanGtkProfile *parent,
   return HYSCAN_PROFILE (hyscan_profile_offset_new (filename));
 }
 
+/*
+ * hyscan_gtk_profile_offset_new:
+ * @sys: путь к системной папке профилей
+ *
+ * Returns: (transfer full) виджет профилей местоположения антенн.
+ */
 GtkWidget *
 hyscan_gtk_profile_offset_new (const gchar *sys)
 {
