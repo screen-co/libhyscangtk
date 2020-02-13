@@ -81,6 +81,7 @@ endif ()
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/hyscangtk")
 
 add_definitions (-DG_LOG_DOMAIN="HyScanGtk")
+add_definitions (-DGETTEXT_PACKAGE="hyscangtk")
 add_subdirectory (hyscangtk)
 add_subdirectory (resources)
 add_subdirectory (tests)

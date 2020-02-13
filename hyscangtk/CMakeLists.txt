@@ -1,12 +1,41 @@
+find_program (MARSHAL_COMPILER glib-genmarshal)
+if (${MARSHAL_COMPILER} STREQUAL MARSHAL_COMPILER-NOTFOUND)
+  message (FATAL_ERROR "GLib marshallers compiler not found.")
+endif ()
+
+file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/marshallers")
+include_directories ("${CMAKE_BINARY_DIR}/marshallers")
+
+add_custom_command (OUTPUT "${CMAKE_BINARY_DIR}/marshallers/hyscan-gtk-marshallers.c"
+                    COMMAND ${MARSHAL_COMPILER} --header
+                            --prefix hyscan_gtk_marshal
+                            hyscan-gtk-marshallers.list >
+                            "${CMAKE_BINARY_DIR}/marshallers/hyscan-gtk-marshallers.h"
+                    COMMAND ${MARSHAL_COMPILER} --body
+                            --prefix hyscan_gtk_marshal
+                            hyscan-gtk-marshallers.list >
+                            "${CMAKE_BINARY_DIR}/marshallers/hyscan-gtk-marshallers.c"
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    DEPENDS hyscan-gtk-marshallers.list
+                    VERBATIM)
+
 add_library (${HYSCAN_GTK_LIBRARY} SHARED
              hyscan-cell-renderer-pixbuf.c
+             hyscan-gtk-spin-button.c
+             hyscan-gtk-datetime.c
+             hyscan-gtk-param-key.c
+             hyscan-gtk-param.c
+             hyscan-gtk-param-list.c
+             hyscan-gtk-param-cc.c
+             hyscan-gtk-param-tree.c
              hyscan-gtk-profile.c
              hyscan-gtk-profile-db-editor.c
              hyscan-gtk-profile-db.c
              hyscan-gtk-profile-hw.c
              hyscan-gtk-profile-offset.c
              hyscan-gtk-connector.c
-             ${CMAKE_BINARY_DIR}/resources/hyscan-gtk-templates.c)
+             ${CMAKE_BINARY_DIR}/resources/hyscan-gtk-templates.c
+             ${CMAKE_BINARY_DIR}/marshallers/hyscan-gtk-marshallers.c)
 
 target_link_libraries (${HYSCAN_GTK_LIBRARY} ${GTK3_LIBRARIES} ${HYSCAN_LIBRARIES})
 
