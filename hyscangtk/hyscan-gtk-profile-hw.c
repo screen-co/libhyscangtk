@@ -140,11 +140,11 @@ hyscan_gtk_profile_hw_new_profile (HyScanGtkProfile *parent,
  * Returns: (transfer full) виджет профилей оборудования.
  */
 GtkWidget *
-hyscan_gtk_profile_hw_new (const gchar  *sys,
-                           gchar       **drivers)
+hyscan_gtk_profile_hw_new (gchar **folders,
+                           gchar **drivers)
 {
   return g_object_new (HYSCAN_TYPE_GTK_PROFILE_HW,
-                       "sysfolder", sys,
+                       "folders", folders,
                        "drivers", drivers,
                        NULL);
 }

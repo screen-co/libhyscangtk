@@ -69,7 +69,7 @@ HYSCAN_API
 GType                  hyscan_gtk_connector_get_type         (void);
 
 HYSCAN_API
-GtkWidget *            hyscan_gtk_connector_new              (const gchar  *sysfolder,
+GtkWidget *            hyscan_gtk_connector_new              (gchar       **folders,
                                                               gchar       **drivers);
 
 HYSCAN_API
@@ -80,6 +80,15 @@ HyScanDB *             hyscan_gtk_connector_get_db           (HyScanGtkConnector
 
 HYSCAN_API
 HyScanControl *        hyscan_gtk_connector_get_control      (HyScanGtkConnector *self);
+
+HYSCAN_API
+const gchar *          hyscan_gtk_connector_get_db_name      (HyScanGtkConnector *self);
+
+HYSCAN_API
+const gchar *          hyscan_gtk_connector_get_hw_name      (HyScanGtkConnector *self);
+
+HYSCAN_API
+const gchar *          hyscan_gtk_connector_get_offset_name  (HyScanGtkConnector *self);
 
 G_END_DECLS
 

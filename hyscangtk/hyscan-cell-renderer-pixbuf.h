@@ -1,6 +1,6 @@
-/* hyscan-gtk-profile-offset.h
+/* hyscan-cell-renderer-pixbuf.h
  *
- * Copyright 2019 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
+ * Copyright 2020 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
  * This file is part of HyScanGtk.
  *
@@ -32,41 +32,41 @@
  * лицензии. Для этого свяжитесь с ООО Экран - <info@screen-co.ru>.
  */
 
-#ifndef __HYSCAN_GTK_PROFILE_OFFSET_H__
-#define __HYSCAN_GTK_PROFILE_OFFSET_H__
+#ifndef __HYSCAN_CELL_RENDERER_PIXBUF_H__
+#define __HYSCAN_CELL_RENDERER_PIXBUF_H__
 
-#include "hyscan-gtk-profile.h"
-#include <hyscan-profile-offset.h>
+#include <gtk/gtk.h>
+#include <hyscan-api.h>
 
 G_BEGIN_DECLS
 
-#define HYSCAN_TYPE_GTK_PROFILE_OFFSET             (hyscan_gtk_profile_offset_get_type ())
-#define HYSCAN_GTK_PROFILE_OFFSET(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), HYSCAN_TYPE_GTK_PROFILE_OFFSET, HyScanGtkProfileOFFSET))
-#define HYSCAN_IS_GTK_PROFILE_OFFSET(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), HYSCAN_TYPE_GTK_PROFILE_OFFSET))
-#define HYSCAN_GTK_PROFILE_OFFSET_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), HYSCAN_TYPE_GTK_PROFILE_OFFSET, HyScanGtkProfileOFFSETClass))
-#define HYSCAN_IS_GTK_PROFILE_OFFSET_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), HYSCAN_TYPE_GTK_PROFILE_OFFSET))
-#define HYSCAN_GTK_PROFILE_OFFSET_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), HYSCAN_TYPE_GTK_PROFILE_OFFSET, HyScanGtkProfileOFFSETClass))
+#define HYSCAN_TYPE_CELL_RENDERER_PIXBUF             (hyscan_cell_renderer_pixbuf_get_type ())
+#define HYSCAN_CELL_RENDERER_PIXBUF(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), HYSCAN_TYPE_CELL_RENDERER_PIXBUF, HyScanCellRendererPixbuf))
+#define HYSCAN_IS_CELL_RENDERER_PIXBUF(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), HYSCAN_TYPE_CELL_RENDERER_PIXBUF))
+#define HYSCAN_CELL_RENDERER_PIXBUF_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), HYSCAN_TYPE_CELL_RENDERER_PIXBUF, HyScanCellRendererPixbufClass))
+#define HYSCAN_IS_CELL_RENDERER_PIXBUF_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), HYSCAN_TYPE_CELL_RENDERER_PIXBUF))
+#define HYSCAN_CELL_RENDERER_PIXBUF_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), HYSCAN_TYPE_CELL_RENDERER_PIXBUF, HyScanCellRendererPixbufClass))
 
-typedef struct _HyScanGtkProfileOffset HyScanGtkProfileOffset;
-typedef struct _HyScanGtkProfileOffsetPrivate HyScanGtkProfileOffsetPrivate;
-typedef struct _HyScanGtkProfileOffsetClass HyScanGtkProfileOffsetClass;
+typedef struct _HyScanCellRendererPixbuf HyScanCellRendererPixbuf;
+typedef struct _HyScanCellRendererPixbufPrivate HyScanCellRendererPixbufPrivate;
+typedef struct _HyScanCellRendererPixbufClass HyScanCellRendererPixbufClass;
 
-struct _HyScanGtkProfileOffset
+struct _HyScanCellRendererPixbuf
 {
-  HyScanGtkProfile parent_instance;
+  GtkCellRendererPixbuf parent_instance;
 };
 
-struct _HyScanGtkProfileOffsetClass
+struct _HyScanCellRendererPixbufClass
 {
-  HyScanGtkProfileClass parent_class;
+  GtkCellRendererPixbufClass parent_class;
 };
 
 HYSCAN_API
-GType                  hyscan_gtk_profile_offset_get_type         (void);
+GType             hyscan_cell_renderer_pixbuf_get_type         (void);
 
 HYSCAN_API
-GtkWidget *            hyscan_gtk_profile_offset_new              (gchar **folders);
+GtkCellRenderer * hyscan_cell_renderer_pixbuf_new              (void);
 
 G_END_DECLS
 
-#endif /* __HYSCAN_GTK_PROFILE_OFFSET_H__ */
+#endif /* __HYSCAN_CELL_RENDERER_PIXBUF_H__ */

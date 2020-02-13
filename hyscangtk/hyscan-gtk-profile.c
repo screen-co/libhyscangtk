@@ -99,7 +99,7 @@ enum
 
 struct _HyScanGtkProfilePrivate
 {
-  gchar        *sysfolder;
+  gchar       **folders;
 
   GHashTable   *profiles; /* {gchar* file_name : HyScanProfile*} */
   GtkTreeModel *store;    /* Модель с виджетами. */
@@ -145,8 +145,8 @@ hyscan_gtk_profile_class_init (HyScanGtkProfileClass *klass)
   klass->update_tree = hyscan_gtk_profile_update_tree;
 
   g_object_class_install_property (oclass, PROP_SYSFOLDER,
-    g_param_spec_string ("sysfolder", "SysFolder", "Folder with system profiles", NULL,
-                         G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+    g_param_spec_pointer ("folders", "Folders", "Folders to look for profiles",
+                          G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 
   hyscan_gtk_profile_signals[SIGNAL_SELECTED] =
     g_signal_new ("selected", G_TYPE_FROM_CLASS (klass),
@@ -175,7 +175,7 @@ hyscan_gtk_profile_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_SYSFOLDER:
-      priv->sysfolder = g_value_dup_string (value);
+      priv->folders = g_strdupv ((gchar**) g_value_get_pointer (value));
       break;
 
     default:
@@ -190,27 +190,21 @@ hyscan_gtk_profile_object_constructed (GObject *object)
   HyScanGtkProfile *self = HYSCAN_GTK_PROFILE (object);
   HyScanGtkProfileClass *klass = HYSCAN_GTK_PROFILE_GET_CLASS (self);
   HyScanGtkProfilePrivate *priv = self->priv;
-  gchar *folder;
+  gchar **iter;
 
   G_OBJECT_CLASS (hyscan_gtk_profile_parent_class)->constructed (object);
 
   priv->profiles = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
 
   /* Профили загружаются из двух каталогов. */
-  if (priv->sysfolder != NULL)
+  for (iter = priv->folders; iter != NULL && *iter != NULL; ++iter)
     {
-      folder = g_build_filename (priv->sysfolder,
-                                 HYSCAN_GTK_PROFILE_PATH,
-                                 klass->subfolder, NULL);
+      gchar *folder = g_build_filename (*iter,
+                                        HYSCAN_GTK_PROFILE_PATH,
+                                        klass->subfolder, NULL);
       hyscan_gtk_profile_load (self, folder);
       g_free (folder);
     }
-
-  folder = g_build_filename (g_get_user_config_dir (),
-                             HYSCAN_GTK_PROFILE_PATH,
-                             klass->subfolder, NULL);
-  hyscan_gtk_profile_load (self, folder);
-  g_free (folder);
 
   klass->make_model (self, priv->profiles);
   klass->make_tree (self);
@@ -223,7 +217,7 @@ hyscan_gtk_profile_object_finalize (GObject *object)
   HyScanGtkProfile *self = HYSCAN_GTK_PROFILE (object);
   HyScanGtkProfilePrivate *priv = self->priv;
 
-  g_clear_pointer (&priv->sysfolder, g_free);
+  g_clear_pointer (&priv->folders, g_strfreev);
   g_clear_pointer (&priv->profiles, g_hash_table_unref);
 
   G_OBJECT_CLASS (hyscan_gtk_profile_parent_class)->finalize (object);
@@ -236,6 +230,12 @@ hyscan_gtk_profile_get_files (const gchar *folder)
   const gchar *filename;
   GError *error = NULL;
   GDir *dir;
+
+  if (!g_file_test (folder, G_FILE_TEST_IS_DIR | G_FILE_TEST_EXISTS))
+    {
+      g_warning ("HyScanGtkProfile: directory %s doesn't exist", folder);
+      return NULL;
+    }
 
   dir = g_dir_open (folder, 0, &error);
   if (error != NULL)
@@ -269,6 +269,8 @@ hyscan_gtk_profile_load (HyScanGtkProfile *self,
   const gchar *filename;
 
   files = hyscan_gtk_profile_get_files (folder);
+  if (files == NULL)
+    return;
 
   g_hash_table_iter_init(&iter, files);
   while (g_hash_table_iter_next (&iter, (gpointer*)&filename, NULL))

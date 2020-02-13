@@ -1,4 +1,4 @@
-/* hyscan-gtk-profile-offset.h
+/* hyscan-gtk-profile-db-editor.h
  *
  * Copyright 2019 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
@@ -32,41 +32,43 @@
  * лицензии. Для этого свяжитесь с ООО Экран - <info@screen-co.ru>.
  */
 
-#ifndef __HYSCAN_GTK_PROFILE_OFFSET_H__
-#define __HYSCAN_GTK_PROFILE_OFFSET_H__
+#ifndef __HYSCAN_GTK_PROFILE_DB_EDITOR_H__
+#define __HYSCAN_GTK_PROFILE_DB_EDITOR_H__
 
-#include "hyscan-gtk-profile.h"
-#include <hyscan-profile-offset.h>
+#include <gtk/gtk.h>
+#include <hyscan-profile-db.h>
 
 G_BEGIN_DECLS
 
-#define HYSCAN_TYPE_GTK_PROFILE_OFFSET             (hyscan_gtk_profile_offset_get_type ())
-#define HYSCAN_GTK_PROFILE_OFFSET(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), HYSCAN_TYPE_GTK_PROFILE_OFFSET, HyScanGtkProfileOFFSET))
-#define HYSCAN_IS_GTK_PROFILE_OFFSET(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), HYSCAN_TYPE_GTK_PROFILE_OFFSET))
-#define HYSCAN_GTK_PROFILE_OFFSET_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), HYSCAN_TYPE_GTK_PROFILE_OFFSET, HyScanGtkProfileOFFSETClass))
-#define HYSCAN_IS_GTK_PROFILE_OFFSET_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), HYSCAN_TYPE_GTK_PROFILE_OFFSET))
-#define HYSCAN_GTK_PROFILE_OFFSET_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), HYSCAN_TYPE_GTK_PROFILE_OFFSET, HyScanGtkProfileOFFSETClass))
+#define HYSCAN_TYPE_GTK_PROFILE_DB_EDITOR             (hyscan_gtk_profile_db_editor_get_type ())
+#define HYSCAN_GTK_PROFILE_DB_EDITOR(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), HYSCAN_TYPE_GTK_PROFILE_DB_EDITOR, HyScanGtkProfileDBEditor))
+#define HYSCAN_IS_GTK_PROFILE_DB_EDITOR(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), HYSCAN_TYPE_GTK_PROFILE_DB_EDITOR))
+#define HYSCAN_GTK_PROFILE_DB_EDITOR_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), HYSCAN_TYPE_GTK_PROFILE_DB_EDITOR, HyScanGtkProfileDBEditorClass))
+#define HYSCAN_IS_GTK_PROFILE_DB_EDITOR_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), HYSCAN_TYPE_GTK_PROFILE_DB_EDITOR))
+#define HYSCAN_GTK_PROFILE_DB_EDITOR_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), HYSCAN_TYPE_GTK_PROFILE_DB_EDITOR, HyScanGtkProfileDBEditorClass))
 
-typedef struct _HyScanGtkProfileOffset HyScanGtkProfileOffset;
-typedef struct _HyScanGtkProfileOffsetPrivate HyScanGtkProfileOffsetPrivate;
-typedef struct _HyScanGtkProfileOffsetClass HyScanGtkProfileOffsetClass;
+typedef struct _HyScanGtkProfileDBEditor HyScanGtkProfileDBEditor;
+typedef struct _HyScanGtkProfileDBEditorPrivate HyScanGtkProfileDBEditorPrivate;
+typedef struct _HyScanGtkProfileDBEditorClass HyScanGtkProfileDBEditorClass;
 
-struct _HyScanGtkProfileOffset
+struct _HyScanGtkProfileDBEditor
 {
-  HyScanGtkProfile parent_instance;
+  GtkGrid parent_instance;
+
+  HyScanGtkProfileDBEditorPrivate *priv;
 };
 
-struct _HyScanGtkProfileOffsetClass
+struct _HyScanGtkProfileDBEditorClass
 {
-  HyScanGtkProfileClass parent_class;
+  GtkGridClass parent_class;
 };
 
 HYSCAN_API
-GType                  hyscan_gtk_profile_offset_get_type         (void);
+GType        hyscan_gtk_profile_db_editor_get_type   (void);
 
 HYSCAN_API
-GtkWidget *            hyscan_gtk_profile_offset_new              (gchar **folders);
+GtkWidget *  hyscan_gtk_profile_db_editor_new        (HyScanProfile *profile);
 
 G_END_DECLS
 
-#endif /* __HYSCAN_GTK_PROFILE_OFFSET_H__ */
+#endif /* __HYSCAN_GTK_PROFILE_DB_EDITOR_H__ */

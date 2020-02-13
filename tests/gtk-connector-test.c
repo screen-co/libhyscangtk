@@ -10,13 +10,16 @@ void cancel_close (HyScanGtkConnector *con,
                    const gchar        *text);
 
 GtkWidget *window;
-const gchar *paths[]={"./"};
+const gchar *paths[3]={NULL, NULL, NULL};
 int
 main (int argc, char **argv)
 {
   gtk_init (&argc, &argv);
 
-  window = hyscan_gtk_connector_new (NULL, (gchar**)paths);
+  paths[0] = "./";
+  paths[1] = g_get_user_config_dir ();
+
+  window = hyscan_gtk_connector_new ((gchar**)paths, (gchar**)paths);
   g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
   g_signal_connect (window, "cancel", G_CALLBACK (cancel_close), "Cancel");
   g_signal_connect (window, "close", G_CALLBACK (cancel_close), "Close");
@@ -42,9 +45,12 @@ cancel_close (HyScanGtkConnector *con,
                                    GTK_MESSAGE_INFO, GTK_BUTTONS_OK,
                                    "%s clicked.", text);
   gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
-                                            "DB: %s; HW: %s",
+                                            "DB: %s (%s); HW: %s (%s, %s)",
                                             db != NULL ? "ok" : "fail",
-                                            control != NULL ? "ok" : "fail");
+                                            hyscan_gtk_connector_get_db_name (con),
+                                            control != NULL ? "ok" : "fail",
+                                            hyscan_gtk_connector_get_hw_name (con),
+                                            hyscan_gtk_connector_get_offset_name (con));
 
   gtk_dialog_run (GTK_DIALOG (dialog));
   gtk_widget_destroy (dialog);
