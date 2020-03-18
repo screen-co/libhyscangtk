@@ -76,6 +76,7 @@ struct _HyScanGtkParamPrivate
   HyScanParam      *param;   /* Отображаемый HyScanParam. */
   gchar            *root;    /* Корень схемы для частичного отображения. */
   gboolean          show_hidden;  /* Отображать ли скрытые ключи. */
+  gboolean          immidiate;  /* Применять ли изменения немедленно. */
 
   HyScanDataSchema *schema;  /* Схема данных. */
   const HyScanDataSchemaNode *root_node; /* Узлы фильтрованные. */
@@ -91,14 +92,6 @@ struct _HyScanGtkParamPrivate
   guint             period;  /* Период опроса. */
 };
 
-static void     hyscan_gtk_param_set_property            (GObject                     *object,
-                                                          guint                        prop_id,
-                                                          const GValue                *value,
-                                                          GParamSpec                  *pspec);
-static void     hyscan_gtk_param_get_property            (GObject                     *object,
-                                                          guint                        prop_id,
-                                                          GValue                      *value,
-                                                          GParamSpec                  *pspec);
 static void     hyscan_gtk_param_object_constructed      (GObject                     *object);
 static void     hyscan_gtk_param_object_finalize         (GObject                     *object);
 static gchar *  hyscan_gtk_param_validate_root           (const gchar                *root);
@@ -125,24 +118,8 @@ hyscan_gtk_param_class_init (HyScanGtkParamClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->set_property = hyscan_gtk_param_set_property;
-  object_class->get_property = hyscan_gtk_param_get_property;
-
   object_class->constructed = hyscan_gtk_param_object_constructed;
   object_class->finalize = hyscan_gtk_param_object_finalize;
-
-  g_object_class_install_property (object_class, PROP_PARAM,
-    g_param_spec_object ("param", "ParamInterface", "HyScanParam Interface",
-                         HYSCAN_TYPE_PARAM,
-                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
-  g_object_class_install_property (object_class, PROP_ROOT,
-    g_param_spec_string ("root", "RootNode", "Show only nodes starting with root",
-                         "/",
-                         G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
-  g_object_class_install_property (object_class, PROP_HIDDEN,
-    g_param_spec_boolean ("hidden", "ShowHidden", "Show hidden keys",
-                          FALSE,
-                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 }
 
 static void
@@ -158,58 +135,6 @@ hyscan_gtk_param_init (HyScanGtkParam *self)
   /* Хэш-таблица для виджетов и путей к ним. */
   self->priv->widgets = g_hash_table_new_full (g_str_hash, g_str_equal,
                                                g_free, g_object_unref);
-}
-
-static void
-hyscan_gtk_param_set_property (GObject      *object,
-                               guint         prop_id,
-                               const GValue *value,
-                               GParamSpec   *pspec)
-{
-  HyScanGtkParam *self = HYSCAN_GTK_PARAM (object);
-  HyScanGtkParamPrivate *priv = self->priv;
-
-  switch (prop_id)
-    {
-    case PROP_PARAM:
-      priv->param = g_value_dup_object (value);
-      break;
-
-    case PROP_ROOT:
-      priv->root = hyscan_gtk_param_validate_root (g_value_get_string (value));
-      break;
-
-    case PROP_HIDDEN:
-      priv->show_hidden = g_value_get_boolean (value);
-      break;
-
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-    }
-}
-
-static void
-hyscan_gtk_param_get_property (GObject    *object,
-                               guint       prop_id,
-                               GValue     *value,
-                               GParamSpec *pspec)
-{
-  HyScanGtkParam *self = HYSCAN_GTK_PARAM (object);
-  HyScanGtkParamPrivate *priv = self->priv;
-
-  switch (prop_id)
-    {
-    case PROP_PARAM:
-      g_value_set_object (value, priv->param);
-      break;
-
-    case PROP_HIDDEN:
-      g_value_set_boolean (value, priv->show_hidden);
-      break;
-
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-    }
 }
 
 static void
@@ -369,6 +294,9 @@ hyscan_gtk_param_key_changed (HyScanGtkParamKey *pkey,
     }
   hyscan_param_list_set (priv->discard, path, old);
   g_variant_unref (old);
+
+  if (priv->immidiate)
+    hyscan_gtk_param_apply (self);
 }
 
 /* Функция рекурсивно создает виджеты, кладет их в хэш-таблицу и
@@ -424,17 +352,31 @@ hyscan_gtk_param_reinitialize (HyScanGtkParam *self)
 
   /* Получаем схему и создаем все виджеты ключей. */
   if (priv->param == NULL)
-    return;
+    goto exit;
 
   priv->schema = hyscan_param_schema (priv->param);
+  if (priv->schema == NULL)
+    goto exit;
+
   nodes = hyscan_data_schema_list_nodes (priv->schema);
   priv->root_node = hyscan_gtk_param_find_node (nodes, priv->root);
 
   /* Создаем виджеты. */
   hyscan_gtk_param_make_keys (self, priv->root_node, priv->widgets);
+
+exit:
   klass->update (self);
 }
 
+/**
+ * hyscan_gtk_param_set_param:
+ * @self: #HyScanGtkParam
+ * @param: бэкенд с параметрами
+ * @root: корень отображаемой схемы
+ * @hidden: показывать ли скрытые узлы
+ *
+ * Функция задает отображаемый HyScanParam.
+ */
 void
 hyscan_gtk_param_set_param (HyScanGtkParam  *self,
                             HyScanParam     *param,
@@ -450,12 +392,32 @@ hyscan_gtk_param_set_param (HyScanGtkParam  *self,
   g_clear_pointer (&priv->root, g_free);
   priv->show_hidden = FALSE;
 
-  priv->param = g_object_ref (param);
-  priv->root = hyscan_gtk_param_validate_root (root);
-  priv->show_hidden = hidden;
+  if (param != NULL)
+    {
+      priv->param = g_object_ref (param);
+      priv->root = hyscan_gtk_param_validate_root (root);
+      priv->show_hidden = hidden;
+    }
 
   /* Инициируем обновление виджета. */
   hyscan_gtk_param_reinitialize (self);
+}
+
+/**
+ * hyscan_gtk_param_set_param:
+ * @self: #HyScanGtkParam
+ * @immidiate: %TRUE, чтобы применять изменения немедленно, %FALSE, чтобы
+ * применять изменения только после вызова метода hyscan_gtk_param_apply().
+ *
+ * Функция задает, следует ли применять изменения немедленно.
+ */
+void
+hyscan_gtk_param_set_immidiate (HyScanGtkParam *self,
+                                gboolean        immidiate)
+{
+  g_return_if_fail (HYSCAN_IS_GTK_PARAM (self));
+
+  self->priv->immidiate = immidiate;
 }
 
 /**

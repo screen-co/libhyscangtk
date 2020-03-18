@@ -196,13 +196,11 @@ hyscan_gtk_param_list_new (HyScanParam *param,
                            const gchar *root,
                            gboolean     show_hidden)
 {
-  g_return_val_if_fail (HYSCAN_IS_PARAM (param), NULL);
+  HyScanGtkParamList *object = g_object_new (HYSCAN_TYPE_GTK_PARAM_LIST, NULL);
 
-  return g_object_new (HYSCAN_TYPE_GTK_PARAM_LIST,
-                       "param", param,
-                       "root", root,
-                       "hidden", show_hidden,
-                       NULL);
+  hyscan_gtk_param_set_param (HYSCAN_GTK_PARAM (object), param, root, show_hidden);
+
+  return GTK_WIDGET (object);
 }
 
 /**

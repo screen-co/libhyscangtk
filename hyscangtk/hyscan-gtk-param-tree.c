@@ -216,6 +216,9 @@ hyscan_gtk_param_tree_update (HyScanGtkParam *gtk_param)
   widgets = hyscan_gtk_param_get_widgets (HYSCAN_GTK_PARAM (self));
   show_hidden = hyscan_gtk_param_get_show_hidden (HYSCAN_GTK_PARAM (self));
 
+  if (nodes == NULL)
+    return;
+
   hyscan_gtk_param_tree_populate (self, nodes, NULL,
                                   widgets, priv->param_lists,
                                   show_hidden);
@@ -630,13 +633,11 @@ hyscan_gtk_param_tree_new (HyScanParam *param,
                            const gchar *root,
                            gboolean     show_hidden)
 {
-  g_return_val_if_fail (HYSCAN_IS_PARAM (param), NULL);
+  HyScanGtkParamTree *object = g_object_new (HYSCAN_TYPE_GTK_PARAM_TREE, NULL);
 
-  return g_object_new (HYSCAN_TYPE_GTK_PARAM_TREE,
-                       "param", param,
-                       "root", root,
-                       "hidden", show_hidden,
-                       NULL);
+  hyscan_gtk_param_set_param (HYSCAN_GTK_PARAM (object), param, root, show_hidden);
+
+  return GTK_WIDGET (object);
 }
 
 /**
