@@ -41,6 +41,7 @@
  */
 
 #include "hyscan-gtk-profile-hw.h"
+#include <hyscan-gtk-profile-hw-editor.h>
 
 #define HYSCAN_GTK_PROFILE_HW_PATH "hw-profiles"
 
@@ -64,6 +65,9 @@ static void hyscan_gtk_profile_hw_object_finalize        (GObject      *object);
 static HyScanProfile * hyscan_gtk_profile_hw_new_profile (HyScanGtkProfile *parent,
                                                           const gchar      *filename);
 
+static GtkWidget *     hyscan_gtk_profile_hw_editor      (HyScanGtkProfile *self,
+                                                          HyScanProfile    *profile);
+
 G_DEFINE_TYPE_WITH_PRIVATE (HyScanGtkProfileHW, hyscan_gtk_profile_hw, HYSCAN_TYPE_GTK_PROFILE);
 
 static void
@@ -77,6 +81,7 @@ hyscan_gtk_profile_hw_class_init (HyScanGtkProfileHWClass *klass)
 
   pklass->subfolder = HYSCAN_GTK_PROFILE_HW_PATH;
   pklass->new_profile = hyscan_gtk_profile_hw_new_profile;
+  pklass->make_editor = hyscan_gtk_profile_hw_editor;
 
   g_object_class_install_property (oclass, PROP_DRIVERS,
     g_param_spec_pointer ("drivers", "DriverPaths", "Where to look for drivert",
@@ -130,6 +135,14 @@ hyscan_gtk_profile_hw_new_profile (HyScanGtkProfile *parent,
   hyscan_profile_hw_set_driver_paths (profile, self->priv->drivers);
 
   return HYSCAN_PROFILE (profile);
+}
+
+static GtkWidget *
+hyscan_gtk_profile_hw_editor (HyScanGtkProfile *parent,
+                              HyScanProfile    *profile)
+{
+  HyScanGtkProfileHW *self = HYSCAN_GTK_PROFILE_HW (parent);
+  return hyscan_gtk_profile_hw_editor_new (profile, self->priv->drivers/*, transient*/);
 }
 
 /*

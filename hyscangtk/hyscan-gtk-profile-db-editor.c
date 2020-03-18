@@ -137,20 +137,20 @@ hyscan_gtk_profile_db_editor_object_constructed (GObject *object)
 
   if (uri != NULL)
     {
-      const gchar *id = NULL;
+      // const gchar *id = NULL;
       gchar **split = g_strsplit (uri, "://", 2);
 
-      g_message ("%s: %s %s", uri, split[0], split[1]);
       if (0 == g_strcmp0 (split[0], "file"))
-        id = "file";
+        ; // id = "file";
       else if (0 == g_strcmp0 (split[0], "tcp"))
-        id = "tcp";
+        ; // id = "tcp";
       else if (0 == g_strcmp0 (split[0], "shm"))
-        id = "shm";
+        ; // id = "shm";
 
-      g_message ("Id: %s", id);
       gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (priv->file_chooser),
                                      split[1]);
+
+      g_strfreev (split);
     }
 }
 
@@ -164,7 +164,6 @@ hyscan_gtk_profile_db_editor_object_finalize (GObject *object)
 
   G_OBJECT_CLASS (hyscan_gtk_profile_db_editor_parent_class)->finalize (object);
 }
-
 
 static void
 hyscan_gtk_profile_db_editor_name_changed (HyScanGtkProfileDBEditor *self)

@@ -39,6 +39,8 @@
  */
 
 #include "hyscan-gtk-profile-db.h"
+#include <hyscan-gtk-profile-db-editor.h>
+
 
 #define HYSCAN_GTK_PROFILE_DB_PATH "db-profiles"
 

@@ -66,10 +66,9 @@ hyscan_cell_renderer_pixbuf_class_init (HyScanCellRendererPixbufClass *klass)
   cell_class->activate = hyscan_cell_renderer_pixbuf_activate;
 
   /**
-   * GtkCellRendererToggle::clicked:
+   * HyScanCellRendererToggle::clicked:
    * @cell_renderer: the object which received the signal
-   * @path: string representation of #GtkTreePath describing the
-   *        event location
+   * @path: string representation of #GtkTreePath describing the event location
    *
    * The ::clicked signal is emitted when the cell is clicked.
    *
@@ -109,7 +108,6 @@ hyscan_cell_renderer_pixbuf_activate  (GtkCellRenderer      *cell,
 GtkCellRenderer *
 hyscan_cell_renderer_pixbuf_new (void)
 {
-  return g_object_new (HYSCAN_TYPE_CELL_RENDERER_PIXBUF,
-                       NULL);
+  return g_object_new (HYSCAN_TYPE_CELL_RENDERER_PIXBUF, NULL);
 }
 

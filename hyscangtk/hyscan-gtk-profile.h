@@ -76,8 +76,7 @@ struct _HyScanGtkProfileClass
   HyScanProfile * (*new_profile) (HyScanGtkProfile *parent,
                                   const gchar      *filename);
 
-  void            (*make_model)  (HyScanGtkProfile *self,
-                                  GHashTable       *profiles);
+  GtkTreeModel *  (*make_model)  (HyScanGtkProfile *self);
   void            (*make_tree)   (HyScanGtkProfile *self);
   void            (*update_tree) (HyScanGtkProfile *self);
 
