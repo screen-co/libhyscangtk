@@ -75,6 +75,9 @@ void                    hyscan_gtk_param_set_param        (HyScanGtkParam  *gtk_
                                                            gboolean         hidden);
 
 HYSCAN_API
+HyScanParam *           hyscan_gtk_param_get_param        (HyScanGtkParam  *gtk_param);
+
+HYSCAN_API
 void                    hyscan_gtk_param_set_immidiate    (HyScanGtkParam  *gtk_param,
                                                            gboolean         immidiate);
 
