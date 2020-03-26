@@ -5,6 +5,8 @@ set (TEST_LIBRARIES ${GTK3_LIBRARIES}
 
 add_executable (gtk-param-test gtk-param-test.c)
 add_executable (gtk-connector-test gtk-connector-test.c)
+add_executable (gtk-spin-button-test gtk-spin-button-test.c)
 
 target_link_libraries (gtk-param-test ${TEST_LIBRARIES})
 target_link_libraries (gtk-connector-test ${TEST_LIBRARIES})
+target_link_libraries (gtk-spin-button-test ${TEST_LIBRARIES})
