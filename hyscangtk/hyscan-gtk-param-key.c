@@ -111,6 +111,7 @@ static void       hyscan_gtk_param_key_set_property          (GObject           
 static void       hyscan_gtk_param_key_object_constructed    (GObject               *object);
 static void       hyscan_gtk_param_key_object_finalize       (GObject               *object);
 static gchar *    hyscan_gtk_param_key_enum_id               (gint64                 val);
+static gint64     hyscan_gtk_param_key_enum_val              (const gchar           *id);
 
 static GtkWidget* hyscan_gtk_param_key_make_editor           (HyScanGtkParamKey     *self);
 static GtkWidget* hyscan_gtk_param_key_make_editor_boolean   (HyScanDataSchema      *schema,
@@ -267,6 +268,13 @@ static gchar *
 hyscan_gtk_param_key_enum_id (gint64 val)
 {
   return g_strdup_printf ("%li", val);
+}
+
+/* Функция возвращает численное значение перечисления по его идентификатору. */
+static gint64
+hyscan_gtk_param_key_enum_val (const gchar *id)
+{
+  return g_ascii_strtoll (id, NULL, 10);
 }
 
 /* Обертка для создания редактора. */
@@ -919,6 +927,101 @@ hyscan_gtk_param_key_set (HyScanGtkParamKey *self,
     }
 
   g_signal_handler_unblock (priv->value, priv->handler);
+}
+
+/**
+ * hyscan_gtk_param_key_get:
+ * @pkey: указатель на #HyScanGtkParamKey
+ *
+ * Функция считывает значение в #GVariant.
+ *
+ * Returns: (transfer full): указатель на #GVariant, для удаления g_variant_unref()
+ */
+GVariant *
+hyscan_gtk_param_key_get (HyScanGtkParamKey *pkey)
+{
+  HyScanGtkParamKeyPrivate *priv;
+  GVariant *value = NULL;
+
+  g_return_val_if_fail (HYSCAN_IS_GTK_PARAM_KEY (pkey), NULL);
+
+  priv = pkey->priv;
+
+  switch (priv->key->type)
+    {
+    case HYSCAN_DATA_SCHEMA_KEY_BOOLEAN:
+      {
+        gboolean val;
+
+        val = gtk_switch_get_active (GTK_SWITCH (priv->value));
+
+        value = g_variant_new_boolean (val);
+        break;
+      }
+
+    case HYSCAN_DATA_SCHEMA_KEY_INTEGER:
+      {
+        gint64 val;
+
+        if (time_view (priv->key->view))
+          val = hyscan_gtk_datetime_get_time (HYSCAN_GTK_DATETIME (priv->value));
+        else
+          val = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (priv->value));
+
+        value = g_variant_new_int64 (val);
+        break;
+      }
+
+    case HYSCAN_DATA_SCHEMA_KEY_DOUBLE:
+      {
+        gdouble val;
+
+        val = gtk_spin_button_get_value(GTK_SPIN_BUTTON (priv->value));
+        value = g_variant_new_double (val);
+        break;
+      }
+
+    case HYSCAN_DATA_SCHEMA_KEY_STRING:
+      {
+        if (color_view (priv->key->view))
+          {
+            GdkRGBA rgba;
+            gchar *string;
+
+            gtk_color_chooser_get_rgba (GTK_COLOR_CHOOSER (priv->value), &rgba);
+            string = gdk_rgba_to_string (&rgba);
+            value = g_variant_new_take_string (string);
+          }
+        else
+          {
+            const gchar *string;
+
+            string = gtk_entry_get_text (GTK_ENTRY (priv->value));
+            value = g_variant_new_string (string);
+          }
+
+        break;
+      }
+
+    case HYSCAN_DATA_SCHEMA_KEY_ENUM:
+      {
+        const gchar *id;
+        gint64 val;
+
+        id = gtk_combo_box_get_active_id (GTK_COMBO_BOX (priv->value));
+        val = hyscan_gtk_param_key_enum_val (id);
+
+        value = g_variant_new_int64 (val);
+        break;
+      }
+
+    default:
+      g_warning (INVALID);
+
+      return NULL;
+    }
+
+  return g_variant_ref_sink (value);
 }
 
 /**

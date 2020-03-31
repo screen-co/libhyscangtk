@@ -81,6 +81,8 @@ HYSCAN_API
 void                    hyscan_gtk_param_key_set                 (HyScanGtkParamKey *pkey,
                                                                   GVariant          *value);
 
+HYSCAN_API
+GVariant *              hyscan_gtk_param_key_get                 (HyScanGtkParamKey *pkey);
 
 HYSCAN_API
 void                    hyscan_gtk_param_key_add_to_size_group   (HyScanGtkParamKey *pkey,

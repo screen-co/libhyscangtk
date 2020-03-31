@@ -404,6 +404,23 @@ hyscan_gtk_param_set_param (HyScanGtkParam  *self,
 }
 
 /**
+ * hyscan_gtk_param_get_param:
+ * @self: #HyScanGtkParam
+ *
+ * Функция возвращает отображаемый HyScanParam.
+ */
+HyScanParam *
+hyscan_gtk_param_get_param (HyScanGtkParam *self)
+{
+  HyScanGtkParamPrivate *priv;
+
+  g_return_val_if_fail (HYSCAN_IS_GTK_PARAM (self), NULL);
+  priv = self->priv;
+
+  return priv->param != NULL ? g_object_ref (priv->param) : NULL;
+}
+
+/**
  * hyscan_gtk_param_set_param:
  * @self: #HyScanGtkParam
  * @immidiate: %TRUE, чтобы применять изменения немедленно, %FALSE, чтобы
