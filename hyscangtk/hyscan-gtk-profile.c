@@ -107,12 +107,14 @@ enum
 enum
 {
   PROP_0,
-  PROP_SYSFOLDER,
+  PROP_FOLDERS,
+  PROP_READONLY,
 };
 
 struct _HyScanGtkProfilePrivate
 {
   gchar       **folders;
+  gboolean      readonly;
 
   GHashTable   *profiles; /* {gchar* file_name : HyScanProfile*} */
   GtkTreeModel *store;    /* Модель с виджетами. */
@@ -156,9 +158,14 @@ hyscan_gtk_profile_class_init (HyScanGtkProfileClass *klass)
   klass->make_tree = hyscan_gtk_profile_make_tree;
   klass->update_tree = hyscan_gtk_profile_update_tree;
 
-  g_object_class_install_property (oclass, PROP_SYSFOLDER,
+  g_object_class_install_property (oclass, PROP_FOLDERS,
     g_param_spec_pointer ("folders", "Folders", "Folders to look for profiles",
                           G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+  
+  g_object_class_install_property (oclass, PROP_READONLY,
+    g_param_spec_boolean ("readonly", "Read-only", "Disable profile editing",
+                          FALSE, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+
 
   hyscan_gtk_profile_signals[SIGNAL_SELECTED] =
     g_signal_new ("selected", G_TYPE_FROM_CLASS (klass),
@@ -186,8 +193,12 @@ hyscan_gtk_profile_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_SYSFOLDER:
+    case PROP_FOLDERS:
       priv->folders = g_strdupv ((gchar**) g_value_get_pointer (value));
+      break;
+
+    case PROP_READONLY:
+      priv->readonly = g_value_get_boolean (value);
       break;
 
     default:
@@ -380,21 +391,6 @@ hyscan_gtk_profile_edit (HyScanGtkProfile *self,
       default:
         hyscan_profile_read (profile);
     }
-  // else
-    // {
-      // hyscan_profile_read (profile);
-    // }
-// if (GTK_RESPONSE_ACCEPT == gtk_dialog_run (GTK_DIALOG (dialog)))
-//     {
-//       const gchar *filename = hyscan_profile_get_file (profile);
-//       hyscan_profile_write (profile);
-//       g_hash_table_insert (priv->profiles, g_strdup (filename), profile);
-//       hyscan_gtk_profile_update_tree (self);
-//     }
-//   else
-//     {
-//
-//     }
 
   gtk_widget_destroy (dialog);
 }
@@ -477,15 +473,19 @@ hyscan_gtk_profile_make_tree (HyScanGtkProfile *self)
   gtk_tree_view_append_column (GTK_TREE_VIEW (self), column);
 
   /* Колонка с иконкой правки. */
-  renderer = hyscan_cell_renderer_pixbuf_new ();
-  column = gtk_tree_view_column_new_with_attributes (NULL,
-                                                     renderer,
-                                                     "icon-name",
-                                                     ICON_NAME_COL,
-                                                     NULL);
-  g_signal_connect (renderer, "clicked", G_CALLBACK (hyscan_gtk_profile_clicked), self);
-  gtk_tree_view_column_set_sizing (column, GTK_TREE_VIEW_COLUMN_FIXED);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (self), column);
+  if (!self->priv->readonly)
+    {
+      renderer = hyscan_cell_renderer_pixbuf_new ();
+      column = gtk_tree_view_column_new_with_attributes (NULL,
+                                                         renderer,
+                                                         "icon-name",
+                                                         ICON_NAME_COL,
+                                                         NULL);
+      g_signal_connect (renderer, "clicked",
+                        G_CALLBACK (hyscan_gtk_profile_clicked), self);
+      gtk_tree_view_column_set_sizing (column, GTK_TREE_VIEW_COLUMN_FIXED);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (self), column);
+    }
 }
 
 /* Функция создает модель по умолчанию. */

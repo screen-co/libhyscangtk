@@ -87,9 +87,11 @@ hyscan_gtk_profile_db_editor (HyScanGtkProfile *parent,
  * Returns: (transfer full) виджет профилей БД.
  */
 GtkWidget *
-hyscan_gtk_profile_db_new (gchar **folders)
+hyscan_gtk_profile_db_new (gchar    **folders,
+                           gboolean   readonly)
 {
   return g_object_new (HYSCAN_TYPE_GTK_PROFILE_DB,
                        "folders", folders,
+                       "readonly", readonly,
                        NULL);
 }
