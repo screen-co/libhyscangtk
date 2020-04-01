@@ -66,12 +66,6 @@
 #include "hyscan-gtk-profile.h"
 #include <hyscan-cell-renderer-pixbuf.h>
 
-/* По умолчанию я буду искать в папке hyscan. Это можно переопределить на
- * этапе компиляции для standalone сборок. */
-#ifndef HYSCAN_GTK_PROFILE_PATH
-# define HYSCAN_GTK_PROFILE_PATH "hyscan"
-#endif
-
 enum
 {
   RESPONSE_CANCEL,
@@ -222,9 +216,7 @@ hyscan_gtk_profile_object_constructed (GObject *object)
   /* Профили загружаются из двух каталогов. */
   for (iter = priv->folders; iter != NULL && *iter != NULL; ++iter)
     {
-      gchar *folder = g_build_filename (*iter,
-                                        HYSCAN_GTK_PROFILE_PATH,
-                                        klass->subfolder, NULL);
+      gchar *folder = g_build_filename (*iter, klass->subfolder, NULL);
       hyscan_gtk_profile_load (self, folder);
       g_free (folder);
     }
@@ -406,9 +398,7 @@ hyscan_gtk_profile_create (HyScanGtkProfile *self)
   GHashTable *files;
 
   /* Сначала сгененрируем новое уникальное имя для профиля. */
-  folder = g_build_filename (g_get_user_config_dir (),
-                             HYSCAN_GTK_PROFILE_PATH,
-                             klass->subfolder, NULL);
+  folder = g_build_filename (g_get_user_config_dir (), klass->subfolder, NULL);
   files = hyscan_gtk_profile_get_files (folder);
 
   do
@@ -587,7 +577,12 @@ hyscan_gtk_profile_selection_changed (GtkTreeSelection *select,
 
   gtk_tree_model_get (model, &iter, OBJECT_COL, &profile, ROW_TYPE_COL, &row_type, -1);
   if (row_type == ROW_NEW_PROFILE)
-    gtk_tree_selection_unselect_iter (select, &iter);
+    {
+      gchar *path = gtk_tree_model_get_string_from_iter (model, &iter);
+      hyscan_gtk_profile_clicked (NULL, path, self);
+      gtk_tree_selection_unselect_iter (select, &iter);
+      g_free (path);
+    }
 
   /* Передаем, кто сейчас выбран. */
   g_signal_emit (self, hyscan_gtk_profile_signals[SIGNAL_SELECTED], 0,

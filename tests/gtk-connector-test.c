@@ -5,21 +5,20 @@
 #include <hyscan-gtk-profile-hw.h>
 #include <hyscan-gtk-profile-offset.h>
 #include <hyscan-gtk-connector.h>
+#include <hyscan-config.h>
 
 void cancel_close (HyScanGtkConnector *con,
                    const gchar        *text);
 
 GtkWidget *window;
-const gchar *paths[3]={NULL, NULL, NULL};
+const gchar *paths[]={"./", NULL};
 int
 main (int argc, char **argv)
 {
   gtk_init (&argc, &argv);
 
-  paths[0] = "./";
-  paths[1] = g_get_user_config_dir ();
-
-  window = hyscan_gtk_connector_new ((gchar**)paths, (gchar**)paths);
+  window = hyscan_gtk_connector_new (hyscan_config_get_profile_dirs(),
+                                     (gchar**)paths);
   g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
   g_signal_connect (window, "cancel", G_CALLBACK (cancel_close), "Cancel");
   g_signal_connect (window, "close", G_CALLBACK (cancel_close), "Close");
