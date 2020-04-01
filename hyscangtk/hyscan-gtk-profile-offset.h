@@ -65,7 +65,8 @@ HYSCAN_API
 GType                  hyscan_gtk_profile_offset_get_type         (void);
 
 HYSCAN_API
-GtkWidget *            hyscan_gtk_profile_offset_new              (gchar **folders);
+GtkWidget *            hyscan_gtk_profile_offset_new              (gchar    **folders,
+                                                                   gboolean   readonly);
 
 G_END_DECLS
 

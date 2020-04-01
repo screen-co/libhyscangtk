@@ -142,8 +142,9 @@ hyscan_gtk_connector_class_init (HyScanGtkConnectorClass *klass)
   oclass->finalize = hyscan_gtk_connector_object_finalize;
 
   g_object_class_install_property (oclass, PROP_DRIVERS,
-    g_param_spec_pointer ("drivers", "DriverPaths", "Where to look for drivert",
+    g_param_spec_pointer ("drivers", "DriverPaths", "Where to look for drivers",
                           G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+
   g_object_class_install_property (oclass, PROP_SYSFOLDER,
     g_param_spec_pointer ("folders", "Folders", "Folders with profiles",
                          G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
@@ -273,7 +274,7 @@ hyscan_gtk_connector_make_intro_page (HyScanGtkConnector *self)
 static void
 hyscan_gtk_connector_make_db_page (HyScanGtkConnector *self)
 {
-  GtkWidget *page = hyscan_gtk_profile_db_new (self->priv->folders);
+  GtkWidget *page = hyscan_gtk_profile_db_new (self->priv->folders, FALSE);
 
   g_signal_connect (page, "selected",
                     G_CALLBACK (hyscan_gtk_connector_selected_db), self);
@@ -284,7 +285,7 @@ hyscan_gtk_connector_make_db_page (HyScanGtkConnector *self)
 static void
 hyscan_gtk_connector_make_hw_page (HyScanGtkConnector *self)
 {
-  GtkWidget *page = hyscan_gtk_profile_hw_new (self->priv->folders, self->priv->drivers);
+  GtkWidget *page = hyscan_gtk_profile_hw_new (self->priv->folders, self->priv->drivers, FALSE);
 
   g_signal_connect (page, "selected",
                     G_CALLBACK (hyscan_gtk_connector_selected_hw), self);
@@ -297,7 +298,7 @@ hyscan_gtk_connector_make_hw_page (HyScanGtkConnector *self)
 static void
 hyscan_gtk_connector_make_offset_page (HyScanGtkConnector *self)
 {
-  GtkWidget *page = hyscan_gtk_profile_offset_new (self->priv->folders);
+  GtkWidget *page = hyscan_gtk_profile_offset_new (self->priv->folders, FALSE);
 
   g_signal_connect (page, "selected",
                     G_CALLBACK (hyscan_gtk_connector_selected_offset), self);

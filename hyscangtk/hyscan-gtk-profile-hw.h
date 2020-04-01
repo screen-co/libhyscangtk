@@ -68,8 +68,9 @@ HYSCAN_API
 GType                  hyscan_gtk_profile_hw_get_type         (void);
 
 HYSCAN_API
-GtkWidget *            hyscan_gtk_profile_hw_new              (gchar **folders,
-                                                               gchar **drivers);
+GtkWidget *            hyscan_gtk_profile_hw_new              (gchar    **folders,
+                                                               gchar    **drivers,
+                                                               gboolean   readonly);
 
 G_END_DECLS
 
