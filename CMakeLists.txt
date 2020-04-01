@@ -70,12 +70,7 @@ else ()
   set (HYSCAN_LIBRARIES "hyscantypes-${HYSCAN_MAJOR_VERSION}"
                         "hyscandriver-${HYSCAN_MAJOR_VERSION}"
                         "hyscancore-${HYSCAN_MAJOR_VERSION}"
-                        "hyscanmodel-${HYSCAN_MAJOR_VERSION}"
-                        )
-
-  include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../urpc/urpc")
-  link_directories ("${CMAKE_CURRENT_SOURCE_DIR}/../urpc/bin")
-  set (URPC_LIBRARIES urpc)
+                        "hyscanmodel-${HYSCAN_MAJOR_VERSION}")
 endif ()
 
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/hyscangtk")
