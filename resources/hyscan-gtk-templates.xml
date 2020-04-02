@@ -14,4 +14,12 @@
         <file compressed="true">hyscan-gtk-sensor-control.ui</file>
         <file compressed="true">hyscan-gtk-tvg-control.ui</file>
     </gresource>
+    <gresource prefix="/org/hyscan">
+        <file compressed="true">icons/main-16x16.png</file>
+        <file compressed="true">icons/main-32x32.png</file>
+        <file compressed="true">icons/main-48x48.png</file>
+        <file compressed="true">icons/main-64x64.png</file>
+        <file compressed="true">icons/main-128x128.png</file>
+        <file compressed="true">icons/main-256x256.png</file>
+    </gresource>
 </gresources>

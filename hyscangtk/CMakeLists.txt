@@ -3,6 +3,12 @@ if (${MARSHAL_COMPILER} STREQUAL MARSHAL_COMPILER-NOTFOUND)
   message (FATAL_ERROR "GLib marshallers compiler not found.")
 endif ()
 
+# Поиск GLib компилятора ресурсов.
+find_program (RESOURCE_COMPILER glib-compile-resources)
+if (${RESOURCE_COMPILER} STREQUAL RESOURCE_COMPILER-NOTFOUND)
+  message (FATAL_ERROR "GLib resource compiler not found.")
+endif ()
+
 file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/marshallers")
 include_directories ("${CMAKE_BINARY_DIR}/marshallers")
 
@@ -18,6 +24,35 @@ add_custom_command (OUTPUT "${CMAKE_BINARY_DIR}/marshallers/hyscan-gtk-marshalle
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                     DEPENDS hyscan-gtk-marshallers.list
                     VERBATIM)
+
+# Генерация ресурсного C-файла.
+file (MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/resources)
+add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/resources/hyscan-gtk-templates.c
+        COMMAND ${RESOURCE_COMPILER}
+        --generate-source
+        --target ${CMAKE_BINARY_DIR}/resources/hyscan-gtk-templates.c
+        ../resources/hyscan-gtk-templates.xml
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../resources"
+        DEPENDS ../resources/hyscan-gtk-templates.xml
+                ../resources/hyscan-gtk-profile-db-editor.ui
+                ../resources/hyscan-gtk-automover.ui
+                ../resources/hyscan-gtk-colorizer.ui
+                ../resources/hyscan-gtk-gen-control.ui
+                ../resources/hyscan-gtk-leveller.ui
+                ../resources/hyscan-gtk-mark-editor.ui
+                ../resources/hyscan-gtk-player.ui
+                ../resources/hyscan-gtk-project-viewer.ui
+                ../resources/hyscan-gtk-recorder.ui
+                ../resources/hyscan-gtk-scaler.ui
+                ../resources/hyscan-gtk-sensor-control.ui
+                ../resources/hyscan-gtk-tvg-control.ui
+                ../resources/icons/main-16x16.png
+                ../resources/icons/main-32x32.png
+                ../resources/icons/main-48x48.png
+                ../resources/icons/main-64x64.png
+                ../resources/icons/main-128x128.png
+                ../resources/icons/main-256x256.png
+        VERBATIM)
 
 add_library (${HYSCAN_GTK_LIBRARY} SHARED
              hyscan-cell-renderer-pixbuf.c
