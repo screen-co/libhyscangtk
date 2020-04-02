@@ -161,6 +161,11 @@ hyscan_gtk_profile_class_init (HyScanGtkProfileClass *klass)
                           FALSE, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 
 
+  g_object_class_install_property (oclass, PROP_READONLY,
+    g_param_spec_boolean ("readonly", "Read-only", "Disable profile editing",
+                          FALSE, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+
+
   hyscan_gtk_profile_signals[SIGNAL_SELECTED] =
     g_signal_new ("selected", G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST, 0,
@@ -530,7 +535,7 @@ hyscan_gtk_profile_update_tree (HyScanGtkProfile *self)
                       ROW_TYPE_COL, ROW_NOT_SELECTED,
                       ICON_NAME_COL, NULL,
                       -1);
-  if (klass->make_editor != NULL)
+  if (klass->make_editor != NULL && !priv->readonly)
     {
       gtk_list_store_append (store, &ls_iter);
       gtk_list_store_set (store, &ls_iter,
