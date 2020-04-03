@@ -11,14 +11,15 @@ void cancel_close (HyScanGtkConnector *con,
                    const gchar        *text);
 
 GtkWidget *window;
-const gchar *paths[]={"./", NULL};
+const gchar *paths[2]={NULL, NULL};
 int
 main (int argc, char **argv)
 {
   gtk_init (&argc, &argv);
 
-  window = hyscan_gtk_connector_new (hyscan_config_get_profile_dirs(),
-                                     (gchar**)paths);
+  paths[0] = "./";
+
+  window = hyscan_gtk_connector_new (hyscan_config_get_profile_dirs (), (gchar**)paths);
   g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
   g_signal_connect (window, "cancel", G_CALLBACK (cancel_close), "Cancel");
   g_signal_connect (window, "close", G_CALLBACK (cancel_close), "Close");

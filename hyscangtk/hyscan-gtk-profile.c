@@ -62,9 +62,10 @@
  *
  */
 
-#include <glib/gi18n.h>
 #include "hyscan-gtk-profile.h"
+#include <glib/gi18n-lib.h>
 #include <hyscan-cell-renderer-pixbuf.h>
+#include <hyscan-config.h>
 
 enum
 {
@@ -83,6 +84,8 @@ enum
 
 enum
 {
+  SELECTOR_COL,
+  SELECTOR_VISIBLE,
   PATH_COL,
   NAME_COL,
   STYLE_COL,
@@ -112,6 +115,8 @@ struct _HyScanGtkProfilePrivate
 
   GHashTable   *profiles; /* {gchar* file_name : HyScanProfile*} */
   GtkTreeModel *store;    /* Модель с виджетами. */
+
+  HyScanProfile *selected_profile;
 };
 
 static void    hyscan_gtk_profile_set_property             (GObject               *object,
@@ -123,11 +128,26 @@ static void    hyscan_gtk_profile_object_finalize          (GObject             
 static void    hyscan_gtk_profile_load                     (HyScanGtkProfile      *self,
                                                             const gchar           *dir);
 
-static GtkTreeModel * hyscan_gtk_profile_make_model        (HyScanGtkProfile      *self);
+static GHashTable * hyscan_gtk_profile_get_files           (const gchar           *folder);
+
+static void    hyscan_gtk_profile_restyle                  (GtkDialog             *dialog,
+                                                            gint                   response_id,
+                                                            const gchar           *style_class);
+
+static void    hyscan_gtk_profile_edit                     (HyScanGtkProfile      *self,
+                                                            HyScanProfile         *profile);
+static void    hyscan_gtk_profile_create                   (HyScanGtkProfile      *self);
+
+static void    hyscan_gtk_profile_clicked                  (GtkCellRenderer       *cell_renderer,
+                                                            const gchar           *path,
+                                                            gpointer               user_data);
+static void    hyscan_gtk_profile_toggled                  (GtkCellRendererToggle *cell_renderer,
+                                                            gchar                 *path,
+                                                            gpointer               user_data);
+
 static void    hyscan_gtk_profile_make_tree                (HyScanGtkProfile      *self);
+static GtkTreeModel * hyscan_gtk_profile_make_model        (HyScanGtkProfile      *self);
 static void    hyscan_gtk_profile_update_tree              (HyScanGtkProfile      *self);
-static void    hyscan_gtk_profile_selection_changed        (GtkTreeSelection      *select,
-                                                            GtkTreeView           *self);
 static gint    hyscan_gtk_profile_compare_func             (GtkTreeModel          *model,
                                                             GtkTreeIter           *a,
                                                             GtkTreeIter           *b,
@@ -159,12 +179,6 @@ hyscan_gtk_profile_class_init (HyScanGtkProfileClass *klass)
   g_object_class_install_property (oclass, PROP_READONLY,
     g_param_spec_boolean ("readonly", "Read-only", "Disable profile editing",
                           FALSE, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
-
-
-  g_object_class_install_property (oclass, PROP_READONLY,
-    g_param_spec_boolean ("readonly", "Read-only", "Disable profile editing",
-                          FALSE, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
-
 
   hyscan_gtk_profile_signals[SIGNAL_SELECTED] =
     g_signal_new ("selected", G_TYPE_FROM_CLASS (klass),
@@ -307,27 +321,6 @@ hyscan_gtk_profile_load (HyScanGtkProfile *self,
   g_hash_table_unref (files);
 }
 
-/* Функция создаёт уникальный идентификатор. */
-static void
-hyscan_gtk_profile_make_id (gchar *buffer,
-                            guint  size)
-{
-  guint i;
-  gint rnd;
-
-  for (i = 0; i < size; i++)
-    {
-      rnd = g_random_int_range (0, 62);
-      if (rnd < 10)
-        buffer[i] = '0' + rnd;
-      else if (rnd < 36)
-        buffer[i] = 'a' + rnd - 10;
-      else
-        buffer[i] = 'A' + rnd - 36;
-    }
-  buffer[i] = '\0';
-}
-
 static void
 hyscan_gtk_profile_restyle (GtkDialog   *dialog,
                             gint         response_id,
@@ -379,7 +372,6 @@ hyscan_gtk_profile_edit (HyScanGtkProfile *self,
 
       case RESPONSE_DELETE:
         hyscan_profile_delete (profile);
-        // G_BREAKPOINT();
         g_hash_table_remove (priv->profiles, hyscan_profile_get_file (profile));
         hyscan_gtk_profile_update_tree (self);
         break;
@@ -403,13 +395,13 @@ hyscan_gtk_profile_create (HyScanGtkProfile *self)
   GHashTable *files;
 
   /* Сначала сгененрируем новое уникальное имя для профиля. */
-  folder = g_build_filename (g_get_user_config_dir (), klass->subfolder, NULL);
+  folder = g_build_filename (hyscan_config_get_user_files_dir(), klass->subfolder, NULL);
   files = hyscan_gtk_profile_get_files (folder);
 
   do
     {
       g_clear_pointer (&filename, g_free);
-      hyscan_gtk_profile_make_id (random_str, G_N_ELEMENTS (random_str));
+      hyscan_profile_make_id (random_str, G_N_ELEMENTS (random_str));
       filename = g_build_filename (folder, random_str, NULL);
     }
   while (g_hash_table_contains (files, filename));
@@ -447,12 +439,52 @@ hyscan_gtk_profile_clicked (GtkCellRenderer *cell_renderer,
   g_clear_object (&profile);
 }
 
+static void
+hyscan_gtk_profile_toggled (GtkCellRendererToggle *cell_renderer,
+                            gchar                 *path,
+                            gpointer               user_data)
+{
+  HyScanGtkProfile *self = user_data;
+  HyScanGtkProfilePrivate *priv = self->priv;
+  GtkTreeIter iter;
+  HyScanProfile *profile;
+
+  if (!gtk_tree_model_get_iter_from_string (priv->store, &iter, path))
+    return;
+
+  gtk_tree_model_get (priv->store, &iter, OBJECT_COL, &profile, -1);
+
+  g_clear_object (&priv->selected_profile);
+  if (profile != NULL)
+    priv->selected_profile = profile;
+
+  hyscan_gtk_profile_update_tree (self);
+
+  /* Передаем, кто сейчас выбран. */
+  g_signal_emit (self, hyscan_gtk_profile_signals[SIGNAL_SELECTED], 0, profile);
+}
+
 /* Функция создает дерево по умолчанию (одна колонка - название профиля). */
 static void
 hyscan_gtk_profile_make_tree (HyScanGtkProfile *self)
 {
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
+
+  /* Выбор профиля. */
+  {
+    renderer = gtk_cell_renderer_toggle_new ();
+    gtk_cell_renderer_toggle_set_radio (GTK_CELL_RENDERER_TOGGLE (renderer), TRUE);
+    g_signal_connect (renderer, "toggled",
+                      G_CALLBACK (hyscan_gtk_profile_toggled), self);
+    column = gtk_tree_view_column_new_with_attributes (NULL,
+                                                       renderer,
+                                                       "active", SELECTOR_COL,
+                                                       "visible", SELECTOR_VISIBLE,
+                                                       NULL);
+    gtk_tree_view_column_set_expand (column, FALSE);
+    gtk_tree_view_append_column (GTK_TREE_VIEW (self), column);
+  }
 
   /* Колонка с названием профиля. */
   renderer = gtk_cell_renderer_text_new ();
@@ -491,6 +523,8 @@ hyscan_gtk_profile_make_model (HyScanGtkProfile *self)
   GtkListStore *store = NULL;
 
   store = gtk_list_store_new (N_COLUMNS,
+                              G_TYPE_BOOLEAN,  /* SELECTOR_COL */
+                              G_TYPE_BOOLEAN,  /* SELECTOR_VISIBLE */
                               G_TYPE_STRING,   /* PATH_COL */
                               G_TYPE_STRING,   /* NAME_COL */
                               G_TYPE_INT,      /* STYLE_COL */
@@ -506,8 +540,7 @@ hyscan_gtk_profile_make_model (HyScanGtkProfile *self)
   gtk_tree_view_set_model (GTK_TREE_VIEW (self), GTK_TREE_MODEL (store));
 
   select = gtk_tree_view_get_selection (GTK_TREE_VIEW (self));
-  gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
-  g_signal_connect (select, "changed", G_CALLBACK (hyscan_gtk_profile_selection_changed), self);
+  gtk_tree_selection_set_mode (select, GTK_SELECTION_NONE);
 
   return GTK_TREE_MODEL (store);
 }
@@ -519,7 +552,7 @@ hyscan_gtk_profile_update_tree (HyScanGtkProfile *self)
   HyScanGtkProfileClass *klass = HYSCAN_GTK_PROFILE_GET_CLASS (self);
   HyScanGtkProfilePrivate *priv = self->priv;
   GtkListStore *store = GTK_LIST_STORE (priv->store);
-  GHashTableIter ht_iter;
+  GHashTableIter iter;
   GtkTreeIter ls_iter;
   gpointer k, v;
 
@@ -528,6 +561,8 @@ hyscan_gtk_profile_update_tree (HyScanGtkProfile *self)
   /* Специальные строки: "не выбрано" и "новый". */
   gtk_list_store_append (store, &ls_iter);
   gtk_list_store_set (store, &ls_iter,
+                      SELECTOR_COL, NULL == priv->selected_profile,
+                      SELECTOR_VISIBLE, TRUE,
                       PATH_COL, NULL,
                       NAME_COL, g_strdup ("Not selected"),
                       STYLE_COL, PANGO_STYLE_ITALIC,
@@ -535,10 +570,12 @@ hyscan_gtk_profile_update_tree (HyScanGtkProfile *self)
                       ROW_TYPE_COL, ROW_NOT_SELECTED,
                       ICON_NAME_COL, NULL,
                       -1);
+
   if (klass->make_editor != NULL && !priv->readonly)
     {
       gtk_list_store_append (store, &ls_iter);
       gtk_list_store_set (store, &ls_iter,
+                          SELECTOR_VISIBLE, FALSE,
                           PATH_COL, NULL,
                           NAME_COL, g_strdup ("New..."),
                           STYLE_COL, PANGO_STYLE_ITALIC,
@@ -548,8 +585,8 @@ hyscan_gtk_profile_update_tree (HyScanGtkProfile *self)
                           -1);
     }
 
-  g_hash_table_iter_init (&ht_iter, self->priv->profiles);
-  while (g_hash_table_iter_next (&ht_iter, &k, &v))
+  g_hash_table_iter_init (&iter, self->priv->profiles);
+  while (g_hash_table_iter_next (&iter, &k, &v))
     {
       const gchar * file = (const gchar *)k;
       HyScanProfile * profile = (HyScanProfile *)v;
@@ -557,6 +594,8 @@ hyscan_gtk_profile_update_tree (HyScanGtkProfile *self)
       /* Добавляем в деревце. */
       gtk_list_store_append (store, &ls_iter);
       gtk_list_store_set (store, &ls_iter,
+                          SELECTOR_COL, profile == priv->selected_profile,
+                          SELECTOR_VISIBLE, TRUE,
                           PATH_COL, g_strdup (file),
                           NAME_COL, g_strdup (hyscan_profile_get_name (profile)),
                           STYLE_COL, PANGO_STYLE_NORMAL,
@@ -565,35 +604,6 @@ hyscan_gtk_profile_update_tree (HyScanGtkProfile *self)
                           ICON_NAME_COL, "emblem-system-symbolic",
                           -1);
     }
-}
-
-/* Функция смены страницы. */
-static void
-hyscan_gtk_profile_selection_changed (GtkTreeSelection *select,
-                                      GtkTreeView      *self)
-{
-  HyScanProfile *profile = NULL;
-  GtkTreeModel *model;
-  GtkTreeIter iter;
-  gint row_type = ROW_INVALID;
-
-  if (!gtk_tree_selection_get_selected (select, &model, &iter))
-    return;
-
-  gtk_tree_model_get (model, &iter, OBJECT_COL, &profile, ROW_TYPE_COL, &row_type, -1);
-  if (row_type == ROW_NEW_PROFILE)
-    {
-      gchar *path = gtk_tree_model_get_string_from_iter (model, &iter);
-      hyscan_gtk_profile_clicked (NULL, path, self);
-      gtk_tree_selection_unselect_iter (select, &iter);
-      g_free (path);
-    }
-
-  /* Передаем, кто сейчас выбран. */
-  g_signal_emit (self, hyscan_gtk_profile_signals[SIGNAL_SELECTED], 0,
-                 profile);
-
-  g_clear_object (&profile);
 }
 
 /* Функция сортировки. Она довольно хитрая, чтобы иметь возможность
