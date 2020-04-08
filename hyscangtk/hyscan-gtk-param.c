@@ -288,10 +288,8 @@ hyscan_gtk_param_key_changed (HyScanGtkParamKey *pkey,
 
   old = hyscan_param_list_get (priv->watch, path);
   if (old == NULL)
-    {
-      g_warning ("HyScanGtkParam: Previous value not set.");
-      return;
-    }
+    old = hyscan_data_schema_key_get_default (priv->schema, path);
+
   hyscan_param_list_set (priv->discard, path, old);
   g_variant_unref (old);
 

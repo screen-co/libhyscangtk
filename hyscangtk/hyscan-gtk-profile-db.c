@@ -39,7 +39,7 @@
  */
 
 #include "hyscan-gtk-profile-db.h"
-#include <hyscan-gtk-profile-db-editor.h>
+#include <hyscan-gtk-profile-editor-db.h>
 
 
 #define HYSCAN_GTK_PROFILE_DB_PATH "db-profiles"
@@ -78,7 +78,7 @@ static GtkWidget *
 hyscan_gtk_profile_db_editor (HyScanGtkProfile *parent,
                               HyScanProfile    *profile)
 {
-  return hyscan_gtk_profile_db_editor_new (profile);
+  return hyscan_gtk_profile_editor_db_new (profile);
 }
 /*
  * hyscan_gtk_profile_db_new:

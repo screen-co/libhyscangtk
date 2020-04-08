@@ -69,6 +69,9 @@ GType                            hyscan_gtk_profile_hw_device_editor_get_type  (
 HYSCAN_API
 GtkWidget *                      hyscan_gtk_profile_hw_device_editor_new       (HyScanProfileHWDevice *device);
 
+HYSCAN_API
+HyScanProfileHWDevice *          hyscan_gtk_profile_hw_device_editor_get_device (HyScanGtkProfileHWDeviceEditor *self);
+
 G_END_DECLS
 
 #endif /* __HYSCAN_GTK_PROFILE_HW_DEVICE_EDITOR_H__ */

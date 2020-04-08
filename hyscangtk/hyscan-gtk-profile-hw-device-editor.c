@@ -46,7 +46,7 @@
 
 enum
 {
-  SIGNAL_SANE,
+  SIGNAL_CHANGED,
   SIGNAL_LAST
 };
 
@@ -94,12 +94,11 @@ hyscan_gtk_profile_hw_device_editor_class_init (HyScanGtkProfileHWDeviceEditorCl
                          HYSCAN_TYPE_PROFILE_HW_DEVICE,
                          G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 
-  hyscan_gtk_profile_hw_device_editor_signals[SIGNAL_SANE] =
-    g_signal_new ("sane", HYSCAN_TYPE_GTK_PROFILE_HW_DEVICE_EDITOR,
+  hyscan_gtk_profile_hw_device_editor_signals[SIGNAL_CHANGED] =
+    g_signal_new ("changed", HYSCAN_TYPE_GTK_PROFILE_HW_DEVICE_EDITOR,
                   G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-                  g_cclosure_marshal_VOID__BOOLEAN,
-                  G_TYPE_NONE,
-                  1, G_TYPE_BOOLEAN);
+                  g_cclosure_marshal_VOID__VOID,
+                  G_TYPE_NONE, 0);
 }
 
 static void
@@ -243,6 +242,9 @@ hyscan_gtk_profile_hw_device_editor_name_changed (HyScanGtkProfileHWDeviceEditor
     return;
 
   hyscan_profile_hw_device_set_name (self->priv->device, text);
+
+  g_signal_emit (self, hyscan_gtk_profile_hw_device_editor_signals[SIGNAL_CHANGED], 0);
+
 }
 
 static void
@@ -287,7 +289,7 @@ hyscan_gtk_profile_hw_device_editor_update (HyScanGtkProfileHWDeviceEditor *self
   else
     hyscan_gtk_param_set_param (priv->param, NULL, "/", FALSE);
 
-  g_signal_emit (self, hyscan_gtk_profile_hw_device_editor_signals[SIGNAL_SANE], 0, update_state);
+  g_signal_emit (self, hyscan_gtk_profile_hw_device_editor_signals[SIGNAL_CHANGED], 0);
 }
 
 static void
@@ -307,4 +309,12 @@ hyscan_gtk_profile_hw_device_editor_new (HyScanProfileHWDevice *device)
   return g_object_new (HYSCAN_TYPE_GTK_PROFILE_HW_DEVICE_EDITOR,
                        "device", device,
                        NULL);
+}
+
+HyScanProfileHWDevice *
+hyscan_gtk_profile_hw_device_editor_get_device (HyScanGtkProfileHWDeviceEditor *self)
+{
+  g_return_val_if_fail (HYSCAN_IS_GTK_PROFILE_HW_DEVICE_EDITOR (self), NULL);
+
+  return g_object_ref (self->priv->device);
 }

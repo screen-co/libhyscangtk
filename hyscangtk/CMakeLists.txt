@@ -29,11 +29,13 @@ add_library (${HYSCAN_GTK_LIBRARY} SHARED
              hyscan-gtk-param-cc.c
              hyscan-gtk-param-tree.c
              hyscan-gtk-profile.c
-             hyscan-gtk-profile-db-editor.c
+             hyscan-gtk-profile-editor.c
+             hyscan-gtk-profile-editor-db.c
              hyscan-gtk-profile-db.c
              hyscan-gtk-profile-hw-device-editor.c
-             hyscan-gtk-profile-hw-editor.c
+             hyscan-gtk-profile-editor-hw.c
              hyscan-gtk-profile-hw.c
+             hyscan-gtk-profile-editor-offset.c
              hyscan-gtk-profile-offset.c
              hyscan-gtk-connector.c
              ${CMAKE_BINARY_DIR}/resources/hyscan-gtk-templates.c

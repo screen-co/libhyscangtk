@@ -38,6 +38,7 @@
 #include <gtk/gtk.h>
 #include <hyscan-api.h>
 #include <hyscan-profile.h>
+#include <hyscan-gtk-profile-editor.h>
 
 G_BEGIN_DECLS
 

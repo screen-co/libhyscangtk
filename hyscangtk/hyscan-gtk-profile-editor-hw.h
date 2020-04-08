@@ -1,4 +1,4 @@
-/* hyscan-gtk-profile-hw-editor.h
+/* hyscan-gtk-profile-editor-hw.h
  *
  * Copyright 2020 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
@@ -32,44 +32,44 @@
  * лицензии. Для этого свяжитесь с ООО Экран - <info@screen-co.ru>.
  */
 
-#ifndef __HYSCAN_GTK_PROFILE_HW_EDITOR_H__
-#define __HYSCAN_GTK_PROFILE_HW_EDITOR_H__
+#ifndef __HYSCAN_GTK_PROFILE_EDITOR_HW_H__
+#define __HYSCAN_GTK_PROFILE_EDITOR_HW_H__
 
-#include <gtk/gtk.h>
+#include <hyscan-gtk-profile-editor.h>
 #include <hyscan-profile-hw.h>
 
 G_BEGIN_DECLS
 
-#define HYSCAN_TYPE_GTK_PROFILE_HW_EDITOR             (hyscan_gtk_profile_hw_editor_get_type ())
-#define HYSCAN_GTK_PROFILE_HW_EDITOR(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), HYSCAN_TYPE_GTK_PROFILE_HW_EDITOR, HyScanGtkProfileHWEditor))
-#define HYSCAN_IS_GTK_PROFILE_HW_EDITOR(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), HYSCAN_TYPE_GTK_PROFILE_HW_EDITOR))
-#define HYSCAN_GTK_PROFILE_HW_EDITOR_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), HYSCAN_TYPE_GTK_PROFILE_HW_EDITOR, HyScanGtkProfileHWEditorClass))
-#define HYSCAN_IS_GTK_PROFILE_HW_EDITOR_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), HYSCAN_TYPE_GTK_PROFILE_HW_EDITOR))
-#define HYSCAN_GTK_PROFILE_HW_EDITOR_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), HYSCAN_TYPE_GTK_PROFILE_HW_EDITOR, HyScanGtkProfileHWEditorClass))
+#define HYSCAN_TYPE_GTK_PROFILE_EDITOR_HW             (hyscan_gtk_profile_editor_hw_get_type ())
+#define HYSCAN_GTK_PROFILE_EDITOR_HW(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), HYSCAN_TYPE_GTK_PROFILE_EDITOR_HW, HyScanGtkProfileEditorHW))
+#define HYSCAN_IS_GTK_PROFILE_EDITOR_HW(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), HYSCAN_TYPE_GTK_PROFILE_EDITOR_HW))
+#define HYSCAN_GTK_PROFILE_EDITOR_HW_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), HYSCAN_TYPE_GTK_PROFILE_EDITOR_HW, HyScanGtkProfileEditorHWClass))
+#define HYSCAN_IS_GTK_PROFILE_EDITOR_HW_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), HYSCAN_TYPE_GTK_PROFILE_EDITOR_HW))
+#define HYSCAN_GTK_PROFILE_EDITOR_HW_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), HYSCAN_TYPE_GTK_PROFILE_EDITOR_HW, HyScanGtkProfileEditorHWClass))
 
-typedef struct _HyScanGtkProfileHWEditor HyScanGtkProfileHWEditor;
-typedef struct _HyScanGtkProfileHWEditorPrivate HyScanGtkProfileHWEditorPrivate;
-typedef struct _HyScanGtkProfileHWEditorClass HyScanGtkProfileHWEditorClass;
+typedef struct _HyScanGtkProfileEditorHW HyScanGtkProfileEditorHW;
+typedef struct _HyScanGtkProfileEditorHWPrivate HyScanGtkProfileEditorHWPrivate;
+typedef struct _HyScanGtkProfileEditorHWClass HyScanGtkProfileEditorHWClass;
 
-struct _HyScanGtkProfileHWEditor
+struct _HyScanGtkProfileEditorHW
 {
-  GtkGrid parent_instance;
+  HyScanGtkProfileEditor parent_instance;
 
-  HyScanGtkProfileHWEditorPrivate *priv;
+  HyScanGtkProfileEditorHWPrivate *priv;
 };
 
-struct _HyScanGtkProfileHWEditorClass
+struct _HyScanGtkProfileEditorHWClass
 {
-  GtkGridClass parent_class;
+  HyScanGtkProfileEditorClass parent_class;
 };
 
 HYSCAN_API
-GType                      hyscan_gtk_profile_hw_editor_get_type         (void);
+GType                      hyscan_gtk_profile_editor_hw_get_type         (void);
 
 HYSCAN_API
-GtkWidget *                hyscan_gtk_profile_hw_editor_new              (HyScanProfile *profile,
+GtkWidget *                hyscan_gtk_profile_editor_hw_new              (HyScanProfile *profile,
                                                                           gchar        **drivers);
 
 G_END_DECLS
 
-#endif /* __HYSCAN_GTK_PROFILE_HW_EDITOR_H__ */
+#endif /* __HYSCAN_GTK_PROFILE_EDITOR_HW_H__ */
