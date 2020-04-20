@@ -7,9 +7,7 @@ endif ()
 
 # Генерация ресурсного C-файла.
 file (MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/resources)
-add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/resources/hyscan-gtk-templates.c
-        COMMAND ${RESOURCE_COMPILER}
-        --generate-source
-        --target ${CMAKE_BINARY_DIR}/resources/hyscan-gtk-templates.c hyscan-gtk-templates.xml
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../resources"
-        VERBATIM)
+execute_process (COMMAND ${RESOURCE_COMPILER}
+                 --generate-source
+                 --target ${CMAKE_BINARY_DIR}/resources/hyscan-gtk-templates.c hyscan-gtk-templates.xml
+                 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
