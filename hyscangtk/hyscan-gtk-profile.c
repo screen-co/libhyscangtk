@@ -57,7 +57,7 @@
  * |               +              |    |
  * |       Gtk..HWDeviceEditor    |    |
  * |                              +    |
- * |                 Gtk..OffsetEditor |
+ * |                 Gtk..EditorOffset |
  * +-----------------------------------+
  *
  */
@@ -140,6 +140,7 @@ static void    hyscan_gtk_profile_create                   (HyScanGtkProfile    
 
 static void    hyscan_gtk_profile_clicked                  (GtkCellRenderer       *cell_renderer,
                                                             const gchar           *path,
+                                                            GdkEvent              *event,
                                                             gpointer               user_data);
 static void    hyscan_gtk_profile_toggled                  (GtkCellRendererToggle *cell_renderer,
                                                             gchar                 *path,
@@ -175,7 +176,7 @@ hyscan_gtk_profile_class_init (HyScanGtkProfileClass *klass)
   g_object_class_install_property (oclass, PROP_FOLDERS,
     g_param_spec_pointer ("folders", "Folders", "Folders to look for profiles",
                           G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
-  
+
   g_object_class_install_property (oclass, PROP_READONLY,
     g_param_spec_boolean ("readonly", "Read-only", "Disable profile editing",
                           FALSE, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
@@ -333,6 +334,14 @@ hyscan_gtk_profile_restyle (GtkDialog   *dialog,
 }
 
 static void
+hyscan_gtk_profile_sanity_check (HyScanGtkProfileEditor *editor,
+                                 GtkDialog              *dialog)
+{
+  gboolean sane = hyscan_gtk_profile_editor_get_sanity (editor);
+  gtk_dialog_set_response_sensitive (dialog, RESPONSE_APPLY, sane);
+}
+
+static void
 hyscan_gtk_profile_edit (HyScanGtkProfile *self,
                          HyScanProfile    *profile)
 {
@@ -357,6 +366,9 @@ hyscan_gtk_profile_edit (HyScanGtkProfile *self,
   content = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
 
   creator = klass->make_editor (self, profile);
+  hyscan_gtk_profile_sanity_check (HYSCAN_GTK_PROFILE_EDITOR (creator), GTK_DIALOG (dialog));
+  g_signal_connect (creator, "sane", G_CALLBACK (hyscan_gtk_profile_sanity_check), dialog);
+
   gtk_container_add (GTK_CONTAINER (content), creator);
   gtk_widget_show_all (dialog);
   switch (gtk_dialog_run (GTK_DIALOG (dialog)))
@@ -416,6 +428,7 @@ hyscan_gtk_profile_create (HyScanGtkProfile *self)
 static void
 hyscan_gtk_profile_clicked (GtkCellRenderer *cell_renderer,
                             const gchar     *path,
+                            GdkEvent        *event,
                             gpointer         user_data)
 {
   HyScanGtkProfile *self = user_data;
@@ -564,7 +577,7 @@ hyscan_gtk_profile_update_tree (HyScanGtkProfile *self)
                       SELECTOR_COL, NULL == priv->selected_profile,
                       SELECTOR_VISIBLE, TRUE,
                       PATH_COL, NULL,
-                      NAME_COL, g_strdup ("Not selected"),
+                      NAME_COL, _("Not selected"),
                       STYLE_COL, PANGO_STYLE_ITALIC,
                       OBJECT_COL, NULL,
                       ROW_TYPE_COL, ROW_NOT_SELECTED,
@@ -577,7 +590,7 @@ hyscan_gtk_profile_update_tree (HyScanGtkProfile *self)
       gtk_list_store_set (store, &ls_iter,
                           SELECTOR_VISIBLE, FALSE,
                           PATH_COL, NULL,
-                          NAME_COL, g_strdup ("New..."),
+                          NAME_COL, _("New..."),
                           STYLE_COL, PANGO_STYLE_ITALIC,
                           OBJECT_COL, NULL,
                           ROW_TYPE_COL, ROW_NEW_PROFILE,
@@ -596,8 +609,8 @@ hyscan_gtk_profile_update_tree (HyScanGtkProfile *self)
       gtk_list_store_set (store, &ls_iter,
                           SELECTOR_COL, profile == priv->selected_profile,
                           SELECTOR_VISIBLE, TRUE,
-                          PATH_COL, g_strdup (file),
-                          NAME_COL, g_strdup (hyscan_profile_get_name (profile)),
+                          PATH_COL, file,
+                          NAME_COL, hyscan_profile_get_name (profile),
                           STYLE_COL, PANGO_STYLE_NORMAL,
                           OBJECT_COL, g_object_ref (profile),
                           ROW_TYPE_COL, ROW_PROFILE,

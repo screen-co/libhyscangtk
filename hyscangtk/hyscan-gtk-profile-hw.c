@@ -41,7 +41,7 @@
  */
 
 #include "hyscan-gtk-profile-hw.h"
-#include <hyscan-gtk-profile-hw-editor.h>
+#include <hyscan-gtk-profile-editor-hw.h>
 
 #define HYSCAN_GTK_PROFILE_HW_PATH "hw-profiles"
 
@@ -142,7 +142,7 @@ hyscan_gtk_profile_hw_editor (HyScanGtkProfile *parent,
                               HyScanProfile    *profile)
 {
   HyScanGtkProfileHW *self = HYSCAN_GTK_PROFILE_HW (parent);
-  return hyscan_gtk_profile_hw_editor_new (profile, self->priv->drivers/*, transient*/);
+  return hyscan_gtk_profile_editor_hw_new (profile, self->priv->drivers/*, transient*/);
 }
 
 /*

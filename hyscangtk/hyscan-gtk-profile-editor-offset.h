@@ -32,43 +32,43 @@
  * лицензии. Для этого свяжитесь с ООО Экран - <info@screen-co.ru>.
  */
 
-#ifndef __HYSCAN_GTK_PROFILE_OFFSET_EDITOR_H__
-#define __HYSCAN_GTK_PROFILE_OFFSET_EDITOR_H__
+#ifndef __HYSCAN_GTK_PROFILE_EDITOR_OFFSET_H__
+#define __HYSCAN_GTK_PROFILE_EDITOR_OFFSET_H__
 
-#include <glib-object.h>
-#include <hyscan-api.h>
+#include <hyscan-gtk-profile-editor.h>
+#include <hyscan-profile-offset.h>
 
 G_BEGIN_DECLS
 
-#define HYSCAN_TYPE_GTK_PROFILE_OFFSET_EDITOR             (hyscan_gtk_profile_offset_editor_get_type ())
-#define HYSCAN_GTK_PROFILE_OFFSET_EDITOR(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), HYSCAN_TYPE_GTK_PROFILE_OFFSET_EDITOR, HyScanGtkProfileOffsetEditor))
-#define HYSCAN_IS_GTK_PROFILE_OFFSET_EDITOR(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), HYSCAN_TYPE_GTK_PROFILE_OFFSET_EDITOR))
-#define HYSCAN_GTK_PROFILE_OFFSET_EDITOR_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), HYSCAN_TYPE_GTK_PROFILE_OFFSET_EDITOR, HyScanGtkProfileOffsetEditorClass))
-#define HYSCAN_IS_GTK_PROFILE_OFFSET_EDITOR_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), HYSCAN_TYPE_GTK_PROFILE_OFFSET_EDITOR))
-#define HYSCAN_GTK_PROFILE_OFFSET_EDITOR_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), HYSCAN_TYPE_GTK_PROFILE_OFFSET_EDITOR, HyScanGtkProfileOffsetEditorClass))
+#define HYSCAN_TYPE_GTK_PROFILE_EDITOR_OFFSET             (hyscan_gtk_profile_editor_offset_get_type ())
+#define HYSCAN_GTK_PROFILE_EDITOR_OFFSET(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), HYSCAN_TYPE_GTK_PROFILE_EDITOR_OFFSET, HyScanGtkProfileEditorOffset))
+#define HYSCAN_IS_GTK_PROFILE_EDITOR_OFFSET(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), HYSCAN_TYPE_GTK_PROFILE_EDITOR_OFFSET))
+#define HYSCAN_GTK_PROFILE_EDITOR_OFFSET_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), HYSCAN_TYPE_GTK_PROFILE_EDITOR_OFFSET, HyScanGtkProfileEditorOffsetClass))
+#define HYSCAN_IS_GTK_PROFILE_EDITOR_OFFSET_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), HYSCAN_TYPE_GTK_PROFILE_EDITOR_OFFSET))
+#define HYSCAN_GTK_PROFILE_EDITOR_OFFSET_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), HYSCAN_TYPE_GTK_PROFILE_EDITOR_OFFSET, HyScanGtkProfileEditorOffsetClass))
 
-typedef struct _HyScanGtkProfileOffsetEditor HyScanGtkProfileOffsetEditor;
-typedef struct _HyScanGtkProfileOffsetEditorPrivate HyScanGtkProfileOffsetEditorPrivate;
-typedef struct _HyScanGtkProfileOffsetEditorClass HyScanGtkProfileOffsetEditorClass;
+typedef struct _HyScanGtkProfileEditorOffset HyScanGtkProfileEditorOffset;
+typedef struct _HyScanGtkProfileEditorOffsetPrivate HyScanGtkProfileEditorOffsetPrivate;
+typedef struct _HyScanGtkProfileEditorOffsetClass HyScanGtkProfileEditorOffsetClass;
 
-struct _HyScanGtkProfileOffsetEditor
+struct _HyScanGtkProfileEditorOffset
 {
-  GObject parent_instance;
+  HyScanGtkProfileEditor parent_instance;
 
-  HyScanGtkProfileOffsetEditorPrivate *priv;
+  HyScanGtkProfileEditorOffsetPrivate *priv;
 };
 
-struct _HyScanGtkProfileOffsetEditorClass
+struct _HyScanGtkProfileEditorOffsetClass
 {
-  GObjectClass parent_class;
+  HyScanGtkProfileEditorClass parent_class;
 };
 
 HYSCAN_API
-GType                  hyscan_gtk_profile_offset_editor_get_type         (void);
+GType        hyscan_gtk_profile_editor_offset_get_type (void);
 
 HYSCAN_API
-HyScanGtkProfileOffsetEditor *        hyscan_gtk_profile_offset_editor_new              (void);
+GtkWidget *  hyscan_gtk_profile_editor_offset_new      (HyScanProfile *profile);
 
 G_END_DECLS
 
-#endif /* __HYSCAN_GTK_PROFILE_OFFSET_EDITOR_H__ */
+#endif /* __HYSCAN_GTK_PROFILE_EDITOR_OFFSET_H__ */

@@ -39,11 +39,14 @@
  */
 
 #include "hyscan-gtk-profile-offset.h"
+#include <hyscan-gtk-profile-editor-offset.h>
 
 #define HYSCAN_OFFSET_PROFILES_PATH "offset-profiles"
 
 static HyScanProfile * hyscan_gtk_profile_offset_new_profile (HyScanGtkProfile *parent,
                                                               const gchar      *filename);
+static GtkWidget *     hyscan_gtk_profile_offset_editor      (HyScanGtkProfile *parent,
+                                                              HyScanProfile    *profile);
 
 G_DEFINE_TYPE (HyScanGtkProfileOffset, hyscan_gtk_profile_offset, HYSCAN_TYPE_GTK_PROFILE);
 
@@ -54,6 +57,7 @@ hyscan_gtk_profile_offset_class_init (HyScanGtkProfileOffsetClass *klass)
 
   pklass->subfolder = HYSCAN_OFFSET_PROFILES_PATH;
   pklass->new_profile = hyscan_gtk_profile_offset_new_profile;
+  pklass->make_editor = hyscan_gtk_profile_offset_editor;
 }
 
 static void
@@ -66,6 +70,13 @@ hyscan_gtk_profile_offset_new_profile (HyScanGtkProfile *parent,
                                        const gchar      *filename)
 {
   return HYSCAN_PROFILE (hyscan_profile_offset_new (filename));
+}
+
+static GtkWidget *
+hyscan_gtk_profile_offset_editor (HyScanGtkProfile *parent,
+                                  HyScanProfile    *profile)
+{
+  return hyscan_gtk_profile_editor_offset_new (profile);
 }
 
 /*
@@ -83,3 +94,4 @@ hyscan_gtk_profile_offset_new (gchar    **folders,
                        "readonly", readonly,
                        NULL);
 }
+

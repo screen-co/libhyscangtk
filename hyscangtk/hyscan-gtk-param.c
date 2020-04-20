@@ -289,11 +289,9 @@ hyscan_gtk_param_key_changed (HyScanGtkParamKey *pkey,
   old = hyscan_param_list_get (priv->watch, path);
   if (old == NULL)
     old = hyscan_data_schema_key_get_default (priv->schema, path);
-  if (old != NULL)
-    {
-      hyscan_param_list_set (priv->discard, path, old);
-      g_variant_unref (old);
-    }
+
+  hyscan_param_list_set (priv->discard, path, old);
+  g_variant_unref (old);
 
   if (priv->immidiate)
     hyscan_gtk_param_apply (self);

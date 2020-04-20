@@ -40,6 +40,7 @@
  */
 
 #include "hyscan-cell-renderer-pixbuf.h"
+#include <hyscan-gtk-marshallers.h>
 
 enum
 {
@@ -69,6 +70,7 @@ hyscan_cell_renderer_pixbuf_class_init (HyScanCellRendererPixbufClass *klass)
    * HyScanCellRendererToggle::clicked:
    * @cell_renderer: the object which received the signal
    * @path: string representation of #GtkTreePath describing the event location
+   * @event: the GdkEvent which triggered this signal
    *
    * The ::clicked signal is emitted when the cell is clicked.
    *
@@ -80,9 +82,12 @@ hyscan_cell_renderer_pixbuf_class_init (HyScanCellRendererPixbufClass *klass)
     g_signal_new ("clicked",
                   HYSCAN_TYPE_CELL_RENDERER_PIXBUF,
                   G_SIGNAL_RUN_LAST,
-                  0, NULL, NULL, NULL,
-                  G_TYPE_NONE, 1,
-                  G_TYPE_STRING);
+                  0, NULL, NULL,
+                  hyscan_gtk_marshal_VOID__STRING_POINTER,
+                  G_TYPE_NONE, 2,
+                  G_TYPE_STRING,
+                  G_TYPE_POINTER);
+
 }
 
 static void
@@ -100,7 +105,8 @@ hyscan_cell_renderer_pixbuf_activate  (GtkCellRenderer      *cell,
                                        const GdkRectangle   *cell_area,
                                        GtkCellRendererState  flags)
 {
-  g_signal_emit (cell, hyscan_cell_renderer_pixbuf_signals[SIGNAL_ACTIVATE], 0, path);
+  g_signal_emit (cell, hyscan_cell_renderer_pixbuf_signals[SIGNAL_ACTIVATE], 0,
+                 path, event);
   return TRUE;
 }
 

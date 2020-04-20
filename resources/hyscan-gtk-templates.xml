@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
     <gresource prefix="/org/hyscan/gtk">
-        <file compressed="true">hyscan-gtk-profile-db-editor.ui</file>
+        <file compressed="true">hyscan-gtk-profile-editor-db.ui</file>
+        <file compressed="true">hyscan-gtk-profile-editor-hw.ui</file>
+        <file compressed="true">hyscan-gtk-profile-editor-offset.ui</file>
+        <file compressed="true">hyscan-gtk-profile-editor-offset-page.ui</file>
         <file compressed="true">hyscan-gtk-automover.ui</file>
         <file compressed="true">hyscan-gtk-colorizer.ui</file>
         <file compressed="true">hyscan-gtk-gen-control.ui</file>
