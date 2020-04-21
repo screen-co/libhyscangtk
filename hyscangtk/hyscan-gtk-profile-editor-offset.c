@@ -1,15 +1,15 @@
-/* hyscan-gtk-profile-editor-offset.h
+/* hyscan-gtk-profile-editor-offset.c
  *
  * Copyright 2020 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
- * This file is part of @library@.
+ * This file is part of HyScanGtk.
  *
- * @library@ is dual-licensed: you can redistribute it and/or modify
+ * HyScanGtk is dual-licensed: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @library@ is distributed in the hope that it will be useful,
+ * HyScanGtk is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,9 +21,9 @@
  * Contact the Screen LLC in this case - <info@screen-co.ru>.
  */
 
-/* @library@ имеет двойную лицензию.
+/* HyScanGtk имеет двойную лицензию.
  *
- * Во-первых, вы можете распространять @library@ на условиях Стандартной
+ * Во-первых, вы можете распространять HyScanGtk на условиях Стандартной
  * Общественной Лицензии GNU версии 3, либо по любой более поздней версии
  * лицензии (по вашему выбору). Полные положения лицензии GNU приведены в
  * <http://www.gnu.org/licenses/>.
@@ -35,7 +35,7 @@
 /**
  * SECTION: hyscan-gtk-profile-editor-offset
  * @Title HyScanGtkProfileEditorOffset
- * @Short_description
+ * @Short_description: Виджет редактирования профилей местоположений антенн
  *
  */
 

@@ -1,6 +1,6 @@
-/* hyscan-gtk-profile-db.h
+/* hyscan-gtk-profile-offset.c
  *
- * Copyright 2019 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
+ * Copyright 2019-2020 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
  * This file is part of HyScanGtk.
  *
@@ -81,7 +81,8 @@ hyscan_gtk_profile_offset_editor (HyScanGtkProfile *parent,
 
 /*
  * hyscan_gtk_profile_offset_new:
- * @sys: путь к системной папке профилей
+ * @folders: список папок с профилями
+ * @readonly: %TRUE для режима "только чтение и выбор"
  *
  * Returns: (transfer full) виджет профилей местоположения антенн.
  */

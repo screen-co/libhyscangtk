@@ -1,0 +1,181 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-04-21 19:54+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: hyscangtk/hyscan-gtk-connector.c:259
+msgid "Welcome to Connection Manager"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-connector.c:268
+msgid "Intro"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-connector.c:280
+msgid "Database"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-connector.c:292
+msgid "Hardware"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-connector.c:304
+msgid "Antennas positions"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-connector.c:315
+msgid "Confirm"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-connector.c:337
+msgid "Connection"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-connector.c:394
+msgid "Connecting to database..."
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-connector.c:426
+msgid "Checking sonars..."
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-connector.c:447 hyscangtk/hyscan-gtk-connector.c:472
+msgid "Connecting to sonars..."
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-connector.c:502
+msgid "Setting up offsets..."
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-connector.c:542
+msgid "Connection completed. HyScan is ready to launch. "
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-connector.c:544
+msgid "Connection failed. "
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-param-tree.c:253
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:334
+#: hyscangtk/hyscan-gtk-profile.c:508 tmp/hyscan-gtk-profile-editor-db.ui.h:1
+#: tmp/hyscan-gtk-profile-editor-hw.ui.h:2
+#: tmp/hyscan-gtk-profile-editor-offset.ui.h:2
+msgid "Name"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-param-tree.c:259
+msgid "Description"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile-editor-hw.c:218
+msgid "Device name"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile-editor-hw.c:377
+msgid "Nameless Device"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile-editor-hw.c:463
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:580
+#: hyscangtk/hyscan-gtk-profile.c:597
+msgid "New..."
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:71
+msgid "Sidescan sonar"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:76
+msgid "Sidescan with Echosounder"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:82
+msgid "High Frequency Sidescan sonar"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:225
+msgid "Sonar presets"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:247
+msgid "Sonars"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:253
+msgid "Other device..."
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:474
+msgid "New device"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:476
+msgid "_Cancel"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:477
+msgid "_OK"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:482
+msgid "Enter sensor name"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile.c:359
+msgid "Delete"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile.c:360
+msgid "Cancel"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile.c:361
+msgid "OK"
+msgstr ""
+
+#: hyscangtk/hyscan-gtk-profile.c:584
+msgid "Not selected"
+msgstr ""
+
+#: tmp/hyscan-gtk-profile-editor-hw.ui.h:1
+#: tmp/hyscan-gtk-profile-editor-offset.ui.h:1
+msgid "Select a device on the left or create a new one"
+msgstr ""
+
+#: tmp/hyscan-gtk-profile-editor-offset-page.ui.h:1
+msgid "Starboard"
+msgstr ""
+
+#: tmp/hyscan-gtk-profile-editor-offset-page.ui.h:2
+msgid "Forward"
+msgstr ""
+
+#: tmp/hyscan-gtk-profile-editor-offset-page.ui.h:3
+msgid "Vertical"
+msgstr ""
+
+#: tmp/hyscan-gtk-profile-editor-offset-page.ui.h:4
+msgid "Yaw"
+msgstr ""
+
+#: tmp/hyscan-gtk-profile-editor-offset-page.ui.h:5
+msgid "Pitch"
+msgstr ""
+
+#: tmp/hyscan-gtk-profile-editor-offset-page.ui.h:6
+msgid "Roll"
+msgstr ""

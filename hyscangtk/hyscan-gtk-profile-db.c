@@ -82,7 +82,8 @@ hyscan_gtk_profile_db_editor (HyScanGtkProfile *parent,
 }
 /*
  * hyscan_gtk_profile_db_new:
- * @sys: путь к системной папке профилей
+ * @folders: список папок с профилями
+ * @readonly: %TRUE для режима "только чтение и выбор"
  *
  * Returns: (transfer full) виджет профилей БД.
  */

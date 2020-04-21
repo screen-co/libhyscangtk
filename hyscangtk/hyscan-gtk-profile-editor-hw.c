@@ -1,4 +1,4 @@
-/* hyscan-gtk-profile-editor-hw.h
+/* hyscan-gtk-profile-editor-hw.c
  *
  * Copyright 2020 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
@@ -35,14 +35,14 @@
 /**
  * SECTION: hyscan-gtk-profile-editor-hw
  * @Title HyScanGtkProfileEditorHW
- * @Short_description
+ * @Short_description : Виджет редактирования профилей оборудования
  *
  */
 
 #include "hyscan-gtk-profile-editor-hw.h"
-#include <hyscan-gtk-profile-hw-device-editor.h>
+#include <hyscan-gtk-profile-editor-hw-device.h>
 #include <hyscan-cell-renderer-pixbuf.h>
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 
 #define WIDGET_RESOURCE_UI "/org/hyscan/gtk/hyscan-gtk-profile-editor-hw.ui"
 
@@ -72,15 +72,15 @@ enum
 
 struct _HyScanGtkProfileEditorHWPrivate
 {
-  HyScanProfileHW  *profile;
-  gchar           **drivers;
+  HyScanProfileHW  *profile;     /* Редактируемый профиль. */
+  gchar           **drivers;     /* Папки с драйверами. */
 
-  GtkEntry         *name;
-  GtkTreeView      *device_list;
-  GtkListStore     *store;
-  GtkStack         *stack;
+  GtkEntry         *name;        /* Поле ввода названия профиля. */
+  GtkTreeView      *device_list; /* Список устройств. */
+  GtkListStore     *store;       /* Модель для списка устр-в. */
+  GtkStack         *stack;       /* Стек с редакторами уст-в. */
 
-  GHashTable       *known; /* set {gchar *}  */
+  GHashTable       *known;       /* Имеющиеся устройства {gchar *}. */
 };
 
 static void           hyscan_gtk_profile_editor_hw_set_property       (GObject                  *object,
@@ -95,13 +95,13 @@ static gint           hyscan_gtk_profile_editor_hw_compare_func       (GtkTreeMo
                                                                        GtkTreeIter              *a,
                                                                        GtkTreeIter              *b,
                                                                        gpointer                  user_data);
-static void           hyscan_profile_editor_hw_ensure_page            (HyScanGtkProfileEditorHW *self,
+static void           hyscan_gtk_profile_editor_hw_ensure_page        (HyScanGtkProfileEditorHW *self,
                                                                        HyScanProfileHWDevice    *device);
 static void           hyscan_gtk_profile_editor_hw_clicked            (GtkCellRenderer          *cell_renderer,
                                                                        const gchar              *path,
                                                                        GdkEvent                 *event,
                                                                        gpointer                  user_data);
-static void           hyscan_gtk_profile_editor_hw_device_changed     (HyScanGtkProfileHWDeviceEditor *device,
+static void           hyscan_gtk_profile_editor_hw_device_changed     (HyScanGtkProfileEditorHWDevice *device,
                                                                        HyScanGtkProfileEditorHW       *self);
 static void           hyscan_gtk_profile_editor_hw_update_tree        (HyScanGtkProfileEditorHW *self);
 static void           hyscan_gtk_profile_editor_hw_name_changed       (HyScanGtkProfileEditorHW *self);
@@ -234,7 +234,7 @@ hyscan_gtk_profile_editor_hw_make_tree (HyScanGtkProfileEditorHW *self)
   gtk_tree_view_column_set_sizing (column, GTK_TREE_VIEW_COLUMN_FIXED);
   gtk_tree_view_append_column (view, column);
 
-  /* Колонка с иконкой правки. */
+  /* Колонка с иконкой создания/удаления. */
   renderer = hyscan_cell_renderer_pixbuf_new ();
   column = gtk_tree_view_column_new_with_attributes (NULL, renderer,
                                                      "icon-name",
@@ -271,6 +271,243 @@ hyscan_gtk_profile_editor_hw_make_model (HyScanGtkProfileEditorHW *self)
   gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (store), NAME_COL, GTK_SORT_DESCENDING);
 
   return store;
+}
+
+/* Функция проверяет наличие страницы и создает её при необходимости. */
+static void
+hyscan_gtk_profile_editor_hw_ensure_page (HyScanGtkProfileEditorHW *self,
+                                          HyScanProfileHWDevice    *device)
+{
+  HyScanGtkProfileEditorHWPrivate *priv = self->priv;
+  GtkWidget *page;
+  const gchar *id;
+
+  id = hyscan_profile_hw_device_get_group (device);
+  if (g_hash_table_contains (priv->known, id))
+    return;
+
+  page = hyscan_gtk_profile_editor_hw_device_new (device);
+  g_signal_connect (page, "changed",
+                    G_CALLBACK (hyscan_gtk_profile_editor_hw_device_changed),
+                    self);
+
+  gtk_stack_add_named (priv->stack, page, id);
+  g_hash_table_add (priv->known, g_strdup (id));
+  gtk_widget_show_all (page);
+}
+
+/* Функция удаления устройства. */
+static void
+hyscan_gtk_profile_editor_hw_remove (HyScanGtkProfileEditorHW *self,
+                                     HyScanProfileHWDevice    *device)
+{
+  HyScanGtkProfileEditorHWPrivate *priv = self->priv;
+  const gchar *id;
+
+  id = hyscan_profile_hw_device_get_group (device);
+
+  hyscan_profile_hw_remove (priv->profile, id);
+  gtk_widget_destroy (gtk_stack_get_child_by_name (priv->stack, id));
+  g_hash_table_remove (priv->known, id);
+}
+
+/* Обработчик нажатия кнопок удаления/добавления устройств. */
+static void
+hyscan_gtk_profile_editor_hw_clicked (GtkCellRenderer *cell_renderer,
+                                      const gchar     *path,
+                                      GdkEvent        *event,
+                                      gpointer         user_data)
+{
+  HyScanGtkProfileEditorHW *self = user_data;
+  HyScanGtkProfileEditorHWPrivate *priv = self->priv;
+  GtkTreeModel *model = GTK_TREE_MODEL (priv->store);
+  HyScanProfileHWDevice *device;
+  GtkTreeIter iter;
+  gint action;
+
+  if (!gtk_tree_model_get_iter_from_string (model, &iter, path))
+    return;
+
+  gtk_tree_model_get (model, &iter,
+                      DEVICE_COL, &device,
+                      ACTION_TYPE_COL, &action, -1);
+
+  /* Если это кнопка добавления нового устройства... */
+  if (action == ACTION_ADD)
+    {
+      device = hyscan_profile_hw_device_new ();
+      hyscan_profile_hw_device_set_paths (device, priv->drivers);
+      hyscan_profile_hw_add (priv->profile, device);
+    }
+  else if (action == ACTION_DELETE)
+    {
+      hyscan_gtk_profile_editor_hw_remove (self, device);
+    }
+
+  g_clear_object (&device);
+  hyscan_gtk_profile_editor_hw_update_tree (self);
+}
+
+/* Функция обновляет строку с устройством в дереве. */
+static void
+hyscan_gtk_profile_editor_hw_update_device (GtkListStore          *store,
+                                            GtkTreeIter           *iter,
+                                            HyScanProfileHWDevice *device)
+{
+  gint style;
+  const gchar *name, *uri, *icon;
+  const gchar *title;
+
+  name = hyscan_profile_hw_device_get_name (device);
+  uri = hyscan_profile_hw_device_get_uri (device);
+
+  if (NULL != name)
+    {
+      style = PANGO_STYLE_NORMAL;
+      title = _(name);
+    }
+  else if (NULL != uri)
+    {
+      style = PANGO_STYLE_ITALIC;
+      title = _(uri);
+    }
+  else
+    {
+      style = PANGO_STYLE_ITALIC;
+      title = _("Nameless Device");
+    }
+
+  if (!hyscan_profile_hw_device_sanity (device))
+    icon = "dialog-warning-symbolic";
+  else if (hyscan_profile_hw_device_check (device))
+    icon = "network-transmit-receive-symbolic";
+  else
+    icon = "network-error-symbolic";
+
+  gtk_list_store_set (store, iter,
+                      DEVICE_COL, device,
+                      NAME_COL, title,
+                      STYLE_COL, style,
+                      STATUS_ICON_COL, icon,
+                      ACTION_TYPE_COL, ACTION_DELETE,
+                      ACTION_ICON_COL, "list-remove-symbolic",
+                      -1);
+}
+
+/* Обработчик сигнала "changed" от редактора уст-ва. */
+static void
+hyscan_gtk_profile_editor_hw_device_changed (HyScanGtkProfileEditorHWDevice *page,
+                                             HyScanGtkProfileEditorHW       *self)
+{
+  GtkTreeModel *model = GTK_TREE_MODEL (self->priv->store);
+  GtkTreeIter iter;
+  HyScanProfileHWDevice *device = hyscan_gtk_profile_editor_hw_device_get_device (page);
+  HyScanProfileHWDevice *device_iter;
+
+  if (!gtk_tree_model_get_iter_first (model, &iter))
+    return;
+
+  do
+    {
+      gtk_tree_model_get (model, &iter, DEVICE_COL, &device_iter, -1);
+
+      if (device_iter != device)
+        {
+          g_clear_object (&device_iter);
+          continue;
+        }
+
+      hyscan_gtk_profile_editor_hw_update_device (GTK_LIST_STORE (model),
+                                                  &iter, device);
+      g_clear_object (&device);
+      break;
+    }
+  while (gtk_tree_model_iter_next (model, &iter));
+
+  g_clear_object (&device);
+  hyscan_gtk_profile_editor_check_sanity (HYSCAN_GTK_PROFILE_EDITOR (self));
+}
+
+/* Функция обновляет список устройств. */
+static void
+hyscan_gtk_profile_editor_hw_update_tree (HyScanGtkProfileEditorHW *self)
+{
+  GtkListStore *store = GTK_LIST_STORE (self->priv->store);
+  GList *devices, *link;
+  GtkTreeIter ls_iter;
+
+  /* Выглядит как грязный хак, но похоже это рабочий способ избежать
+   * ворнинга при удалении строки. */
+  {
+    GtkTreeSelection *selection = gtk_tree_view_get_selection (self->priv->device_list);
+    gtk_tree_selection_set_mode  (selection, GTK_SELECTION_NONE);
+    gtk_list_store_clear (store);
+    gtk_tree_selection_set_mode  (selection, GTK_SELECTION_SINGLE);
+  }
+
+  devices = hyscan_profile_hw_list (self->priv->profile);
+
+  for (link = devices; link != NULL; link = link->next)
+    {
+      HyScanProfileHWDevice *device = (HyScanProfileHWDevice *)link->data;
+
+      hyscan_gtk_profile_editor_hw_ensure_page (self, device);
+      gtk_list_store_append (store, &ls_iter);
+      hyscan_gtk_profile_editor_hw_update_device (store, &ls_iter, device);
+    }
+
+  /* Специальная строка: "новый профиль". */
+  gtk_list_store_append (store, &ls_iter);
+  gtk_list_store_set (store, &ls_iter,
+                      DEVICE_COL, NULL,
+                      NAME_COL, _("New..."),
+                      STYLE_COL, PANGO_STYLE_ITALIC,
+                      STATUS_ICON_COL, "blank",
+                      ACTION_TYPE_COL, ACTION_ADD,
+                      ACTION_ICON_COL, "list-add-symbolic",
+                      -1);
+
+  hyscan_gtk_profile_editor_check_sanity (HYSCAN_GTK_PROFILE_EDITOR (self));
+}
+
+/* Обработчик изменения названия профиля. */
+static void
+hyscan_gtk_profile_editor_hw_name_changed (HyScanGtkProfileEditorHW *self)
+{
+  HyScanGtkProfileEditorHWPrivate *priv = self->priv;
+  const gchar *name;
+
+  name = gtk_entry_get_text (priv->name);
+  hyscan_profile_set_name (HYSCAN_PROFILE (priv->profile), name);
+
+  hyscan_gtk_profile_editor_check_sanity (HYSCAN_GTK_PROFILE_EDITOR (self));
+}
+
+/* Выбор устройства. */
+static void
+hyscan_gtk_profile_editor_hw_selected (GtkTreeSelection         *selection,
+                                       HyScanGtkProfileEditorHW *self)
+{
+  HyScanProfileHWDevice *device;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  gint action;
+
+  if (!gtk_tree_selection_get_selected (selection, &model, &iter))
+    return;
+
+  gtk_tree_model_get (model, &iter, ACTION_TYPE_COL, &action, DEVICE_COL, &device, -1);
+  if (action == ACTION_ADD)
+    {
+      gtk_tree_selection_unselect_iter (selection, &iter);
+    }
+  else
+    {
+      const gchar *id = hyscan_profile_hw_device_get_group (device);
+      gtk_stack_set_visible_child_name (self->priv->stack, id);
+    }
+
+  g_clear_object (&device);
 }
 
 /* Функция сортировки. Она довольно хитрая, чтобы иметь возможность
@@ -315,214 +552,13 @@ hyscan_gtk_profile_editor_hw_compare_func (GtkTreeModel *model,
   return result;
 }
 
-static void
-hyscan_profile_editor_hw_ensure_page (HyScanGtkProfileEditorHW *self,
-                                      HyScanProfileHWDevice    *device)
-{
-  HyScanGtkProfileEditorHWPrivate *priv = self->priv;
-  GtkWidget *page;
-  const gchar *id;
-
-  id = hyscan_profile_hw_device_get_group (device);
-  if (g_hash_table_contains (priv->known, id))
-    return;
-
-  page = hyscan_gtk_profile_hw_device_editor_new (device);
-  g_signal_connect (page, "changed",
-                    G_CALLBACK (hyscan_gtk_profile_editor_hw_device_changed),
-                    self);
-
-  gtk_stack_add_named (priv->stack, page, id);
-  g_hash_table_add (priv->known, g_strdup (id));
-  gtk_widget_show_all (page);
-}
-
-static void
-hyscan_gtk_profile_editor_hw_remove (HyScanGtkProfileEditorHW *self,
-                                     HyScanProfileHWDevice    *device)
-{
-  HyScanGtkProfileEditorHWPrivate *priv = self->priv;
-  const gchar *id;
-
-  id = hyscan_profile_hw_device_get_group (device);
-
-  hyscan_profile_hw_remove (priv->profile, id);
-  gtk_widget_destroy (gtk_stack_get_child_by_name (priv->stack, id));
-  g_hash_table_remove (priv->known, id);
-}
-
-static void
-hyscan_gtk_profile_editor_hw_clicked (GtkCellRenderer *cell_renderer,
-                                      const gchar     *path,
-                                      GdkEvent        *event,
-                                      gpointer         user_data)
-{
-  HyScanGtkProfileEditorHW *self = user_data;
-  HyScanGtkProfileEditorHWPrivate *priv = self->priv;
-  GtkTreeModel *model = GTK_TREE_MODEL (priv->store);
-  HyScanProfileHWDevice *device;
-  GtkTreeIter iter;
-  gint action;
-
-  if (!gtk_tree_model_get_iter_from_string (model, &iter, path))
-    return;
-
-  gtk_tree_model_get (model, &iter,
-                      DEVICE_COL, &device,
-                      ACTION_TYPE_COL, &action, -1);
-
-  /* Если это кнопка добавления нового устройства... */
-  if (action == ACTION_ADD)
-    {
-      device = hyscan_profile_hw_device_new ();
-      hyscan_profile_hw_device_set_paths (device, priv->drivers);
-      hyscan_profile_hw_add (priv->profile, device);
-    }
-  else if (action == ACTION_DELETE)
-    {
-      hyscan_gtk_profile_editor_hw_remove (self, device);
-    }
-
-  g_clear_object (&device);
-  hyscan_gtk_profile_editor_hw_update_tree (self);
-
-
-}
-
-static void
-hyscan_gtk_profile_editor_hw_update_device (GtkListStore          *store,
-                                            GtkTreeIter           *iter,
-                                            HyScanProfileHWDevice *device)
-{
-  gint style;
-  const gchar *name, *uri, *icon;
-  gchar *title;
-
-  name = hyscan_profile_hw_device_get_name (device);
-  uri = hyscan_profile_hw_device_get_uri (device);
-
-  if (NULL != name)
-    {
-      style = PANGO_STYLE_NORMAL;
-      title = g_strdup (name);
-    }
-  else if (NULL != uri)
-    {
-      style = PANGO_STYLE_ITALIC;
-      title = g_strdup (uri);
-    }
-  else
-    {
-      style = PANGO_STYLE_ITALIC;
-      title = g_strdup_printf ("Nameless Device");
-    }
-
-  if (!hyscan_profile_hw_device_sanity (device))
-    icon = "dialog-warning-symbolic";
-  else if (hyscan_profile_hw_device_check (device))
-    icon = "network-transmit-receive-symbolic";
-  else
-    icon = "network-error-symbolic";
-
-  gtk_list_store_set (store, iter,
-                      DEVICE_COL, device,
-                      NAME_COL, title,
-                      STYLE_COL, style,
-                      STATUS_ICON_COL, icon,
-                      ACTION_TYPE_COL, ACTION_DELETE,
-                      ACTION_ICON_COL, "list-remove-symbolic",
-                      -1);
-
-  g_free (title);
-}
-
-static void
-hyscan_gtk_profile_editor_hw_device_changed (HyScanGtkProfileHWDeviceEditor *page,
-                                             HyScanGtkProfileEditorHW       *self)
-{
-  GtkTreeModel *model = GTK_TREE_MODEL (self->priv->store);
-  GtkTreeIter iter;
-  HyScanProfileHWDevice *device = hyscan_gtk_profile_hw_device_editor_get_device (page);
-
-  if (!gtk_tree_model_get_iter_first (model, &iter))
-    return;
-
-  do
-    {
-      HyScanProfileHWDevice *this_device;
-
-      gtk_tree_model_get (model, &iter, DEVICE_COL, &this_device, -1);
-
-      if (this_device != device)
-        {
-          g_clear_object (&this_device);
-          continue;
-        }
-
-      hyscan_gtk_profile_editor_hw_update_device (GTK_LIST_STORE (model),
-                                                          &iter, device);
-      g_clear_object (&device);
-      break;
-    }
-  while (gtk_tree_model_iter_next (model, &iter));
-
-  g_clear_object (&device);
-  hyscan_gtk_profile_editor_check_sanity (HYSCAN_GTK_PROFILE_EDITOR (self));
-}
-
-static void
-hyscan_gtk_profile_editor_hw_update_tree (HyScanGtkProfileEditorHW *self)
-{
-  GtkListStore *store = GTK_LIST_STORE (self->priv->store);
-  GList *devices, *link;
-  GtkTreeIter ls_iter;
-
-  /* Выглядит как грязный хак, но похоже это рабочий способ избежать
-   * ворнинга при удалении строки. */
-  {
-    GtkTreeSelection *selection = gtk_tree_view_get_selection (self->priv->device_list);
-    gtk_tree_selection_set_mode  (selection, GTK_SELECTION_NONE);
-    gtk_list_store_clear (store);
-    gtk_tree_selection_set_mode  (selection, GTK_SELECTION_SINGLE);
-  }
-
-  devices = hyscan_profile_hw_list (self->priv->profile);
-
-  for (link = devices; link != NULL; link = link->next)
-    {
-      HyScanProfileHWDevice *device = (HyScanProfileHWDevice *)link->data;
-
-      hyscan_profile_editor_hw_ensure_page (self, device);
-      gtk_list_store_append (store, &ls_iter);
-      hyscan_gtk_profile_editor_hw_update_device (store, &ls_iter, device);
-    }
-
-  /* Специальная строка: "новый профиль". */
-  gtk_list_store_append (store, &ls_iter);
-  gtk_list_store_set (store, &ls_iter,
-                      DEVICE_COL, NULL,
-                      NAME_COL, _("New..."),
-                      STYLE_COL, PANGO_STYLE_ITALIC,
-                      STATUS_ICON_COL, "blank",
-                      ACTION_TYPE_COL, ACTION_ADD,
-                      ACTION_ICON_COL, "list-add-symbolic",
-                      -1);
-
-  hyscan_gtk_profile_editor_check_sanity (HYSCAN_GTK_PROFILE_EDITOR (self));
-}
-
-static void
-hyscan_gtk_profile_editor_hw_name_changed (HyScanGtkProfileEditorHW *self)
-{
-  HyScanGtkProfileEditorHWPrivate *priv = self->priv;
-  const gchar *name;
-
-  name = gtk_entry_get_text (priv->name);
-  hyscan_profile_set_name (HYSCAN_PROFILE (priv->profile), name);
-
-  hyscan_gtk_profile_editor_check_sanity (HYSCAN_GTK_PROFILE_EDITOR (self));
-}
-
+/*
+ * hyscan_gtk_profile_editor_hw_new:
+ * @profile: редактируемый профиль
+ * @drivers: список папок с драйверами устройств
+ *
+ * Returns: (transfer full) виджет профилей БД.
+ */
 GtkWidget *
 hyscan_gtk_profile_editor_hw_new (HyScanProfile *profile,
                                   gchar        **drivers)
@@ -531,30 +567,4 @@ hyscan_gtk_profile_editor_hw_new (HyScanProfile *profile,
                        "profile", profile,
                        "drivers", drivers,
                        NULL);
-}
-
-static void
-hyscan_gtk_profile_editor_hw_selected (GtkTreeSelection         *selection,
-                                       HyScanGtkProfileEditorHW *self)
-{
-  HyScanProfileHWDevice *device;
-  GtkTreeModel *model;
-  GtkTreeIter iter;
-  gint action;
-
-  if (!gtk_tree_selection_get_selected (selection, &model, &iter))
-    return;
-
-  gtk_tree_model_get (model, &iter, ACTION_TYPE_COL, &action, DEVICE_COL, &device, -1);
-  if (action == ACTION_ADD)
-    {
-      gtk_tree_selection_unselect_iter (selection, &iter);
-    }
-  else
-    {
-      const gchar *id = hyscan_profile_hw_device_get_group (device);
-      gtk_stack_set_visible_child_name (self->priv->stack, id);
-    }
-
-  g_clear_object (&device);
 }

@@ -1,0 +1,182 @@
+# Russian translations for PACKAGE package.
+# Copyright (C) 2020 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Alexander <m1n7@yandex.ru>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-04-21 19:54+0300\n"
+"PO-Revision-Date: 2020-04-21 19:13+0300\n"
+"Last-Translator: Alexander <m1n7@yandex.ru>\n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: hyscangtk/hyscan-gtk-connector.c:259
+msgid "Welcome to Connection Manager"
+msgstr "Добро пожаловать в менеджер подключений"
+
+#: hyscangtk/hyscan-gtk-connector.c:268
+msgid "Intro"
+msgstr "Начало"
+
+#: hyscangtk/hyscan-gtk-connector.c:280
+msgid "Database"
+msgstr "База данных"
+
+#: hyscangtk/hyscan-gtk-connector.c:292
+msgid "Hardware"
+msgstr "Оборудование"
+
+#: hyscangtk/hyscan-gtk-connector.c:304
+msgid "Antennas positions"
+msgstr "Местоположение антенн"
+
+#: hyscangtk/hyscan-gtk-connector.c:315
+msgid "Confirm"
+msgstr "Подтверждение"
+
+#: hyscangtk/hyscan-gtk-connector.c:337
+msgid "Connection"
+msgstr "Подключение"
+
+#: hyscangtk/hyscan-gtk-connector.c:394
+msgid "Connecting to database..."
+msgstr "Подключение к базе данных..."
+
+#: hyscangtk/hyscan-gtk-connector.c:426
+msgid "Checking sonars..."
+msgstr "Проверка локаторов..."
+
+#: hyscangtk/hyscan-gtk-connector.c:447 hyscangtk/hyscan-gtk-connector.c:472
+msgid "Connecting to sonars..."
+msgstr "Подключение к локаторам..."
+
+#: hyscangtk/hyscan-gtk-connector.c:502
+msgid "Setting up offsets..."
+msgstr "Настройка местоположений антенн..."
+
+#: hyscangtk/hyscan-gtk-connector.c:542
+msgid "Connection completed. HyScan is ready to launch. "
+msgstr "Подключение завершено. HyScan готов к запуску. "
+
+#: hyscangtk/hyscan-gtk-connector.c:544
+msgid "Connection failed. "
+msgstr "Не удалось подключиться."
+
+#: hyscangtk/hyscan-gtk-param-tree.c:253
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:334
+#: hyscangtk/hyscan-gtk-profile.c:508 tmp/hyscan-gtk-profile-editor-db.ui.h:1
+#: tmp/hyscan-gtk-profile-editor-hw.ui.h:2
+#: tmp/hyscan-gtk-profile-editor-offset.ui.h:2
+msgid "Name"
+msgstr "Название"
+
+#: hyscangtk/hyscan-gtk-param-tree.c:259
+msgid "Description"
+msgstr "Описание"
+
+#: hyscangtk/hyscan-gtk-profile-editor-hw.c:218
+msgid "Device name"
+msgstr "Название устройства"
+
+#: hyscangtk/hyscan-gtk-profile-editor-hw.c:377
+msgid "Nameless Device"
+msgstr "Безымянное устройство"
+
+#: hyscangtk/hyscan-gtk-profile-editor-hw.c:463
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:580
+#: hyscangtk/hyscan-gtk-profile.c:597
+msgid "New..."
+msgstr "Создать..."
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:71
+msgid "Sidescan sonar"
+msgstr "ГБО"
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:76
+msgid "Sidescan with Echosounder"
+msgstr "ГБО+Э"
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:82
+msgid "High Frequency Sidescan sonar"
+msgstr "ВЧ-ГБО"
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:225
+msgid "Sonar presets"
+msgstr "Комплексные локаторы"
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:247
+msgid "Sonars"
+msgstr "Акустические датчики"
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:253
+msgid "Other device..."
+msgstr "Другое устройство..."
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:474
+msgid "New device"
+msgstr "Новое устройство"
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:476
+msgid "_Cancel"
+msgstr "Отмена"
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:477
+msgid "_OK"
+msgstr "OK"
+
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:482
+msgid "Enter sensor name"
+msgstr "Введите название датчика"
+
+#: hyscangtk/hyscan-gtk-profile.c:359
+msgid "Delete"
+msgstr "Удалить"
+
+#: hyscangtk/hyscan-gtk-profile.c:360
+msgid "Cancel"
+msgstr "Отмена"
+
+#: hyscangtk/hyscan-gtk-profile.c:361
+msgid "OK"
+msgstr "OK"
+
+#: hyscangtk/hyscan-gtk-profile.c:584
+msgid "Not selected"
+msgstr "Не выбрано"
+
+#: tmp/hyscan-gtk-profile-editor-hw.ui.h:1
+#: tmp/hyscan-gtk-profile-editor-offset.ui.h:1
+msgid "Select a device on the left or create a new one"
+msgstr "Выберите устройство в списке слева или создайте новое"
+
+#: tmp/hyscan-gtk-profile-editor-offset-page.ui.h:1
+msgid "Starboard"
+msgstr "Правый борт"
+
+#: tmp/hyscan-gtk-profile-editor-offset-page.ui.h:2
+msgid "Forward"
+msgstr "На нос"
+
+#: tmp/hyscan-gtk-profile-editor-offset-page.ui.h:3
+msgid "Vertical"
+msgstr "Вертикально"
+
+#: tmp/hyscan-gtk-profile-editor-offset-page.ui.h:4
+msgid "Yaw"
+msgstr "Рысканье"
+
+#: tmp/hyscan-gtk-profile-editor-offset-page.ui.h:5
+msgid "Pitch"
+msgstr "Тангаж"
+
+#: tmp/hyscan-gtk-profile-editor-offset-page.ui.h:6
+msgid "Roll"
+msgstr "Крен"
