@@ -38,7 +38,6 @@
 #include "hyscan-gtk-profile.h"
 #include <hyscan-profile-hw.h>
 
-
 G_BEGIN_DECLS
 
 #define HYSCAN_TYPE_GTK_PROFILE_HW             (hyscan_gtk_profile_hw_get_type ())

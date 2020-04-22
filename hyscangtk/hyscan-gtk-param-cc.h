@@ -62,7 +62,6 @@ struct _HyScanGtkParamCCClass
   HyScanGtkParamClass parent_class;
 };
 
-
 HYSCAN_API
 GType                  hyscan_gtk_param_cc_get_type         (void);
 

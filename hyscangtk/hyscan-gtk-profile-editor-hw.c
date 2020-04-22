@@ -137,7 +137,6 @@ hyscan_gtk_profile_editor_hw_init (HyScanGtkProfileEditorHW *self)
 
   self->priv = hyscan_gtk_profile_editor_hw_get_instance_private (self);
   gtk_widget_init_template (GTK_WIDGET (self));
-
   priv = self->priv;
 
   priv->known = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
@@ -335,8 +334,7 @@ hyscan_gtk_profile_editor_hw_clicked (GtkCellRenderer *cell_renderer,
   /* Если это кнопка добавления нового устройства... */
   if (action == ACTION_ADD)
     {
-      device = hyscan_profile_hw_device_new ();
-      hyscan_profile_hw_device_set_paths (device, priv->drivers);
+      device = hyscan_profile_hw_device_new (priv->drivers);
       hyscan_profile_hw_add (priv->profile, device);
     }
   else if (action == ACTION_DELETE)

@@ -110,7 +110,6 @@ hyscan_cell_renderer_pixbuf_activate  (GtkCellRenderer      *cell,
   return TRUE;
 }
 
-
 GtkCellRenderer *
 hyscan_cell_renderer_pixbuf_new (void)
 {

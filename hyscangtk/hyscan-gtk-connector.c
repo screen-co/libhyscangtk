@@ -308,7 +308,7 @@ hyscan_gtk_connector_make_offset_page (HyScanGtkConnector *self)
 static void
 hyscan_gtk_connector_make_confirm_page (HyScanGtkConnector *self)
 {
-  GtkWidget *page = gtk_label_new ("Review your selections");
+  GtkWidget *page = gtk_label_new (_("Review your selections"));
 
   gtk_assistant_append_page (GTK_ASSISTANT (self), page);
   gtk_assistant_set_page_type (GTK_ASSISTANT (self), page, GTK_ASSISTANT_PAGE_CONFIRM);
@@ -351,7 +351,6 @@ hyscan_gtk_connector_selected_db (HyScanGtkProfile   *page,
       self->priv->db_profile = g_object_ref (profile);
       self->priv->db_profile_file = g_strdup (hyscan_profile_get_file (profile));
     }
-
 
   gtk_assistant_set_page_complete (GTK_ASSISTANT (self), GTK_WIDGET (page), profile != NULL);
 }
@@ -477,7 +476,6 @@ hyscan_gtk_connector_done_hw (HyScanGtkConnector *self,
                        priv->control, NULL,
                        (HyScanAsyncResult)hyscan_gtk_connector_done_bind, self);
 }
-
 
 static void
 hyscan_gtk_connector_done_bind (HyScanGtkConnector *self,

@@ -3,6 +3,7 @@
     <gresource prefix="/org/hyscan/gtk">
         <file compressed="true">hyscan-gtk-profile-editor-db.ui</file>
         <file compressed="true">hyscan-gtk-profile-editor-hw.ui</file>
+        <file compressed="true">hyscan-gtk-profile-editor-hw-device.ui</file>
         <file compressed="true">hyscan-gtk-profile-editor-offset.ui</file>
         <file compressed="true">hyscan-gtk-profile-editor-offset-page.ui</file>
     </gresource>

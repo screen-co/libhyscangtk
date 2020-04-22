@@ -8,7 +8,6 @@ add_executable (gtk-datetime-test gtk-datetime-test.c)
 add_executable (gtk-spin-button-test gtk-spin-button-test.c)
 add_executable (gtk-connector-test gtk-connector-test.c)
 
-
 target_link_libraries (gtk-param-test ${TEST_LIBRARIES})
 target_link_libraries (gtk-spin-button-test ${TEST_LIBRARIES})
 target_link_libraries (gtk-datetime-test ${TEST_LIBRARIES})

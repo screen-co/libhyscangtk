@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-21 19:54+0300\n"
+"POT-Creation-Date: 2020-04-22 14:37+0300\n"
 "PO-Revision-Date: 2020-04-21 19:13+0300\n"
 "Last-Translator: Alexander <m1n7@yandex.ru>\n"
 "Language-Team: Russian\n"
@@ -37,6 +37,10 @@ msgstr "Оборудование"
 #: hyscangtk/hyscan-gtk-connector.c:304
 msgid "Antennas positions"
 msgstr "Местоположение антенн"
+
+#: hyscangtk/hyscan-gtk-connector.c:311
+msgid "Review your selections"
+msgstr "Проверьте параметры подключения"
 
 #: hyscangtk/hyscan-gtk-connector.c:315
 msgid "Confirm"
@@ -71,10 +75,8 @@ msgid "Connection failed. "
 msgstr "Не удалось подключиться."
 
 #: hyscangtk/hyscan-gtk-param-tree.c:253
-#: hyscangtk/hyscan-gtk-profile-editor-offset.c:334
-#: hyscangtk/hyscan-gtk-profile.c:508 tmp/hyscan-gtk-profile-editor-db.ui.h:1
-#: tmp/hyscan-gtk-profile-editor-hw.ui.h:2
-#: tmp/hyscan-gtk-profile-editor-offset.ui.h:2
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:333
+#: hyscangtk/hyscan-gtk-profile.c:508
 msgid "Name"
 msgstr "Название"
 
@@ -82,16 +84,17 @@ msgstr "Название"
 msgid "Description"
 msgstr "Описание"
 
-#: hyscangtk/hyscan-gtk-profile-editor-hw.c:218
+#: hyscangtk/hyscan-gtk-profile-editor-hw.c:217
+#: tmp/hyscan-gtk-profile-editor-hw-device.ui.h:1
 msgid "Device name"
 msgstr "Название устройства"
 
-#: hyscangtk/hyscan-gtk-profile-editor-hw.c:377
+#: hyscangtk/hyscan-gtk-profile-editor-hw.c:375
 msgid "Nameless Device"
 msgstr "Безымянное устройство"
 
-#: hyscangtk/hyscan-gtk-profile-editor-hw.c:463
-#: hyscangtk/hyscan-gtk-profile-editor-offset.c:580
+#: hyscangtk/hyscan-gtk-profile-editor-hw.c:461
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:579
 #: hyscangtk/hyscan-gtk-profile.c:597
 msgid "New..."
 msgstr "Создать..."
@@ -108,31 +111,31 @@ msgstr "ГБО+Э"
 msgid "High Frequency Sidescan sonar"
 msgstr "ВЧ-ГБО"
 
-#: hyscangtk/hyscan-gtk-profile-editor-offset.c:225
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:224
 msgid "Sonar presets"
 msgstr "Комплексные локаторы"
 
-#: hyscangtk/hyscan-gtk-profile-editor-offset.c:247
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:246
 msgid "Sonars"
 msgstr "Акустические датчики"
 
-#: hyscangtk/hyscan-gtk-profile-editor-offset.c:253
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:252
 msgid "Other device..."
 msgstr "Другое устройство..."
 
-#: hyscangtk/hyscan-gtk-profile-editor-offset.c:474
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:473
 msgid "New device"
 msgstr "Новое устройство"
 
-#: hyscangtk/hyscan-gtk-profile-editor-offset.c:476
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:475
 msgid "_Cancel"
 msgstr "Отмена"
 
-#: hyscangtk/hyscan-gtk-profile-editor-offset.c:477
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:476
 msgid "_OK"
 msgstr "OK"
 
-#: hyscangtk/hyscan-gtk-profile-editor-offset.c:482
+#: hyscangtk/hyscan-gtk-profile-editor-offset.c:481
 msgid "Enter sensor name"
 msgstr "Введите название датчика"
 
@@ -151,6 +154,24 @@ msgstr "OK"
 #: hyscangtk/hyscan-gtk-profile.c:584
 msgid "Not selected"
 msgstr "Не выбрано"
+
+#: tmp/hyscan-gtk-profile-editor-db.ui.h:1
+#: tmp/hyscan-gtk-profile-editor-hw.ui.h:2
+#: tmp/hyscan-gtk-profile-editor-offset.ui.h:2
+msgid "Profile name"
+msgstr "Название профиля"
+
+#: tmp/hyscan-gtk-profile-editor-hw-device.ui.h:2
+msgid "Driver"
+msgstr "Драйвер"
+
+#: tmp/hyscan-gtk-profile-editor-hw-device.ui.h:3
+msgid "URI"
+msgstr "URI"
+
+#: tmp/hyscan-gtk-profile-editor-hw-device.ui.h:4
+msgid "Connection parameters"
+msgstr "Параметры подключения"
 
 #: tmp/hyscan-gtk-profile-editor-hw.ui.h:1
 #: tmp/hyscan-gtk-profile-editor-offset.ui.h:1

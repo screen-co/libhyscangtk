@@ -66,6 +66,7 @@
 #include <glib/gi18n-lib.h>
 #include <hyscan-cell-renderer-pixbuf.h>
 #include <hyscan-config.h>
+#include <hyscan-types.h>
 #include <glib/gstdio.h>
 
 enum
@@ -156,7 +157,6 @@ static void    hyscan_gtk_profile_restyle                  (GtkDialog           
                                                             const gchar           *style_class);
 static void    hyscan_gtk_profile_sanity_check             (HyScanGtkProfileEditor *editor,
                                                             GtkDialog              *dialog);
-
 
 static guint   hyscan_gtk_profile_signals[SIGNAL_LAST] = {0};
 
@@ -415,7 +415,7 @@ hyscan_gtk_profile_create (HyScanGtkProfile *self)
   do
     {
       g_clear_pointer (&filename, g_free);
-      hyscan_profile_make_id (random_str, G_N_ELEMENTS (random_str));
+      hyscan_rand_id (random_str, G_N_ELEMENTS (random_str));
       filename = g_build_filename (folder, random_str, NULL);
     }
   while (g_hash_table_contains (files, filename));

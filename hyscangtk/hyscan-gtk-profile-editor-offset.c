@@ -171,10 +171,9 @@ hyscan_gtk_profile_editor_offset_init (HyScanGtkProfileEditorOffset *self)
 {
   HyScanGtkProfileEditorOffsetPrivate * priv;
 
-  priv = hyscan_gtk_profile_editor_offset_get_instance_private (self);
-  self->priv = priv;
-
+  self->priv = hyscan_gtk_profile_editor_offset_get_instance_private (self);
   gtk_widget_init_template (GTK_WIDGET (self));
+  priv = self->priv;
 
   priv->store = hyscan_gtk_profile_editor_offset_make_model (self);
   hyscan_gtk_profile_editor_offset_make_tree (self);
@@ -291,7 +290,6 @@ hyscan_gtk_profile_editor_offset_object_finalize (GObject *object)
 
   G_OBJECT_CLASS (hyscan_gtk_profile_editor_offset_parent_class)->finalize (object);
 }
-
 
 GtkWidget *
 hyscan_gtk_profile_editor_offset_new (HyScanProfile *profile)

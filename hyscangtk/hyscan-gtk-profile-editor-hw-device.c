@@ -44,6 +44,8 @@
 #include <hyscan-data-box.h>
 #include <hyscan-gtk-param-tree.h>
 
+#define WIDGET_RESOURCE_UI "/org/hyscan/gtk/hyscan-gtk-profile-editor-hw-device.ui"
+
 enum
 {
   SIGNAL_CHANGED,
@@ -59,9 +61,12 @@ enum
 struct _HyScanGtkProfileEditorHWDevicePrivate
 {
   HyScanProfileHWDevice *device;
+
   GtkEntry              *name;
   GtkEntry              *uri;
   GtkComboBoxText       *driver;
+  GtkExpander           *expander;
+
   HyScanGtkParam        *param;
 };
 
@@ -84,16 +89,22 @@ static void
 hyscan_gtk_profile_editor_hw_device_class_init (HyScanGtkProfileEditorHWDeviceClass *klass)
 {
   GObjectClass *oclass = G_OBJECT_CLASS (klass);
+  GtkWidgetClass *wclass = GTK_WIDGET_CLASS (klass);
 
   oclass->set_property = hyscan_gtk_profile_editor_hw_device_set_property;
   oclass->constructed = hyscan_gtk_profile_editor_hw_device_object_constructed;
   oclass->finalize = hyscan_gtk_profile_editor_hw_device_object_finalize;
 
+  gtk_widget_class_set_template_from_resource (wclass, WIDGET_RESOURCE_UI);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHWDevice, name);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHWDevice, uri);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHWDevice, driver);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHWDevice, expander);
+
   g_object_class_install_property (oclass, PROP_PROFILE,
     g_param_spec_object ("device", "Device", "HW Device Profile",
                          HYSCAN_TYPE_PROFILE_HW_DEVICE,
                          G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
-
 
   hyscan_gtk_profile_editor_hw_device_signals[SIGNAL_CHANGED] =
     g_signal_new ("changed", HYSCAN_TYPE_GTK_PROFILE_EDITOR_HW_DEVICE,
@@ -106,51 +117,15 @@ static void
 hyscan_gtk_profile_editor_hw_device_init (HyScanGtkProfileEditorHWDevice *self)
 {
   HyScanGtkProfileEditorHWDevicePrivate *priv;
-  GtkWidget *name_label, *uri_label, *driver_label;
-  GtkGrid *grid = GTK_GRID (self);
-  gint row = 0;
 
-  priv = hyscan_gtk_profile_editor_hw_device_get_instance_private (self);
-  self->priv = priv;
+  self->priv = hyscan_gtk_profile_editor_hw_device_get_instance_private (self);
+  gtk_widget_init_template (GTK_WIDGET (self));
+  priv = self->priv;
 
-  /* Создаю виджеты. */
-  name_label = gtk_label_new ("Name");
-  driver_label = gtk_label_new ("Driver");
-  uri_label = gtk_label_new ("URI");
-
-  priv->name = GTK_ENTRY (gtk_entry_new ());
-  priv->uri = GTK_ENTRY (gtk_entry_new ());
-  priv->driver = GTK_COMBO_BOX_TEXT (gtk_combo_box_text_new ());
   priv->param = HYSCAN_GTK_PARAM (hyscan_gtk_param_tree_new (NULL, NULL, FALSE));
   hyscan_gtk_param_set_immidiate (HYSCAN_GTK_PARAM (priv->param), TRUE);
 
-  /* Left, Top, Width, Height. */
-  gtk_grid_attach (grid, GTK_WIDGET (name_label), 0, row, 1, 1);
-  gtk_grid_attach (grid, GTK_WIDGET (priv->name), 1, row, 1, 1);
-  ++row;
-
-  gtk_grid_attach (grid, GTK_WIDGET (driver_label), 0, row, 1, 1);
-  gtk_grid_attach (grid, GTK_WIDGET (priv->driver), 1, row, 1, 1);
-  ++row;
-
-  gtk_grid_attach (grid, GTK_WIDGET (uri_label), 0, row, 1, 1);
-  gtk_grid_attach (grid, GTK_WIDGET (priv->uri), 1, row, 1, 1);
-  ++row;
-
-  gtk_grid_attach (grid, GTK_WIDGET (priv->param), 0, row, 2, 1);
-
-  gtk_widget_set_hexpand (GTK_WIDGET (priv->name), TRUE);
-  gtk_widget_set_hexpand (GTK_WIDGET (priv->uri), TRUE);
-  gtk_widget_set_hexpand (GTK_WIDGET (priv->driver), TRUE);
-  gtk_grid_set_row_spacing (grid, 6);
-  gtk_grid_set_column_spacing (grid, 6);
-  gtk_widget_set_margin_start (GTK_WIDGET (self), 6);
-  gtk_widget_set_margin_end (GTK_WIDGET (self), 6);
-  gtk_widget_set_margin_top (GTK_WIDGET (self), 6);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (self), 6);
-  gtk_widget_set_hexpand (GTK_WIDGET (self), TRUE);
-  gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
-
+  gtk_container_add (GTK_CONTAINER (priv->expander), GTK_WIDGET (priv->param));
 }
 
 static void
@@ -303,6 +278,10 @@ hyscan_gtk_profile_editor_hw_device_update (HyScanGtkProfileEditorHWDevice *self
     hyscan_gtk_param_set_param (priv->param, HYSCAN_PARAM (priv->device), "/", FALSE);
   else
     hyscan_gtk_param_set_param (priv->param, NULL, "/", FALSE);
+
+  // gtk_revealer_set_reveal_child (priv->revealer, update_state);
+  gtk_expander_set_expanded (priv->expander, update_state);
+  gtk_widget_set_sensitive (GTK_WIDGET (priv->expander), update_state);
 
   g_signal_emit (self, hyscan_gtk_profile_editor_hw_device_signals[SIGNAL_CHANGED], 0);
 }

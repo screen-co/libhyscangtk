@@ -73,7 +73,6 @@ GtkWidget *            hyscan_gtk_param_list_new              (HyScanParam *para
 HYSCAN_API
 GtkWidget *            hyscan_gtk_param_list_new_default      (HyScanParam *param);
 
-
 G_END_DECLS
 
 #endif /* __HYSCAN_GTK_PARAM_LIST_H__ */

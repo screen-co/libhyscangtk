@@ -159,7 +159,6 @@ hyscan_gtk_profile_editor_db_file_path_changed (HyScanGtkProfileEditorDB *self)
   g_free (uri);
 }
 
-
 GtkWidget *
 hyscan_gtk_profile_editor_db_new (HyScanProfile *profile)
 {

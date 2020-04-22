@@ -14,7 +14,6 @@ void cancel_close (HyScanGtkConnector *con,
 GtkWidget *window;
 const gchar *paths[2]={NULL, NULL};
 
-
 int
 main (int argc, char **argv)
 {

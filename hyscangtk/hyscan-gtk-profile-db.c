@@ -41,14 +41,12 @@
 #include "hyscan-gtk-profile-db.h"
 #include <hyscan-gtk-profile-editor-db.h>
 
-
 #define HYSCAN_GTK_PROFILE_DB_PATH "db-profiles"
 
 static HyScanProfile * hyscan_gtk_profile_db_new_profile (HyScanGtkProfile *parent,
                                                           const gchar      *filename);
 static GtkWidget *     hyscan_gtk_profile_db_editor      (HyScanGtkProfile *parent,
                                                           HyScanProfile    *profile);
-
 
 G_DEFINE_TYPE (HyScanGtkProfileDB, hyscan_gtk_profile_db, HYSCAN_TYPE_GTK_PROFILE);
 

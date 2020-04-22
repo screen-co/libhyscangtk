@@ -131,8 +131,7 @@ hyscan_gtk_profile_hw_new_profile (HyScanGtkProfile *parent,
   HyScanGtkProfileHW *self = HYSCAN_GTK_PROFILE_HW (parent);
   HyScanProfileHW *profile;
 
-  profile = hyscan_profile_hw_new (filename);
-  hyscan_profile_hw_set_driver_paths (profile, self->priv->drivers);
+  profile = hyscan_profile_hw_new (filename, self->priv->drivers);
 
   return HYSCAN_PROFILE (profile);
 }

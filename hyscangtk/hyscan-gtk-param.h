@@ -115,14 +115,12 @@ HYSCAN_API
 const HyScanDataSchemaNode * hyscan_gtk_param_find_node   (const HyScanDataSchemaNode *node,
                                                            const gchar                *path);
 
-
 HYSCAN_API
 gboolean                hyscan_gtk_param_node_has_visible_keys (const HyScanDataSchemaNode *node,
                                                                 gboolean                    show_hidden);
 
 HYSCAN_API
 void                    hyscan_gtk_param_clear_container  (GtkContainer    *container);
-
 
 G_END_DECLS
 
