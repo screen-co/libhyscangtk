@@ -1,6 +1,6 @@
-/* hyscan-gtk-profile-viewer.h
+/* hyscan-gtk-profile.c
  *
- * Copyright 2019 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
+ * Copyright 2020 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
  * This file is part of HyScanGtk.
  *
@@ -37,8 +37,8 @@
  * @Title: HyScanGtkProfile
  * @Short_description: Общий класс для виджетов профилей
  *
- * Класс позволяет легко создавать новые профили и гарантировать одинаковое
- * поведение у виджетов, реализующих профили.
+ * Класс позволяет относительно легко создавать новые профили и гарантировать
+ * одинаковое поведение у виджетов, реализующих профили.
  *
  *              HyScanGtk                          HyScanCore
  * +-----------------------------------+  +-----------------------------+
@@ -55,7 +55,7 @@
  * |               +              |    |  |       ProfileHWDevice       |
  * |         Gtk..HWEditor        |    |  +-----------------------------+
  * |               +              |    |
- * |       Gtk..HWDeviceEditor    |    |
+ * |       Gtk..EditorHWDevice    |    |
  * |                              +    |
  * |                 Gtk..EditorOffset |
  * +-----------------------------------+
@@ -66,6 +66,8 @@
 #include <glib/gi18n-lib.h>
 #include <hyscan-cell-renderer-pixbuf.h>
 #include <hyscan-config.h>
+#include <hyscan-types.h>
+#include <glib/gstdio.h>
 
 enum
 {
@@ -110,13 +112,13 @@ enum
 
 struct _HyScanGtkProfilePrivate
 {
-  gchar       **folders;
-  gboolean      readonly;
+  gchar        **folders;          /* Список папок. */
+  gboolean       readonly;         /* Возможно ли редактирование/создание профилей. */
 
-  GHashTable   *profiles; /* {gchar* file_name : HyScanProfile*} */
-  GtkTreeModel *store;    /* Модель с виджетами. */
+  GHashTable    *profiles;         /* {gchar* file_name : HyScanProfile*} */
+  GtkTreeModel  *store;            /* Модель с профилями. */
 
-  HyScanProfile *selected_profile;
+  HyScanProfile *selected_profile; /* Выбранный профиль. */
 };
 
 static void    hyscan_gtk_profile_set_property             (GObject               *object,
@@ -125,14 +127,11 @@ static void    hyscan_gtk_profile_set_property             (GObject             
                                                             GParamSpec            *pspec);
 static void    hyscan_gtk_profile_object_constructed       (GObject               *object);
 static void    hyscan_gtk_profile_object_finalize          (GObject               *object);
+
+static GHashTable * hyscan_gtk_profile_get_files           (const gchar           *folder,
+                                                            gboolean               create);
 static void    hyscan_gtk_profile_load                     (HyScanGtkProfile      *self,
                                                             const gchar           *dir);
-
-static GHashTable * hyscan_gtk_profile_get_files           (const gchar           *folder);
-
-static void    hyscan_gtk_profile_restyle                  (GtkDialog             *dialog,
-                                                            gint                   response_id,
-                                                            const gchar           *style_class);
 
 static void    hyscan_gtk_profile_edit                     (HyScanGtkProfile      *self,
                                                             HyScanProfile         *profile);
@@ -153,6 +152,11 @@ static gint    hyscan_gtk_profile_compare_func             (GtkTreeModel        
                                                             GtkTreeIter           *a,
                                                             GtkTreeIter           *b,
                                                             gpointer               user_data);
+static void    hyscan_gtk_profile_restyle                  (GtkDialog             *dialog,
+                                                            gint                   response_id,
+                                                            const gchar           *style_class);
+static void    hyscan_gtk_profile_sanity_check             (HyScanGtkProfileEditor *editor,
+                                                            GtkDialog              *dialog);
 
 static guint   hyscan_gtk_profile_signals[SIGNAL_LAST] = {0};
 
@@ -191,9 +195,15 @@ hyscan_gtk_profile_class_init (HyScanGtkProfileClass *klass)
 }
 
 static void
-hyscan_gtk_profile_init (HyScanGtkProfile *gtk_profile)
+hyscan_gtk_profile_init (HyScanGtkProfile *self)
 {
-  gtk_profile->priv = hyscan_gtk_profile_get_instance_private (gtk_profile);
+  HyScanGtkProfileClass *klass = HYSCAN_GTK_PROFILE_GET_CLASS (self);
+  HyScanGtkProfilePrivate *priv = hyscan_gtk_profile_get_instance_private (self);
+  self->priv = priv;
+
+  priv->profiles = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
+  priv->store = klass->make_model (self);
+  klass->make_tree (self);
 }
 
 static void
@@ -231,9 +241,7 @@ hyscan_gtk_profile_object_constructed (GObject *object)
 
   G_OBJECT_CLASS (hyscan_gtk_profile_parent_class)->constructed (object);
 
-  priv->profiles = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
-
-  /* Профили загружаются из двух каталогов. */
+  /* Профили загружаются из каталогов, переданных на этапе конструирования. */
   for (iter = priv->folders; iter != NULL && *iter != NULL; ++iter)
     {
       gchar *folder = g_build_filename (*iter, klass->subfolder, NULL);
@@ -241,8 +249,6 @@ hyscan_gtk_profile_object_constructed (GObject *object)
       g_free (folder);
     }
 
-  priv->store = klass->make_model (self);
-  klass->make_tree (self);
   klass->update_tree (self);
 }
 
@@ -258,8 +264,10 @@ hyscan_gtk_profile_object_finalize (GObject *object)
   G_OBJECT_CLASS (hyscan_gtk_profile_parent_class)->finalize (object);
 }
 
+/* Функция возвращает список файлов в папке. */
 static GHashTable *
-hyscan_gtk_profile_get_files (const gchar *folder)
+hyscan_gtk_profile_get_files (const gchar *folder,
+                              gboolean     create)
 {
   GHashTable *set;
   const gchar *filename;
@@ -268,8 +276,20 @@ hyscan_gtk_profile_get_files (const gchar *folder)
 
   if (!g_file_test (folder, G_FILE_TEST_IS_DIR | G_FILE_TEST_EXISTS))
     {
-      g_warning ("HyScanGtkProfile: directory %s doesn't exist", folder);
-      return NULL;
+      gint flags = S_IRUSR | S_IWUSR | S_IXUSR |
+                   S_IRGRP | S_IWGRP | S_IXGRP |
+                   S_IROTH | S_IXOTH;
+      if (!create)
+        {
+          g_warning ("HyScanGtkProfile: directory %s doesn't exist", folder);
+          return NULL;
+        }
+      else if (0 != g_mkdir (folder, flags))
+        {
+          g_warning ("HyScanGtkProfile: directory %s "
+                     "doesn't exist and can't be created", folder);
+          return NULL;
+        }
     }
 
   dir = g_dir_open (folder, 0, &error);
@@ -303,7 +323,7 @@ hyscan_gtk_profile_load (HyScanGtkProfile *self,
   GHashTableIter iter;
   const gchar *filename;
 
-  files = hyscan_gtk_profile_get_files (folder);
+  files = hyscan_gtk_profile_get_files (folder, FALSE);
   if (files == NULL)
     return;
 
@@ -322,25 +342,7 @@ hyscan_gtk_profile_load (HyScanGtkProfile *self,
   g_hash_table_unref (files);
 }
 
-static void
-hyscan_gtk_profile_restyle (GtkDialog   *dialog,
-                            gint         response_id,
-                            const gchar *style_class)
-{
-  GtkWidget *widget = gtk_dialog_get_widget_for_response (dialog, response_id);
-  GtkStyleContext *context = gtk_widget_get_style_context (widget);
-
-  gtk_style_context_add_class (context, style_class);
-}
-
-static void
-hyscan_gtk_profile_sanity_check (HyScanGtkProfileEditor *editor,
-                                 GtkDialog              *dialog)
-{
-  gboolean sane = hyscan_gtk_profile_editor_get_sanity (editor);
-  gtk_dialog_set_response_sensitive (dialog, RESPONSE_APPLY, sane);
-}
-
+/* Функция редактирования существующего профиля. */
 static void
 hyscan_gtk_profile_edit (HyScanGtkProfile *self,
                          HyScanProfile    *profile)
@@ -354,9 +356,9 @@ hyscan_gtk_profile_edit (HyScanGtkProfile *self,
   dialog = gtk_dialog_new_with_buttons ("Edit profile",
                                         window,
                                         flags,
-                                        _("_Delete"), RESPONSE_DELETE,
-                                        _("_Cancel"), RESPONSE_CANCEL,
-                                        _("_OK"), RESPONSE_APPLY,
+                                        _("Delete"), RESPONSE_DELETE,
+                                        _("Cancel"), RESPONSE_CANCEL,
+                                        _("OK"), RESPONSE_APPLY,
                                         NULL);
   hyscan_gtk_profile_restyle (GTK_DIALOG (dialog), RESPONSE_APPLY,
                               GTK_STYLE_CLASS_SUGGESTED_ACTION);
@@ -367,7 +369,7 @@ hyscan_gtk_profile_edit (HyScanGtkProfile *self,
 
   creator = klass->make_editor (self, profile);
   hyscan_gtk_profile_sanity_check (HYSCAN_GTK_PROFILE_EDITOR (creator), GTK_DIALOG (dialog));
-  g_signal_connect (creator, "sane", G_CALLBACK (hyscan_gtk_profile_sanity_check), dialog);
+  g_signal_connect (creator, "changed", G_CALLBACK (hyscan_gtk_profile_sanity_check), dialog);
 
   gtk_container_add (GTK_CONTAINER (content), creator);
   gtk_widget_show_all (dialog);
@@ -396,7 +398,7 @@ hyscan_gtk_profile_edit (HyScanGtkProfile *self,
   gtk_widget_destroy (dialog);
 }
 
-/* Функция загружает профили. */
+/* Функция создания нового профиля. */
 static void
 hyscan_gtk_profile_create (HyScanGtkProfile *self)
 {
@@ -408,12 +410,12 @@ hyscan_gtk_profile_create (HyScanGtkProfile *self)
 
   /* Сначала сгененрируем новое уникальное имя для профиля. */
   folder = g_build_filename (hyscan_config_get_user_files_dir(), klass->subfolder, NULL);
-  files = hyscan_gtk_profile_get_files (folder);
+  files = hyscan_gtk_profile_get_files (folder, TRUE);
 
   do
     {
       g_clear_pointer (&filename, g_free);
-      hyscan_profile_make_id (random_str, G_N_ELEMENTS (random_str));
+      hyscan_rand_id (random_str, G_N_ELEMENTS (random_str));
       filename = g_build_filename (folder, random_str, NULL);
     }
   while (g_hash_table_contains (files, filename));
@@ -425,6 +427,7 @@ hyscan_gtk_profile_create (HyScanGtkProfile *self)
   g_object_unref (profile);
 }
 
+/* Обработчик нажатия на кнопку добавления/удаления. */
 static void
 hyscan_gtk_profile_clicked (GtkCellRenderer *cell_renderer,
                             const gchar     *path,
@@ -452,6 +455,7 @@ hyscan_gtk_profile_clicked (GtkCellRenderer *cell_renderer,
   g_clear_object (&profile);
 }
 
+/* Функция выбора профиля. */
 static void
 hyscan_gtk_profile_toggled (GtkCellRendererToggle *cell_renderer,
                             gchar                 *path,
@@ -659,4 +663,25 @@ hyscan_gtk_profile_compare_func (GtkTreeModel *model,
   g_free (name_b);
 
   return result;
+}
+
+/* Вспомогательная функция добавления стиля к диалоговым кнопкам. */
+static void
+hyscan_gtk_profile_restyle (GtkDialog   *dialog,
+                            gint         response_id,
+                            const gchar *style_class)
+{
+  GtkWidget *widget = gtk_dialog_get_widget_for_response (dialog, response_id);
+  GtkStyleContext *context = gtk_widget_get_style_context (widget);
+
+  gtk_style_context_add_class (context, style_class);
+}
+
+/* Функция активации/деактивации кнопок диалога. */
+static void
+hyscan_gtk_profile_sanity_check (HyScanGtkProfileEditor *editor,
+                                 GtkDialog              *dialog)
+{
+  gboolean sane = hyscan_gtk_profile_editor_get_sanity (editor);
+  gtk_dialog_set_response_sensitive (dialog, RESPONSE_APPLY, sane);
 }

@@ -1,6 +1,6 @@
-/* hyscan-gtk-profile-viewer.h
+/* hyscan-gtk-profile.h
  *
- * Copyright 2019 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
+ * Copyright 2020 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
  * This file is part of HyScanGtk.
  *
@@ -67,6 +67,7 @@ struct _HyScanGtkProfile
  * @new_profile: фабричный метод создания новых объектов профилей.
  * @make_model: метод создания модели для виджета.
  * @make_tree: метод создания #GtkTreeView с профилями.
+ * @make_editor: метод создания редактора конкретного профиля.
  */
 struct _HyScanGtkProfileClass
 {

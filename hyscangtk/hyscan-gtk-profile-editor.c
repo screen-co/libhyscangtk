@@ -1,6 +1,6 @@
-/* hyscan-gtk-profile-editor.h
+/* hyscan-gtk-profile-editor.c
  *
- * Copyright 2019 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
+ * Copyright 2020 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
  * This file is part of HyScanGtk.
  *
@@ -35,7 +35,7 @@
 /**
  * SECTION: hyscan-gtk-profile-editor
  * @Title HyScanGtkProfileEditor
- * @Short_description
+ * @Short_description: Базовый класс виджетов редактирования профилей
  *
  */
 
@@ -55,8 +55,8 @@ enum
 
 struct _HyScanGtkProfileEditorPrivate
 {
-  HyScanProfile *profile;
-  gboolean       sane;
+  HyScanProfile *profile; /* Профиль. */
+  gboolean       sane;    /* Значение валидности. */
 };
 
 static void    hyscan_gtk_profile_editor_set_property             (GObject               *object,
@@ -81,8 +81,16 @@ hyscan_gtk_profile_editor_class_init (HyScanGtkProfileEditorClass *klass)
                          HYSCAN_TYPE_PROFILE,
                          G_PARAM_CONSTRUCT | G_PARAM_WRITABLE));
 
+  /**
+   * HyScanGtkProfileEditor::changed:
+   * @editor: the object which received the signal
+   *
+   * The ::changed signal is emitted when the underlying profile has changed.
+   * Normally you check profile's sanity with hyscan_gtk_profile_editor_get_sanity()
+   * and update your widget to reflect current state.
+   **/
   hyscan_gtk_profile_editor_signals[SIGNAL_SANE] =
-    g_signal_new ("sane", HYSCAN_TYPE_GTK_PROFILE_EDITOR,
+    g_signal_new ("changed", HYSCAN_TYPE_GTK_PROFILE_EDITOR,
                   G_SIGNAL_RUN_LAST, 0, NULL, NULL,
                   g_cclosure_marshal_VOID__VOID,
                   G_TYPE_NONE, 0);
@@ -125,6 +133,12 @@ hyscan_gtk_profile_editor_object_finalize (GObject *object)
   G_OBJECT_CLASS (hyscan_gtk_profile_editor_parent_class)->finalize (object);
 }
 
+/**
+ * hyscan_gtk_profile_editor_get_profile:
+ * @self: #HyScanGtkProfileEditor
+ *
+ * Returns: (transfer full): указатель на HyScanProfile, редактируемый виджетом
+ */
 HyScanProfile *
 hyscan_gtk_profile_editor_get_profile (HyScanGtkProfileEditor *self)
 {
@@ -133,6 +147,13 @@ hyscan_gtk_profile_editor_get_profile (HyScanGtkProfileEditor *self)
   return g_object_ref (self->priv->profile);
 }
 
+/**
+ * hyscan_gtk_profile_editor_check_sanity:
+ * @self: #HyScanGtkProfileEditor
+ *
+ * Функция инициирует валидацию профиля и эмитирует HyScanGtkProfileEditor::changed,
+ * если состояние изменилось.
+ */
 void
 hyscan_gtk_profile_editor_check_sanity (HyScanGtkProfileEditor *self)
 {
@@ -150,6 +171,14 @@ hyscan_gtk_profile_editor_check_sanity (HyScanGtkProfileEditor *self)
     g_signal_emit (self, hyscan_gtk_profile_editor_signals[SIGNAL_SANE], 0, new_sanity);
 }
 
+/**
+ * hyscan_gtk_profile_editor_get_sanity:
+ * @self: #HyScanGtkProfileEditor
+ *
+ * Функция возвращает валидность профиля.
+ *
+ * Returns: %TRUE, если профиль валиден.
+ */
 gboolean
 hyscan_gtk_profile_editor_get_sanity (HyScanGtkProfileEditor *self)
 {

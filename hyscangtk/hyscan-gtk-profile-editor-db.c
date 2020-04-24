@@ -1,6 +1,6 @@
-/* hyscan-gtk-profile-db-editor.h
+/* hyscan-gtk-profile-editor-db.h
  *
- * Copyright 2019 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
+ * Copyright 2019-2020 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
  * This file is part of HyScanGtk.
  *
@@ -35,7 +35,7 @@
 /**
  * SECTION: hyscan-gtk-profile-editor
  * @Title HyScanGtkProfileEditorDB
- * @Short_description
+ * @Short_description: Виджет редактирования профилей баз данных
  *
  */
 
@@ -158,7 +158,6 @@ hyscan_gtk_profile_editor_db_file_path_changed (HyScanGtkProfileEditorDB *self)
   g_free (selected);
   g_free (uri);
 }
-
 
 GtkWidget *
 hyscan_gtk_profile_editor_db_new (HyScanProfile *profile)

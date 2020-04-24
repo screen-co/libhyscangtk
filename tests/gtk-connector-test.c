@@ -6,13 +6,13 @@
 #include <hyscan-gtk-profile-offset.h>
 #include <hyscan-gtk-connector.h>
 #include <hyscan-config.h>
+#include <glib/gi18n.h>
 
 void cancel_close (HyScanGtkConnector *con,
                    const gchar        *text);
 
 GtkWidget *window;
 const gchar *paths[2]={NULL, NULL};
-
 
 int
 main (int argc, char **argv)

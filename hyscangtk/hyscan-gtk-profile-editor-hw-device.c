@@ -1,4 +1,4 @@
-/* hyscan-gtk-profile-hw-device-editor.h
+/* hyscan-gtk-profile-editor-hw-device.c
  *
  * Copyright 2020 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
@@ -33,16 +33,18 @@
  */
 
 /**
- * SECTION: hyscan-gtk-profile-hw-device-editor
- * @Title HyScanGtkProfileHWDeviceEditor
- * @Short_description
+ * SECTION: hyscan-gtk-profile-editor-hw-device
+ * @Title HyScanGtkProfileEditorHWDevice
+ * @Short_description: Виджет редактирования устройств в составе профиля оборудования
  *
  */
 
-#include "hyscan-gtk-profile-hw-device-editor.h"
+#include "hyscan-gtk-profile-editor-hw-device.h"
 #include <hyscan-driver.h>
 #include <hyscan-data-box.h>
 #include <hyscan-gtk-param-tree.h>
+
+#define WIDGET_RESOURCE_UI "/org/hyscan/gtk/hyscan-gtk-profile-editor-hw-device.ui"
 
 enum
 {
@@ -56,110 +58,84 @@ enum
   PROP_PROFILE
 };
 
-struct _HyScanGtkProfileHWDeviceEditorPrivate
+struct _HyScanGtkProfileEditorHWDevicePrivate
 {
   HyScanProfileHWDevice *device;
+
   GtkEntry              *name;
   GtkEntry              *uri;
   GtkComboBoxText       *driver;
+  GtkExpander           *expander;
+
   HyScanGtkParam        *param;
 };
 
-static void    hyscan_gtk_profile_hw_device_editor_set_property       (GObject               *object,
+static void    hyscan_gtk_profile_editor_hw_device_set_property       (GObject               *object,
                                                                        guint                  prop_id,
                                                                        const GValue          *value,
                                                                        GParamSpec            *pspec);
-static void    hyscan_gtk_profile_hw_device_editor_object_constructed (GObject               *object);
-static void    hyscan_gtk_profile_hw_device_editor_object_finalize    (GObject               *object);
-static void    hyscan_gtk_profile_hw_device_editor_name_changed       (HyScanGtkProfileHWDeviceEditor *self);
-static void    hyscan_gtk_profile_hw_device_editor_uri_changed        (HyScanGtkProfileHWDeviceEditor *self);
-static void    hyscan_gtk_profile_hw_device_editor_driver_changed     (HyScanGtkProfileHWDeviceEditor *self);
-static void    hyscan_gtk_profile_hw_device_editor_update             (HyScanGtkProfileHWDeviceEditor *self);
+static void    hyscan_gtk_profile_editor_hw_device_object_constructed (GObject               *object);
+static void    hyscan_gtk_profile_editor_hw_device_object_finalize    (GObject               *object);
+static void    hyscan_gtk_profile_editor_hw_device_name_changed       (HyScanGtkProfileEditorHWDevice *self);
+static void    hyscan_gtk_profile_editor_hw_device_uri_changed        (HyScanGtkProfileEditorHWDevice *self);
+static void    hyscan_gtk_profile_editor_hw_device_driver_changed     (HyScanGtkProfileEditorHWDevice *self);
+static void    hyscan_gtk_profile_editor_hw_device_update             (HyScanGtkProfileEditorHWDevice *self);
 
-static guint   hyscan_gtk_profile_hw_device_editor_signals[SIGNAL_LAST] = {0};
+static guint   hyscan_gtk_profile_editor_hw_device_signals[SIGNAL_LAST] = {0};
 
-G_DEFINE_TYPE_WITH_PRIVATE (HyScanGtkProfileHWDeviceEditor, hyscan_gtk_profile_hw_device_editor, GTK_TYPE_GRID);
+G_DEFINE_TYPE_WITH_PRIVATE (HyScanGtkProfileEditorHWDevice, hyscan_gtk_profile_editor_hw_device, GTK_TYPE_GRID);
 
 static void
-hyscan_gtk_profile_hw_device_editor_class_init (HyScanGtkProfileHWDeviceEditorClass *klass)
+hyscan_gtk_profile_editor_hw_device_class_init (HyScanGtkProfileEditorHWDeviceClass *klass)
 {
   GObjectClass *oclass = G_OBJECT_CLASS (klass);
+  GtkWidgetClass *wclass = GTK_WIDGET_CLASS (klass);
 
-  oclass->set_property = hyscan_gtk_profile_hw_device_editor_set_property;
-  oclass->constructed = hyscan_gtk_profile_hw_device_editor_object_constructed;
-  oclass->finalize = hyscan_gtk_profile_hw_device_editor_object_finalize;
+  oclass->set_property = hyscan_gtk_profile_editor_hw_device_set_property;
+  oclass->constructed = hyscan_gtk_profile_editor_hw_device_object_constructed;
+  oclass->finalize = hyscan_gtk_profile_editor_hw_device_object_finalize;
+
+  gtk_widget_class_set_template_from_resource (wclass, WIDGET_RESOURCE_UI);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHWDevice, name);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHWDevice, uri);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHWDevice, driver);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHWDevice, expander);
 
   g_object_class_install_property (oclass, PROP_PROFILE,
     g_param_spec_object ("device", "Device", "HW Device Profile",
                          HYSCAN_TYPE_PROFILE_HW_DEVICE,
                          G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 
-  hyscan_gtk_profile_hw_device_editor_signals[SIGNAL_CHANGED] =
-    g_signal_new ("changed", HYSCAN_TYPE_GTK_PROFILE_HW_DEVICE_EDITOR,
+  hyscan_gtk_profile_editor_hw_device_signals[SIGNAL_CHANGED] =
+    g_signal_new ("changed", HYSCAN_TYPE_GTK_PROFILE_EDITOR_HW_DEVICE,
                   G_SIGNAL_RUN_LAST, 0, NULL, NULL,
                   g_cclosure_marshal_VOID__VOID,
                   G_TYPE_NONE, 0);
 }
 
 static void
-hyscan_gtk_profile_hw_device_editor_init (HyScanGtkProfileHWDeviceEditor *self)
+hyscan_gtk_profile_editor_hw_device_init (HyScanGtkProfileEditorHWDevice *self)
 {
-  HyScanGtkProfileHWDeviceEditorPrivate *priv;
-  GtkWidget *name_label, *uri_label, *driver_label;
-  GtkGrid *grid = GTK_GRID (self);
-  gint row = 0;
+  HyScanGtkProfileEditorHWDevicePrivate *priv;
 
-  priv = hyscan_gtk_profile_hw_device_editor_get_instance_private (self);
-  self->priv = priv;
+  self->priv = hyscan_gtk_profile_editor_hw_device_get_instance_private (self);
+  gtk_widget_init_template (GTK_WIDGET (self));
+  priv = self->priv;
 
-  /* Создаю виджеты. */
-  name_label = gtk_label_new ("Name");
-  driver_label = gtk_label_new ("Driver");
-  uri_label = gtk_label_new ("URI");
-
-  priv->name = GTK_ENTRY (gtk_entry_new ());
-  priv->uri = GTK_ENTRY (gtk_entry_new ());
-  priv->driver = GTK_COMBO_BOX_TEXT (gtk_combo_box_text_new ());
   priv->param = HYSCAN_GTK_PARAM (hyscan_gtk_param_tree_new (NULL, NULL, FALSE));
   hyscan_gtk_param_set_immidiate (HYSCAN_GTK_PARAM (priv->param), TRUE);
 
-  /* Left, Top, Width, Height. */
-  gtk_grid_attach (grid, GTK_WIDGET (name_label), 0, row, 1, 1);
-  gtk_grid_attach (grid, GTK_WIDGET (priv->name), 1, row, 1, 1);
-  ++row;
-
-  gtk_grid_attach (grid, GTK_WIDGET (driver_label), 0, row, 1, 1);
-  gtk_grid_attach (grid, GTK_WIDGET (priv->driver), 1, row, 1, 1);
-  ++row;
-
-  gtk_grid_attach (grid, GTK_WIDGET (uri_label), 0, row, 1, 1);
-  gtk_grid_attach (grid, GTK_WIDGET (priv->uri), 1, row, 1, 1);
-  ++row;
-
-  gtk_grid_attach (grid, GTK_WIDGET (priv->param), 0, row, 2, 1);
-
-  gtk_widget_set_hexpand (GTK_WIDGET (priv->name), TRUE);
-  gtk_widget_set_hexpand (GTK_WIDGET (priv->uri), TRUE);
-  gtk_widget_set_hexpand (GTK_WIDGET (priv->driver), TRUE);
-  gtk_grid_set_row_spacing (grid, 6);
-  gtk_grid_set_column_spacing (grid, 6);
-  gtk_widget_set_margin_start (GTK_WIDGET (self), 6);
-  gtk_widget_set_margin_end (GTK_WIDGET (self), 6);
-  gtk_widget_set_margin_top (GTK_WIDGET (self), 6);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (self), 6);
-  gtk_widget_set_hexpand (GTK_WIDGET (self), TRUE);
-  gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
-
+  gtk_container_add (GTK_CONTAINER (priv->expander), GTK_WIDGET (priv->param));
 }
 
 static void
-hyscan_gtk_profile_hw_device_editor_set_property (GObject      *object,
+hyscan_gtk_profile_editor_hw_device_set_property (GObject      *object,
                                                   guint         prop_id,
                                                   const GValue *value,
                                                   GParamSpec   *pspec)
 {
-  HyScanGtkProfileHWDeviceEditor *self = HYSCAN_GTK_PROFILE_HW_DEVICE_EDITOR (object);
-  HyScanGtkProfileHWDeviceEditorPrivate *priv = self->priv;
+  HyScanGtkProfileEditorHWDevice *self = HYSCAN_GTK_PROFILE_EDITOR_HW_DEVICE (object);
+  HyScanGtkProfileEditorHWDevicePrivate *priv = self->priv;
 
   switch (prop_id)
     {
@@ -174,23 +150,23 @@ hyscan_gtk_profile_hw_device_editor_set_property (GObject      *object,
 }
 
 static void
-hyscan_gtk_profile_hw_device_editor_object_constructed (GObject *object)
+hyscan_gtk_profile_editor_hw_device_object_constructed (GObject *object)
 {
-  HyScanGtkProfileHWDeviceEditor *self = HYSCAN_GTK_PROFILE_HW_DEVICE_EDITOR (object);
-  HyScanGtkProfileHWDeviceEditorPrivate *priv = self->priv;
+  HyScanGtkProfileEditorHWDevice *self = HYSCAN_GTK_PROFILE_EDITOR_HW_DEVICE (object);
+  HyScanGtkProfileEditorHWDevicePrivate *priv = self->priv;
   const gchar *name, *uri;
 
-  G_OBJECT_CLASS (hyscan_gtk_profile_hw_device_editor_parent_class)->constructed (object);
+  G_OBJECT_CLASS (hyscan_gtk_profile_editor_hw_device_parent_class)->constructed (object);
 
   /* Сигналы виджетов. */
   g_signal_connect_swapped (priv->name, "changed",
-                            G_CALLBACK (hyscan_gtk_profile_hw_device_editor_name_changed),
+                            G_CALLBACK (hyscan_gtk_profile_editor_hw_device_name_changed),
                             self);
   g_signal_connect_swapped (priv->uri, "changed",
-                            G_CALLBACK (hyscan_gtk_profile_hw_device_editor_uri_changed),
+                            G_CALLBACK (hyscan_gtk_profile_editor_hw_device_uri_changed),
                             self);
   g_signal_connect_swapped (priv->driver, "changed",
-                            G_CALLBACK (hyscan_gtk_profile_hw_device_editor_driver_changed),
+                            G_CALLBACK (hyscan_gtk_profile_editor_hw_device_driver_changed),
                             self);
 
   /* Считываем название профиля, uri. */
@@ -227,11 +203,23 @@ hyscan_gtk_profile_hw_device_editor_object_constructed (GObject *object)
                                  hyscan_profile_hw_device_get_driver (priv->device));
   }
 
-  hyscan_gtk_profile_hw_device_editor_update (self);
+  hyscan_gtk_profile_editor_hw_device_update (self);
 }
 
 static void
-hyscan_gtk_profile_hw_device_editor_name_changed (HyScanGtkProfileHWDeviceEditor *self)
+hyscan_gtk_profile_editor_hw_device_object_finalize (GObject *object)
+{
+  HyScanGtkProfileEditorHWDevice *self = HYSCAN_GTK_PROFILE_EDITOR_HW_DEVICE (object);
+  HyScanGtkProfileEditorHWDevicePrivate *priv = self->priv;
+
+  g_clear_object (&priv->device);
+
+  G_OBJECT_CLASS (hyscan_gtk_profile_editor_hw_device_parent_class)->finalize (object);
+}
+
+/* Обработчик смены названия устройства. */
+static void
+hyscan_gtk_profile_editor_hw_device_name_changed (HyScanGtkProfileEditorHWDevice *self)
 {
   const gchar *name, *text;
 
@@ -243,12 +231,12 @@ hyscan_gtk_profile_hw_device_editor_name_changed (HyScanGtkProfileHWDeviceEditor
 
   hyscan_profile_hw_device_set_name (self->priv->device, text);
 
-  g_signal_emit (self, hyscan_gtk_profile_hw_device_editor_signals[SIGNAL_CHANGED], 0);
-
+  g_signal_emit (self, hyscan_gtk_profile_editor_hw_device_signals[SIGNAL_CHANGED], 0);
 }
 
+/* Обработчик смены адреса. */
 static void
-hyscan_gtk_profile_hw_device_editor_uri_changed (HyScanGtkProfileHWDeviceEditor *self)
+hyscan_gtk_profile_editor_hw_device_uri_changed (HyScanGtkProfileEditorHWDevice *self)
 {
   const gchar *uri, *text;
 
@@ -259,11 +247,12 @@ hyscan_gtk_profile_hw_device_editor_uri_changed (HyScanGtkProfileHWDeviceEditor 
     return;
 
   hyscan_profile_hw_device_set_uri (self->priv->device, text);
-  hyscan_gtk_profile_hw_device_editor_update (self);
+  hyscan_gtk_profile_editor_hw_device_update (self);
 }
 
+/* Обработчик смены драйвера. */
 static void
-hyscan_gtk_profile_hw_device_editor_driver_changed (HyScanGtkProfileHWDeviceEditor *self)
+hyscan_gtk_profile_editor_hw_device_driver_changed (HyScanGtkProfileEditorHWDevice *self)
 {
   const gchar *driver, *text;
 
@@ -274,13 +263,14 @@ hyscan_gtk_profile_hw_device_editor_driver_changed (HyScanGtkProfileHWDeviceEdit
     return;
 
   hyscan_profile_hw_device_set_driver (self->priv->device, text);
-  hyscan_gtk_profile_hw_device_editor_update (self);
+  hyscan_gtk_profile_editor_hw_device_update (self);
 }
 
+/* Функция обновляет схему устройства. */
 static void
-hyscan_gtk_profile_hw_device_editor_update (HyScanGtkProfileHWDeviceEditor *self)
+hyscan_gtk_profile_editor_hw_device_update (HyScanGtkProfileEditorHWDevice *self)
 {
-  HyScanGtkProfileHWDeviceEditorPrivate *priv = self->priv;
+  HyScanGtkProfileEditorHWDevicePrivate *priv = self->priv;
   gboolean update_state;
 
   update_state = hyscan_profile_hw_device_update (priv->device);
@@ -289,32 +279,38 @@ hyscan_gtk_profile_hw_device_editor_update (HyScanGtkProfileHWDeviceEditor *self
   else
     hyscan_gtk_param_set_param (priv->param, NULL, "/", FALSE);
 
-  g_signal_emit (self, hyscan_gtk_profile_hw_device_editor_signals[SIGNAL_CHANGED], 0);
+  // gtk_revealer_set_reveal_child (priv->revealer, update_state);
+  gtk_expander_set_expanded (priv->expander, update_state);
+  gtk_widget_set_sensitive (GTK_WIDGET (priv->expander), update_state);
+
+  g_signal_emit (self, hyscan_gtk_profile_editor_hw_device_signals[SIGNAL_CHANGED], 0);
 }
 
-static void
-hyscan_gtk_profile_hw_device_editor_object_finalize (GObject *object)
-{
-  HyScanGtkProfileHWDeviceEditor *self = HYSCAN_GTK_PROFILE_HW_DEVICE_EDITOR (object);
-  HyScanGtkProfileHWDeviceEditorPrivate *priv = self->priv;
-
-  g_clear_object (&priv->device);
-
-  G_OBJECT_CLASS (hyscan_gtk_profile_hw_device_editor_parent_class)->finalize (object);
-}
-
+/*
+ * hyscan_gtk_profile_editor_hw_device_new:
+ * @device: редактируемый HyScanProfileHWDevice
+ *
+ * Returns: (transfer full): виджет редактирования устройства.
+ */
 GtkWidget *
-hyscan_gtk_profile_hw_device_editor_new (HyScanProfileHWDevice *device)
+hyscan_gtk_profile_editor_hw_device_new (HyScanProfileHWDevice *device)
 {
-  return g_object_new (HYSCAN_TYPE_GTK_PROFILE_HW_DEVICE_EDITOR,
+  return g_object_new (HYSCAN_TYPE_GTK_PROFILE_EDITOR_HW_DEVICE,
                        "device", device,
                        NULL);
 }
 
+/*
+ * hyscan_gtk_profile_editor_hw_device_get_device:
+ * @self: редактор устройства
+ *
+ * Returns: (transfer full): HyScanProfileHWDevice. При этом нельзя что-либо менять
+ * в устройстве, т.к. редактор об этом не узнает.
+ */
 HyScanProfileHWDevice *
-hyscan_gtk_profile_hw_device_editor_get_device (HyScanGtkProfileHWDeviceEditor *self)
+hyscan_gtk_profile_editor_hw_device_get_device (HyScanGtkProfileEditorHWDevice *self)
 {
-  g_return_val_if_fail (HYSCAN_IS_GTK_PROFILE_HW_DEVICE_EDITOR (self), NULL);
+  g_return_val_if_fail (HYSCAN_IS_GTK_PROFILE_EDITOR_HW_DEVICE (self), NULL);
 
   return g_object_ref (self->priv->device);
 }

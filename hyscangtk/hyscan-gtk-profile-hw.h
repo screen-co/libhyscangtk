@@ -1,6 +1,6 @@
 /* hyscan-gtk-profile-hw.h
  *
- * Copyright 2019 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
+ * Copyright 2019-2020 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
  * This file is part of HyScanGtk.
  *
@@ -37,7 +37,6 @@
 
 #include "hyscan-gtk-profile.h"
 #include <hyscan-profile-hw.h>
-
 
 G_BEGIN_DECLS
 

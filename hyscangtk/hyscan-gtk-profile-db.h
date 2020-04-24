@@ -1,6 +1,6 @@
 /* hyscan-gtk-profile-db.h
  *
- * Copyright 2019 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
+ * Copyright 2019-2020 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
  * This file is part of HyScanGtk.
  *
@@ -54,8 +54,6 @@ typedef struct _HyScanGtkProfileDBClass HyScanGtkProfileDBClass;
 struct _HyScanGtkProfileDB
 {
   HyScanGtkProfile parent_instance;
-
-  // HyScanGtkProfileDBPrivate *priv;
 };
 
 struct _HyScanGtkProfileDBClass

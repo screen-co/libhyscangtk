@@ -1,6 +1,6 @@
-/* hyscan-gtk-profile-hw.h
+/* hyscan-gtk-profile-hw.c
  *
- * Copyright 2019 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
+ * Copyright 2019-2020 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
  * This file is part of HyScanGtk.
  *
@@ -131,8 +131,7 @@ hyscan_gtk_profile_hw_new_profile (HyScanGtkProfile *parent,
   HyScanGtkProfileHW *self = HYSCAN_GTK_PROFILE_HW (parent);
   HyScanProfileHW *profile;
 
-  profile = hyscan_profile_hw_new (filename);
-  hyscan_profile_hw_set_driver_paths (profile, self->priv->drivers);
+  profile = hyscan_profile_hw_new (filename, self->priv->drivers);
 
   return HYSCAN_PROFILE (profile);
 }
@@ -147,8 +146,9 @@ hyscan_gtk_profile_hw_editor (HyScanGtkProfile *parent,
 
 /*
  * hyscan_gtk_profile_offset_new:
- * @sys: путь к системной папке профилей
+ * @folders: список папок с профилями
  * @drivers: нуль-терминированный список путей с драйверами
+ * @readonly: %TRUE для режима "только чтение и выбор"
  *
  * Returns: (transfer full) виджет профилей оборудования.
  */

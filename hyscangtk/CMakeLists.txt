@@ -33,7 +33,7 @@ add_library (${HYSCAN_GTK_LIBRARY} SHARED
              hyscan-gtk-profile-editor.c
              hyscan-gtk-profile-editor-db.c
              hyscan-gtk-profile-db.c
-             hyscan-gtk-profile-hw-device-editor.c
+             hyscan-gtk-profile-editor-hw-device.c
              hyscan-gtk-profile-editor-hw.c
              hyscan-gtk-profile-hw.c
              hyscan-gtk-profile-editor-offset.c

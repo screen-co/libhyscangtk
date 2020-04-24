@@ -45,13 +45,14 @@
 #include "hyscan-gtk-profile-hw.h"
 #include "hyscan-gtk-profile-offset.h"
 #include <hyscan-async.h>
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 
 #define HYSCAN_GTK_CONNECTOR_DB "db"
 #define HYSCAN_GTK_CONNECTOR_HW_CHK "hw_check"
 #define HYSCAN_GTK_CONNECTOR_HW "hw"
 #define HYSCAN_GTK_CONNECTOR_BIND "bind"
 #define HYSCAN_GTK_CONNECTOR_OF "offset"
+
 enum
 {
   PROP_0,
@@ -252,15 +253,12 @@ static void
 hyscan_gtk_connector_make_intro_page (HyScanGtkConnector *self)
 {
   GtkWidget *box, *label;
-  // GtkWidget *button;
 
   box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
 
   label = gtk_label_new (_("Welcome to Connection Manager"));
-  // button = gtk_button_new_with_label(_("Restore previous connection"));
 
   gtk_box_pack_start (GTK_BOX (box), label, TRUE, FALSE, 0);
-  // gtk_box_pack_start (GTK_BOX (box), button, FALSE, FALSE, 0);
   gtk_widget_set_halign (box, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (box, GTK_ALIGN_CENTER);
 
@@ -310,7 +308,7 @@ hyscan_gtk_connector_make_offset_page (HyScanGtkConnector *self)
 static void
 hyscan_gtk_connector_make_confirm_page (HyScanGtkConnector *self)
 {
-  GtkWidget *page = gtk_label_new ("Review your selections");
+  GtkWidget *page = gtk_label_new (_("Review your selections"));
 
   gtk_assistant_append_page (GTK_ASSISTANT (self), page);
   gtk_assistant_set_page_type (GTK_ASSISTANT (self), page, GTK_ASSISTANT_PAGE_CONFIRM);
@@ -353,7 +351,6 @@ hyscan_gtk_connector_selected_db (HyScanGtkProfile   *page,
       self->priv->db_profile = g_object_ref (profile);
       self->priv->db_profile_file = g_strdup (hyscan_profile_get_file (profile));
     }
-
 
   gtk_assistant_set_page_complete (GTK_ASSISTANT (self), GTK_WIDGET (page), profile != NULL);
 }
@@ -479,7 +476,6 @@ hyscan_gtk_connector_done_hw (HyScanGtkConnector *self,
                        priv->control, NULL,
                        (HyScanAsyncResult)hyscan_gtk_connector_done_bind, self);
 }
-
 
 static void
 hyscan_gtk_connector_done_bind (HyScanGtkConnector *self,
