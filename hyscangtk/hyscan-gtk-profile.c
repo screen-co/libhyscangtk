@@ -276,9 +276,14 @@ hyscan_gtk_profile_get_files (const gchar *folder,
 
   if (!g_file_test (folder, G_FILE_TEST_IS_DIR | G_FILE_TEST_EXISTS))
     {
+    #if G_OS_UNIX
       gint flags = S_IRUSR | S_IWUSR | S_IXUSR |
                    S_IRGRP | S_IWGRP | S_IXGRP |
                    S_IROTH | S_IXOTH;
+    #else
+      gint flags = 0;
+    #endif
+
       if (!create)
         {
           g_warning ("HyScanGtkProfile: directory %s doesn't exist", folder);
