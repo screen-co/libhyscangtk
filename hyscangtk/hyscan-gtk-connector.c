@@ -40,18 +40,12 @@
  * Имеет ряд недостатков. Увы.
  */
 
-#include "hyscan-gtk-connector.h"
-#include "hyscan-gtk-profile-db.h"
-#include "hyscan-gtk-profile-hw.h"
-#include "hyscan-gtk-profile-offset.h"
+#include <hyscan-gtk-connector.h>
+#include <hyscan-gtk-profile-db.h>
+#include <hyscan-gtk-profile-hw.h>
+#include <hyscan-gtk-profile-offset.h>
 #include <hyscan-async.h>
 #include <glib/gi18n-lib.h>
-
-#define HYSCAN_GTK_CONNECTOR_DB "db"
-#define HYSCAN_GTK_CONNECTOR_HW_CHK "hw_check"
-#define HYSCAN_GTK_CONNECTOR_HW "hw"
-#define HYSCAN_GTK_CONNECTOR_BIND "bind"
-#define HYSCAN_GTK_CONNECTOR_OF "offset"
 
 enum
 {
