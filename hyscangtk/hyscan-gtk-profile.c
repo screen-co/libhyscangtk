@@ -100,6 +100,9 @@ struct _HyScanGtkProfilePrivate
   GtkListBox    *list_box;         /* Виджет со списком профилей. */
   GtkWidget     *action_bar;       /* Контейнер с действиями над профилями. */
 
+  GtkWidget     *remove;           /* Кнопка. */
+  GtkWidget     *config;           /* Кнопка. */
+
   HyScanProfile *selected_profile; /* Выбранный профиль. */
 };
 
@@ -190,9 +193,12 @@ hyscan_gtk_profile_init (HyScanGtkProfile *self)
   g_signal_connect_swapped (config, "clicked", G_CALLBACK (hyscan_gtk_profile_config), self);
 
   priv->action_bar = gtk_action_bar_new ();
-  gtk_action_bar_pack_start (GTK_ACTION_BAR (priv->action_bar), config);
   gtk_action_bar_pack_start (GTK_ACTION_BAR (priv->action_bar), add);
+  gtk_action_bar_pack_start (GTK_ACTION_BAR (priv->action_bar), config);
   gtk_action_bar_pack_start (GTK_ACTION_BAR (priv->action_bar), remove);
+
+  priv->remove = remove;
+  priv->config = config;
 
   gtk_grid_attach (GTK_GRID (self), GTK_WIDGET (priv->list_box), 0, 0, 1, 1);
   gtk_grid_attach (GTK_GRID (self), GTK_WIDGET (priv->action_bar), 0, 1, 1, 1);
@@ -449,14 +455,18 @@ hyscan_gtk_profile_row_selected (GtkListBox    *box,
                                  gpointer       user_data)
 {
   HyScanGtkProfile *self = HYSCAN_GTK_PROFILE (user_data);
+  HyScanGtkProfilePrivate *priv = self->priv;
   HyScanProfile *profile = NULL;
 
   if (row != NULL)
     profile = g_object_get_data (G_OBJECT (row), HYSCAN_GTK_PROFILE_PROFILE);
 
-  g_clear_object (&self->priv->selected_profile);
+  g_clear_object (&priv->selected_profile);
   if (profile != NULL)
-    self->priv->selected_profile = g_object_ref (profile);
+    priv->selected_profile = g_object_ref (profile);
+
+  gtk_widget_set_sensitive (priv->remove, row != NULL);
+  gtk_widget_set_sensitive (priv->config, row != NULL);
 
   g_signal_emit (self, hyscan_gtk_profile_signals[SIGNAL_SELECTED], 0, profile);
 }
