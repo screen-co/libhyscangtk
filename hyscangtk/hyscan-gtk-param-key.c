@@ -217,16 +217,13 @@ static void
 hyscan_gtk_param_key_object_constructed (GObject *object)
 {
   HyScanGtkParamKey *self = HYSCAN_GTK_PARAM_KEY (object);
-  GtkGrid *grid = GTK_GRID (self);
   HyScanGtkParamKeyPrivate *priv = self->priv;
-  gboolean sensitive;
+  gboolean sensitive = (priv->key->access & HYSCAN_DATA_SCHEMA_ACCESS_WRITE);;
 
   G_OBJECT_CLASS (hyscan_gtk_param_key_parent_class)->constructed (object);
 
   priv->label = gtk_label_new (priv->key->name);
   priv->value = hyscan_gtk_param_key_make_editor (self);
-
-  sensitive = (priv->key->access & HYSCAN_DATA_SCHEMA_ACCESS_WRITE);
 
   gtk_widget_set_sensitive (priv->label, sensitive);
   gtk_widget_set_sensitive (priv->value, sensitive);
@@ -234,15 +231,19 @@ hyscan_gtk_param_key_object_constructed (GObject *object)
   if (priv->key->description != NULL)
     gtk_widget_set_tooltip_text (priv->label, priv->key->description);
 
+  gtk_label_set_xalign (priv->label, 1.0);
   gtk_widget_set_halign (priv->label, GTK_ALIGN_END);
   gtk_widget_set_hexpand (priv->label, FALSE);
-  gtk_widget_set_halign (priv->value, GTK_ALIGN_START);
+
+  if (priv->key->type == HYSCAN_DATA_SCHEMA_KEY_BOOLEAN)
+    gtk_widget_set_halign (priv->value, GTK_ALIGN_START);
+  else
+    gtk_widget_set_halign (priv->value, GTK_ALIGN_FILL);
   gtk_widget_set_hexpand (priv->value, TRUE);
 
-  gtk_grid_set_column_homogeneous (grid, TRUE);
-  gtk_grid_set_column_spacing (grid, 12);
-  gtk_grid_attach (grid, priv->label, 0, 0, 1, 1);
-  gtk_grid_attach (grid, priv->value, 1, 0, 1, 1);
+  gtk_grid_set_column_spacing (GTK_GRID (self), 12);
+  gtk_grid_attach (GTK_GRID (self), priv->label, 0, 0, 1, 1);
+  gtk_grid_attach (GTK_GRID (self), priv->value, 1, 0, 1, 1);
 
   gtk_widget_set_hexpand (GTK_WIDGET (self), TRUE);
 
@@ -1029,12 +1030,7 @@ hyscan_gtk_param_key_get (HyScanGtkParamKey *pkey)
  * @pkey: указатель на #HyScanGtkParamKey
  * @group #GtkSizeGroup
 
- * Функция добавляет виджет значения к #GtkSizeGroup. Особенностью является то,
- * что в случае ключа %HYSCAN_DATA_SCHEMA_KEY_BOOLEAN горизонтальная группа
- * игнорируется. Также нужно понимать, что если #GtkSizeGroup контроллирует оба
- * размера, частично проигнорировать запросы размеров не получится. Поэтому
- * рекомендуется передавать такой #GtkSizeGroup, который не регулирует
- * вертикальный размер.
+ * Функция добавляет виджет названия к #GtkSizeGroup.
  */
 void
 hyscan_gtk_param_key_add_to_size_group (HyScanGtkParamKey *self,
@@ -1043,6 +1039,7 @@ hyscan_gtk_param_key_add_to_size_group (HyScanGtkParamKey *self,
   HyScanGtkParamKeyPrivate *priv;
 
   g_return_if_fail (HYSCAN_IS_GTK_PARAM_KEY (self));
+
   priv = self->priv;
 
   if (priv->hsize != NULL)
@@ -1051,10 +1048,11 @@ hyscan_gtk_param_key_add_to_size_group (HyScanGtkParamKey *self,
       g_clear_object (&priv->hsize);
     }
 
-  priv->hsize = g_object_ref (group);
-
-  if (priv->key->type != HYSCAN_DATA_SCHEMA_KEY_BOOLEAN)
-    gtk_size_group_add_widget (priv->hsize, priv->value);
+  if (group != NULL)
+    {
+      gtk_size_group_add_widget (group, priv->label);
+      priv->hsize = g_object_ref (group);
+    }
 }
 
 /**

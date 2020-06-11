@@ -42,6 +42,7 @@
 #include "hyscan-gtk-profile-editor-hw.h"
 #include <hyscan-driver.h>
 #include <hyscan-gtk-param-tree.h>
+#include <hyscan-gtk-param-list.h>
 #include <glib/gi18n-lib.h>
 
 #define WIDGET_RESOURCE_UI "/org/hyscan/gtk/hyscan-gtk-profile-editor-hw.ui"
@@ -316,7 +317,7 @@ hyscan_gtk_profile_editor_hw_add_helper (HyScanGtkProfileEditorHW *self,
   const gchar *id;
 
   id = hyscan_profile_hw_device_get_group (device);
-  param = hyscan_gtk_param_tree_new (HYSCAN_PARAM (device), NULL, FALSE);
+  param = hyscan_gtk_param_list_new_full (HYSCAN_PARAM (device), NULL, FALSE);
   gtk_widget_show_all (param);
 
   g_hash_table_insert (priv->known, g_strdup (id), g_object_ref (device));

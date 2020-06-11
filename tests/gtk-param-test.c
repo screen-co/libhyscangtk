@@ -136,11 +136,8 @@ make_window (HyScanParam * backend,
   GtkWidget *frontend;
 
   /* Виджет отображения. */
-  frontend = g_object_new (view_type,
-                           "param", backend,
-                           "hidden", hidden,
-                           "root", root,
-                           NULL);
+  frontend = g_object_new (view_type, NULL);
+  hyscan_gtk_param_set_param (HYSCAN_GTK_PARAM (frontend), backend, root, hidden);
   frontend_list = g_list_prepend (frontend_list, frontend);
 
   hyscan_gtk_param_set_watch_period (HYSCAN_GTK_PARAM (frontend), 1000);

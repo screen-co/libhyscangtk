@@ -58,10 +58,16 @@ struct _HyScanGtkParam
   HyScanGtkParamPrivate *priv;
 };
 
+/**
+ * HyScanGtkParamClass:
+ * @clear: метод очистки всех виджетов
+ * @update: метод обновления всех виджетов. 
+ */
 struct _HyScanGtkParamClass
 {
   GtkGridClass  parent_class;
 
+  void        (*clear)  (HyScanGtkParam *self);
   void        (*update) (HyScanGtkParam *self);
 };
 
