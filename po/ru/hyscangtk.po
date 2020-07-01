@@ -85,7 +85,7 @@ msgid "Description"
 msgstr "Описание"
 
 #: hyscangtk/hyscan-gtk-profile-editor-hw.c:217
-#: tmp/hyscan-gtk-profile-editor-hw-device.ui.h:1
+#: tmp/hyscan-gtk-device-auto.ui.h:1
 msgid "Device name"
 msgstr "Название устройства"
 
@@ -161,15 +161,15 @@ msgstr "Не выбрано"
 msgid "Profile name"
 msgstr "Название профиля"
 
-#: tmp/hyscan-gtk-profile-editor-hw-device.ui.h:2
+#: tmp/hyscan-gtk-device-auto.ui.h:2
 msgid "Driver"
 msgstr "Драйвер"
 
-#: tmp/hyscan-gtk-profile-editor-hw-device.ui.h:3
+#: tmp/hyscan-gtk-device-auto.ui.h:3
 msgid "URI"
 msgstr "URI"
 
-#: tmp/hyscan-gtk-profile-editor-hw-device.ui.h:4
+#: tmp/hyscan-gtk-device-auto.ui.h:4
 msgid "Connection parameters"
 msgstr "Параметры подключения"
 

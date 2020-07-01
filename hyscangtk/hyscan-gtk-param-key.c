@@ -56,7 +56,6 @@
 #include <math.h>
 
 #define DESCRIPTION_MARKUP "<span style=\"italic\">\%s</span>"
-#define TEXT_WIDTH 24
 #define INVALID "HyScanGtkParam: invalid key"
 
 #define time_view(view) ((view) == HYSCAN_DATA_SCHEMA_VIEW_DATE || \
@@ -231,7 +230,7 @@ hyscan_gtk_param_key_object_constructed (GObject *object)
   if (priv->key->description != NULL)
     gtk_widget_set_tooltip_text (priv->label, priv->key->description);
 
-  gtk_label_set_xalign (priv->label, 1.0);
+  gtk_label_set_xalign (GTK_LABEL (priv->label), 1.0);
   gtk_widget_set_halign (priv->label, GTK_ALIGN_END);
   gtk_widget_set_hexpand (priv->label, FALSE);
 
@@ -418,8 +417,6 @@ hyscan_gtk_param_key_make_editor_integer (HyScanDataSchema    *schema,
                          "base", base,                  /* HyScanGtkSpinButton */
                          "adjustment", adjustment,      /* GtkSpinButton */
                          "climb-rate", 1.0,             /* GtkSpinButton */
-                         "width-chars", TEXT_WIDTH,     /* GtkEntry */
-                         "max-width-chars", TEXT_WIDTH, /* GtkEntry */
                          NULL);
 
   g_clear_pointer (&_def, g_variant_unref);
@@ -501,9 +498,6 @@ hyscan_gtk_param_key_make_editor_double (HyScanDataSchema    *schema,
   adjustment = gtk_adjustment_new (def, min, max, step, step, step);
   editor = gtk_spin_button_new (adjustment, step, digits);
 
-  gtk_entry_set_width_chars (GTK_ENTRY (editor), TEXT_WIDTH);
-  gtk_entry_set_max_width_chars (GTK_ENTRY (editor), TEXT_WIDTH);
-
   g_clear_pointer (&_def, g_variant_unref);
   g_clear_pointer (&_min, g_variant_unref);
   g_clear_pointer (&_max, g_variant_unref);
@@ -548,7 +542,6 @@ hyscan_gtk_param_key_make_editor_string (HyScanDataSchema    *schema,
   const gchar *def = "";
 
   editor = gtk_entry_new ();
-  gtk_entry_set_max_width_chars (GTK_ENTRY (editor), TEXT_WIDTH);
 
   _def = hyscan_data_schema_key_get_default (schema, key->id);
   if (_def != NULL)

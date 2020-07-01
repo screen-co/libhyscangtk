@@ -12,7 +12,8 @@
     <property name="can_focus">False</property>
     <property name="icon_name">list-remove-symbolic</property>
   </object>
-  <template class="HyScanGtkProfileEditorHW" parent="GtkGrid">
+  <!-- <template class="HyScanGtkProfileEditorHW" parent="GtkGrid"> -->
+  <template class="HyScanGtkProfileEditorHW" parent="HyScanGtkProfileEditor">
     <property name="width_request">800</property>
     <property name="height_request">600</property>
     <property name="visible">True</property>
@@ -94,7 +95,7 @@
                     <signal name="clicked" handler="remove_device_clicked" swapped="yes"/>
                   </object>
                   <packing>
-                    <property name="position">0</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
               </object>
@@ -166,106 +167,4 @@
       </packing>
     </child>
   </template>
-  <object class="GtkPopover" id="popover">
-    <property name="can_focus">False</property>
-    <property name="relative_to">add</property>
-    <property name="position">bottom</property>
-    <child>
-      <object class="GtkGrid">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="row_spacing">6</property>
-        <property name="column_spacing">6</property>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">end</property>
-            <property name="label" translatable="yes">Device name</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">end</property>
-            <property name="label" translatable="yes">Driver</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">end</property>
-            <property name="label" translatable="yes">URI</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="new_add">
-            <property name="label" translatable="yes">Add</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <signal name="clicked" handler="new_device_add_clicked" swapped="yes"/>
-            <style>
-              <class name="add_device"/>
-            </style>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">3</property>
-            <property name="width">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="new_name">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="hexpand">True</property>
-            <signal name="changed" handler="new_device_name_changed" swapped="yes"/>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="new_uri">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="hexpand">True</property>
-            <signal name="changed" handler="new_device_uri_changed" swapped="yes"/>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkComboBoxText" id="new_driver">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="hexpand">True</property>
-            <signal name="changed" handler="new_device_driver_changed" swapped="yes"/>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">1</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
 </interface>

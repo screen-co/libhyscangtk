@@ -40,13 +40,18 @@
  */
 
 #include "hyscan-gtk-profile-editor-hw.h"
-#include <hyscan-driver.h>
+#include <hyscan-gtk-device-auto.h>
+#include <hyscan-gtk-device-manual.h>
 #include <hyscan-gtk-param-tree.h>
 #include <hyscan-gtk-param-list.h>
 #include <glib/gi18n-lib.h>
 
 #define WIDGET_RESOURCE_UI "/org/hyscan/gtk/hyscan-gtk-profile-editor-hw.ui"
 #define HYSCAN_GTK_PROFILE_HW_DEVICE "hyscan-gtk-profile-hw-device"
+#define gtk_window_set_transient_for_self(window, self)    \
+          gtk_window_set_transient_for (                   \
+            GTK_WINDOW (window), GTK_WINDOW (              \
+              gtk_widget_get_toplevel (GTK_WIDGET (self))))
 
 enum
 {
@@ -83,13 +88,9 @@ struct _HyScanGtkProfileEditorHWPrivate
   GtkEntry              *add;          /* Кнопка добавления устройства. */
   GtkEntry              *remove;       /* Кнопка удаления устройства. */
 
-  GtkPopover            *popover;      /* Всплывающее окно добавления. */
-  GtkEntry              *new_name;     /* Название нового устройства. */
-  GtkComboBoxText       *new_driver;   /* Драйвер нового устройства. */
-  GtkEntry              *new_uri;      /* Адрес нового устройства. */
-  GtkButton             *new_add;      /* Кнопка подтверждения выбора. */
+  GtkWidget             *dialog;       /* Диалог нового устройства. */
 
-  GHashTable            *known;       /* Имеющиеся устройства {gchar *: HyScanProfileHWDevice *}. */
+  GHashTable            *known;        /* Имеющиеся устройства {gchar *: HyScanProfileHWDevice *}. */
   HyScanProfileHWDevice *selected_device;
 };
 
@@ -104,13 +105,12 @@ static GtkWidget *    hyscan_gtk_profile_editor_hw_make_row           (HyScanPro
 static void           hyscan_gtk_profile_editor_hw_select_helper      (HyScanGtkProfileEditorHW *self,
                                                                        HyScanProfileHWDevice    *device);
 static void           hyscan_gtk_profile_editor_hw_add_helper         (HyScanGtkProfileEditorHW *self,
-                                                                       HyScanProfileHWDevice    *device);
+                                                                       HyScanProfileHWDevice    *device,
+                                                                       gboolean                  new_device);
 static void           hyscan_gtk_profile_editor_hw_name_changed       (HyScanGtkProfileEditorHW *self);
-static void           hyscan_gtk_profile_editor_hw_new_device_sanity  (HyScanGtkProfileEditorHW *self);
 
 static void           hyscan_gtk_profile_editor_hw_remove             (HyScanGtkProfileEditorHW *self);
-static void           hyscan_gtk_profile_editor_hw_add_start          (HyScanGtkProfileEditorHW *self);
-static void           hyscan_gtk_profile_editor_hw_add_ok             (HyScanGtkProfileEditorHW *self);
+static void           hyscan_gtk_profile_editor_hw_add                (HyScanGtkProfileEditorHW *self);
 
 static void           hyscan_gtk_profile_editor_hw_update_list        (HyScanGtkProfileEditorHW *self);
 static void           hyscan_gtk_profile_editor_hw_selected           (GtkListBox               *box,
@@ -136,29 +136,24 @@ hyscan_gtk_profile_editor_hw_class_init (HyScanGtkProfileEditorHWClass *klass)
   gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHW, stack);
   gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHW, add);
   gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHW, remove);
-  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHW, popover);
-  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHW, new_name);
-  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHW, new_driver);
-  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHW, new_uri);
-  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkProfileEditorHW, new_add);
 
   gtk_widget_class_bind_template_callback_full (wclass,
     "row_selected", (GCallback)hyscan_gtk_profile_editor_hw_selected);
   gtk_widget_class_bind_template_callback_full (wclass,
     "profile_name_changed", (GCallback)hyscan_gtk_profile_editor_hw_name_changed);
   gtk_widget_class_bind_template_callback_full (wclass,
-    "add_device_clicked", (GCallback)hyscan_gtk_profile_editor_hw_add_start);
+    "add_device_clicked", (GCallback)hyscan_gtk_profile_editor_hw_add);
   gtk_widget_class_bind_template_callback_full (wclass,
     "remove_device_clicked", (GCallback)hyscan_gtk_profile_editor_hw_remove);
 
-  gtk_widget_class_bind_template_callback_full (wclass,
-    "new_device_name_changed", (GCallback)hyscan_gtk_profile_editor_hw_new_device_sanity);
-  gtk_widget_class_bind_template_callback_full (wclass,
-    "new_device_driver_changed", (GCallback)hyscan_gtk_profile_editor_hw_new_device_sanity);
-  gtk_widget_class_bind_template_callback_full (wclass,
-    "new_device_uri_changed", (GCallback)hyscan_gtk_profile_editor_hw_new_device_sanity);
-  gtk_widget_class_bind_template_callback_full (wclass,
-    "new_device_add_clicked", (GCallback)hyscan_gtk_profile_editor_hw_add_ok);
+  // gtk_widget_class_bind_template_callback_full (wclass,
+  //   "new_device_name_changed", (GCallback)hyscan_gtk_profile_editor_hw_new_device_sanity);
+  // gtk_widget_class_bind_template_callback_full (wclass,
+  //   "new_device_driver_changed", (GCallback)hyscan_gtk_profile_editor_hw_new_device_sanity);
+  // gtk_widget_class_bind_template_callback_full (wclass,
+  //   "new_device_uri_changed", (GCallback)hyscan_gtk_profile_editor_hw_new_device_sanity);
+  // gtk_widget_class_bind_template_callback_full (wclass,
+  //   "new_device_add_clicked", (GCallback)hyscan_gtk_profile_editor_hw_add_ok);
 
 
   g_object_class_install_property (oclass, PROP_DRIVERS,
@@ -216,28 +211,6 @@ hyscan_gtk_profile_editor_hw_object_constructed (GObject *object)
   if (name != NULL)
     gtk_entry_set_text (priv->profile_name, name);
 
-  /* Заполняем комбобокс с драйверами. */
-  {
-    GArray *driver_list = g_array_new (TRUE, FALSE, sizeof(gchar*));
-    gchar **path, **drivers, **driv;
-
-    /* Из каждого пути получаем список доступных драйверов. */
-    for (path = priv->drivers; path != NULL && *path != NULL; ++path)
-      {
-        drivers = hyscan_driver_list (*path);
-        for (driv = drivers; driv != NULL && *driv != NULL; ++driv)
-          g_array_append_val (driver_list, *driv);
-
-        g_free (drivers);
-      }
-
-    /* Для красоты сортируем список драйверов, запихиваем его в комбобокс. */
-    g_array_sort (driver_list, (GCompareFunc)g_strcmp0);
-    drivers = (gchar**)g_array_free (driver_list, FALSE);
-    for (driv = drivers; driv != NULL && *driv != NULL; ++driv)
-      gtk_combo_box_text_insert (priv->new_driver, -1, *driv, *driv);
-  }
-
   /* */
   {
     GList *devices, *link;
@@ -246,7 +219,7 @@ hyscan_gtk_profile_editor_hw_object_constructed (GObject *object)
     for (link = devices; link != NULL; link = link->next)
       {
         HyScanProfileHWDevice *device = (HyScanProfileHWDevice*)link->data;
-        hyscan_gtk_profile_editor_hw_add_helper (self, device);
+        hyscan_gtk_profile_editor_hw_add_helper (self, device, FALSE);
       }
 
     g_list_free (devices);
@@ -310,11 +283,15 @@ hyscan_gtk_profile_editor_hw_select_helper (HyScanGtkProfileEditorHW *self,
 
 static void
 hyscan_gtk_profile_editor_hw_add_helper (HyScanGtkProfileEditorHW *self,
-                                         HyScanProfileHWDevice    *device)
+                                         HyScanProfileHWDevice    *device,
+                                         gboolean                  new_device)
 {
   HyScanGtkProfileEditorHWPrivate *priv = self->priv;
   GtkWidget *param;
   const gchar *id;
+
+  if (new_device)
+    hyscan_profile_hw_add (priv->profile, device);
 
   id = hyscan_profile_hw_device_get_group (device);
   param = hyscan_gtk_param_list_new_full (HYSCAN_PARAM (device), NULL, FALSE);
@@ -337,28 +314,6 @@ hyscan_gtk_profile_editor_hw_name_changed (HyScanGtkProfileEditorHW *self)
   hyscan_gtk_profile_editor_check_sanity (HYSCAN_GTK_PROFILE_EDITOR (self));
 }
 
-
-/* Функция настривает активность кнопки добавления устройства. */
-static void
-hyscan_gtk_profile_editor_hw_new_device_sanity (HyScanGtkProfileEditorHW *self)
-{
-  const gchar *name, *uri, *driver;
-  gboolean sane = TRUE;
-
-  name = gtk_entry_get_text (self->priv->new_name);
-  uri = gtk_entry_get_text (self->priv->new_uri);
-  driver = gtk_combo_box_get_active_id (GTK_COMBO_BOX (self->priv->new_driver));
-
-  if (name == NULL || name[0] == '\0' ||
-      uri == NULL || uri[0] == '\0' ||
-      driver == NULL || driver[0] == '\0')
-    {
-      sane = FALSE;
-    }
-
-  gtk_widget_set_sensitive (GTK_WIDGET (self->priv->new_add), sane);
-}
-
 /* Функция удаления устройства. */
 static void
 hyscan_gtk_profile_editor_hw_remove (HyScanGtkProfileEditorHW *self)
@@ -376,51 +331,56 @@ hyscan_gtk_profile_editor_hw_remove (HyScanGtkProfileEditorHW *self)
   hyscan_gtk_profile_editor_hw_update_list (self);
 }
 
-/* Показ поповера добавления устройства. */
 static void
-hyscan_gtk_profile_editor_hw_add_start (HyScanGtkProfileEditorHW *self)
-{
-  HyScanGtkProfileEditorHWPrivate *priv = self->priv;
-
-  hyscan_gtk_profile_editor_hw_new_device_sanity (self);
-
-  gtk_popover_popup (priv->popover);
-}
-
-/* Обработчик добавления устройства. */
-static void
-hyscan_gtk_profile_editor_hw_add_ok (HyScanGtkProfileEditorHW *self)
+hyscan_gtk_profile_editor_hw_add (HyScanGtkProfileEditorHW *self)
 {
   HyScanGtkProfileEditorHWPrivate *priv = self->priv;
   HyScanProfileHWDevice *device;
-  const gchar *name, *uri, *driver;
+  GtkWidget *dialog;
+  gint response;
 
-  name = gtk_entry_get_text (priv->new_name);
-  uri = gtk_entry_get_text (priv->new_uri);
-  driver = gtk_combo_box_get_active_id (GTK_COMBO_BOX (priv->new_driver));
+  if (priv->dialog == NULL)
+    {
+      dialog = hyscan_gtk_device_auto_new (priv->drivers);
+      gtk_window_set_transient_for_self (dialog, self);
 
-  /* Создаем и наполняем профиль. */
-  device = hyscan_profile_hw_device_new (priv->drivers);
-  hyscan_profile_hw_device_set_name (device, name);
-  hyscan_profile_hw_device_set_uri (device, uri);
-  hyscan_profile_hw_device_set_driver (device, driver);
-  hyscan_profile_hw_device_update (device);
+      priv->dialog = dialog;
+    }
 
-  /* Добавляем в профиль.*/
-  hyscan_profile_hw_add (priv->profile, device);
+  gtk_widget_show_all (priv->dialog);
+  response = gtk_dialog_run (GTK_DIALOG (priv->dialog));
+  gtk_widget_hide (priv->dialog);
 
-  /* Добавляем во внутренние структуры.*/
-  hyscan_gtk_profile_editor_hw_add_helper (self, device);
-  hyscan_gtk_profile_editor_hw_update_list (self);
+  /* Ok - добавление выбранного устройства. */
+  if (GTK_RESPONSE_OK == response)
+    {
+      HyScanGtkDeviceAuto *finder = HYSCAN_GTK_DEVICE_AUTO (priv->dialog);
+      device = hyscan_gtk_device_auto_get_device (finder);
+      hyscan_gtk_profile_editor_hw_add_helper (self, device, TRUE);
+      hyscan_gtk_profile_editor_hw_update_list (self);
+      return;
+    }
 
-  /* Очищаем поля. */
-  gtk_entry_set_text (priv->new_name, "");
-  gtk_entry_set_text (priv->new_uri, "");
-  gtk_combo_box_set_active_id (GTK_COMBO_BOX (priv->new_driver), NULL);
-  hyscan_gtk_profile_editor_hw_new_device_sanity (self);
+  /* Всё, что не REJECT -- отмена и выход. */
+  if (GTK_RESPONSE_REJECT != response)
+    return;
 
-  /* Прячем поповер. */
-  gtk_popover_popdown (priv->popover);
+  /* REJECT -- ручной ввод параметров. */
+  dialog = hyscan_gtk_device_manual_new (priv->drivers);
+  gtk_window_set_transient_for_self (dialog, self);
+
+  gtk_widget_show_all (dialog);
+
+  response = gtk_dialog_run (GTK_DIALOG (dialog));
+  if (GTK_RESPONSE_OK == response)
+    {
+      HyScanGtkDeviceManual *finder = HYSCAN_GTK_DEVICE_MANUAL (dialog);
+      device = hyscan_gtk_device_manual_get_device (finder);
+      hyscan_gtk_profile_editor_hw_add_helper (self, device, TRUE);
+      hyscan_gtk_profile_editor_hw_update_list (self);
+    }
+
+  gtk_widget_destroy (dialog);
 }
 
 /* Функция обновляет список. */
