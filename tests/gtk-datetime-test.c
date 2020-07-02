@@ -26,7 +26,7 @@ notify_time (GObject    *object,
   gint64 val = -1;
 
   g_object_get (object, pspec->name, &val, NULL);
-  g_message ("\"notify::time\": %p, %li", object, val);
+  g_message ("\"notify::%s\": %li from: %p", pspec->name, val, object);
 }
 
 /* Функция создает виджет и упаковывает его в бокс. */
@@ -35,11 +35,9 @@ create_and_pack (HyScanGtkDateTimeMode  mode,
                  GtkWidget             *box)
 {
   GtkWidget *widget = hyscan_gtk_datetime_new (mode);
-  GtkWidget *separator = gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
 
   g_signal_connect (widget, "notify::time", G_CALLBACK (notify_time), NULL);
   gtk_box_pack_start (GTK_BOX (box), widget, TRUE, TRUE, 0);
-  gtk_box_pack_start (GTK_BOX (box), separator, TRUE, TRUE, 0);
 
   return widget;
 }
@@ -51,7 +49,7 @@ main (int argc, char **argv)
 
   gtk_init (&argc, &argv);
 
-  box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
+  box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
 
   hs_date = create_and_pack (HYSCAN_GTK_DATETIME_DATE, box);
   hs_time = create_and_pack (HYSCAN_GTK_DATETIME_TIME, box);
@@ -62,10 +60,10 @@ main (int argc, char **argv)
   gtk_box_pack_start (GTK_BOX (box), button, FALSE, FALSE, 0);
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_container_add (GTK_CONTAINER (window), box);
-
   g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
+  gtk_widget_set_size_request (window, 400, 400);
 
+  gtk_container_add (GTK_CONTAINER (window), box);
   gtk_widget_show_all (window);
   gtk_main ();
 

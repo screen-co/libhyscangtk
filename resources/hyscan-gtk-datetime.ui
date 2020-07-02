@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <template class="HyScanGtkDateTime" parent="GtkToggleButton">
@@ -9,17 +9,17 @@
     <signal name="toggled" handler="hyscan_gtk_datetime_start_edit" swapped="no"/>
   </template>
   <object class="GtkAdjustment" id="hour">
-    <property name="upper">100</property>
+    <property name="upper">23</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="minute">
-    <property name="upper">100</property>
+    <property name="upper">59</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="second">
-    <property name="upper">100</property>
+    <property name="upper">59</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
@@ -32,6 +32,10 @@
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="margin_left">3</property>
+        <property name="margin_right">3</property>
+        <property name="margin_top">3</property>
+        <property name="margin_bottom">3</property>
         <property name="hexpand">True</property>
         <property name="vexpand">True</property>
         <property name="orientation">vertical</property>
@@ -40,11 +44,13 @@
           <object class="GtkCalendar" id="date">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="no_show_all">True</property>
             <property name="hexpand">True</property>
             <property name="vexpand">True</property>
             <property name="year">2020</property>
             <property name="month">5</property>
             <property name="day">8</property>
+            <signal name="day-selected-double-click" handler="gtk_widget_hide" object="popover" swapped="yes"/>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -53,16 +59,20 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="time">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="no_show_all">True</property>
             <property name="spacing">6</property>
             <child>
               <object class="GtkSpinButton">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Hours</property>
                 <property name="hexpand">True</property>
-                <property name="adjustment">second</property>
+                <property name="progress_pulse_step">0</property>
+                <property name="adjustment">hour</property>
+                <property name="wrap">True</property>
                 <signal name="output" handler="hyscan_gtk_datetime_output" swapped="no"/>
               </object>
               <packing>
@@ -72,11 +82,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSpinButton">
+              <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="hexpand">True</property>
-                <signal name="output" handler="hyscan_gtk_datetime_output" swapped="no"/>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">:</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -88,7 +97,11 @@
               <object class="GtkSpinButton">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Minutes</property>
                 <property name="hexpand">True</property>
+                <property name="progress_pulse_step">0</property>
+                <property name="adjustment">minute</property>
+                <property name="wrap">True</property>
                 <signal name="output" handler="hyscan_gtk_datetime_output" swapped="no"/>
               </object>
               <packing>
@@ -97,11 +110,54 @@
                 <property name="position">2</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">:</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Seconds</property>
+                <property name="hexpand">True</property>
+                <property name="progress_pulse_step">0</property>
+                <property name="adjustment">second</property>
+                <property name="wrap">True</property>
+                <signal name="output" handler="hyscan_gtk_datetime_output" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label" translatable="yes">OK</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <signal name="clicked" handler="gtk_widget_hide" object="popover" swapped="yes"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>

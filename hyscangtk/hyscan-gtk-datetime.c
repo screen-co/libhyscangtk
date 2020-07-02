@@ -2,14 +2,14 @@
  *
  * Copyright 2018 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  *
- * This file is part of HyScanGui.
+ * This file is part of HyScanGtk.
  *
- * HyScanGui is dual-licensed: you can redistribute it and/or modify
+ * HyScanGtk is dual-licensed: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * HyScanGui is distributed in the hope that it will be useful,
+ * HyScanGtk is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,9 +21,9 @@
  * Contact the Screen LLC in this case - <info@screen-co.ru>.
  */
 
-/* HyScanGui имеет двойную лицензию.
+/* HyScanGtk имеет двойную лицензию.
  *
- * Во-первых, вы можете распространять HyScanGui на условиях Стандартной
+ * Во-первых, вы можете распространять HyScanGtk на условиях Стандартной
  * Общественной Лицензии GNU версии 3, либо по любой более поздней версии
  * лицензии (по вашему выбору). Полные положения лицензии GNU приведены в
  * <http://www.gnu.org/licenses/>.
@@ -41,8 +41,9 @@
  * Временная зона всегда UTC.
  */
 #include "hyscan-gtk-datetime.h"
+#include <glib/gprintf.h>
 
-#define HYSCAN_GTK_DATETIME_STYLE "hyscan-gtk-datetime"
+#define WIDGET_RESOURCE_UI "/org/hyscan/gtk/hyscan-gtk-datetime.ui"
 
 enum
 {
@@ -54,16 +55,16 @@ enum
 struct _HyScanGtkDateTimePrivate
 {
   GDateTime       *dt;         /* Дата и время. */
-
   HyScanGtkDateTimeMode mode;  /* Режим отображения. */
 
-  /* Виджеты. */
   GtkWidget       *popover;    /* Всплывающее окошко. */
+
+  GtkCalendar     *date;       /* Календарь. */
+  GtkWidget       *time;       /* Время. */
 
   GtkAdjustment   *hour;       /* Часы. */
   GtkAdjustment   *minute;     /* Минуты. */
   GtkAdjustment   *second;     /* Секунды. */
-  GtkCalendar     *calendar;   /* Дата. */
 };
 
 static void        hyscan_gtk_datetime_object_set_property  (GObject           *object,
@@ -74,20 +75,11 @@ static void        hyscan_gtk_datetime_object_get_property  (GObject           *
                                                              guint              prop_id,
                                                              GValue            *value,
                                                              GParamSpec        *pspec);
-static void        hyscan_gtk_datetime_object_constructed   (GObject           *object);
 static void        hyscan_gtk_datetime_object_finalize      (GObject           *object);
 
 static void        hyscan_gtk_datetime_start_edit           (HyScanGtkDateTime *self);
 static void        hyscan_gtk_datetime_end_edit             (HyScanGtkDateTime *self,
                                                              GtkWidget         *popover);
-
-static GtkWidget * hyscan_gtk_datetime_make_popover         (HyScanGtkDateTime *self);
-static GtkWidget * hyscan_gtk_datetime_make_time_spin       (HyScanGtkDateTime *self,
-                                                             GtkAdjustment     *adjustment);
-static void        hyscan_gtk_datetime_make_clock           (HyScanGtkDateTime *self,
-                                                             GtkGrid           *grid);
-static void        hyscan_gtk_datetime_make_calendar        (HyScanGtkDateTime *self,
-                                                             GtkGrid           *grid);
 
 static void        hyscan_gtk_datetime_changed              (HyScanGtkDateTime *self,
                                                              GDateTime         *dt);
@@ -101,18 +93,31 @@ static void
 hyscan_gtk_datetime_class_init (HyScanGtkDateTimeClass *klass)
 {
   GObjectClass *oclass = G_OBJECT_CLASS (klass);
+  GtkWidgetClass *wclass = GTK_WIDGET_CLASS (klass);
 
   oclass->set_property = hyscan_gtk_datetime_object_set_property;
   oclass->get_property = hyscan_gtk_datetime_object_get_property;
-  oclass->constructed = hyscan_gtk_datetime_object_constructed;
   oclass->finalize = hyscan_gtk_datetime_object_finalize;
+
+  gtk_widget_class_set_template_from_resource (wclass, WIDGET_RESOURCE_UI);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkDateTime, popover);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkDateTime, date);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkDateTime, time);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkDateTime, hour);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkDateTime, minute);
+  gtk_widget_class_bind_template_child_private (wclass, HyScanGtkDateTime, second);
+
+  gtk_widget_class_bind_template_callback (wclass, hyscan_gtk_datetime_output);
+  gtk_widget_class_bind_template_callback (wclass, hyscan_gtk_datetime_start_edit);
+  gtk_widget_class_bind_template_callback (wclass, hyscan_gtk_datetime_end_edit);
+  gtk_widget_class_bind_template_callback (wclass, gtk_widget_hide);
 
   g_object_class_install_property (oclass, PROP_MODE,
     g_param_spec_int ("mode", "Mode", "Time, date or both",
                       HYSCAN_GTK_DATETIME_TIME,
                       HYSCAN_GTK_DATETIME_BOTH,
                       HYSCAN_GTK_DATETIME_BOTH,
-                      G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
   /* Это специально вынесено в отдельную переменную,
    * чтобы рассылать уведомления об изменении. */
@@ -122,14 +127,14 @@ hyscan_gtk_datetime_class_init (HyScanGtkDateTimeClass *klass)
                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT);
   g_object_class_install_property (oclass, PROP_TIME,
                                    hyscan_gtk_datetime_prop_time);
-
-  // hyscan_gtk_datetime_prop_time = g_object_class_find_property (oclass, "time");
 }
 
 static void
 hyscan_gtk_datetime_init (HyScanGtkDateTime *self)
 {
   self->priv = hyscan_gtk_datetime_get_instance_private (self);
+  gtk_widget_init_template (GTK_WIDGET (self));
+  hyscan_gtk_datetime_set_time (self, 0);
 }
 
 static void
@@ -143,7 +148,7 @@ hyscan_gtk_datetime_object_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_MODE:
-      self->priv->mode = g_value_get_int (value);
+      hyscan_gtk_datetime_set_mode (self, g_value_get_int (value));
       break;
 
     case PROP_TIME:
@@ -165,6 +170,10 @@ hyscan_gtk_datetime_object_get_property (GObject    *object,
 
   switch (prop_id)
     {
+    case PROP_MODE:
+      g_value_set_int (value, hyscan_gtk_datetime_get_mode (self));
+      break;
+
     case PROP_TIME:
       g_value_set_int64 (value, hyscan_gtk_datetime_get_time (self));
       break;
@@ -175,31 +184,12 @@ hyscan_gtk_datetime_object_get_property (GObject    *object,
 }
 
 static void
-hyscan_gtk_datetime_object_constructed (GObject *object)
-{
-  HyScanGtkDateTime *self = HYSCAN_GTK_DATETIME (object);
-  HyScanGtkDateTimePrivate *priv = self->priv;
-
-  G_OBJECT_CLASS (hyscan_gtk_datetime_parent_class)->constructed (object);
-
-  if (priv->dt == NULL)
-    hyscan_gtk_datetime_set_time (self, 0);
-
-  priv->popover = hyscan_gtk_datetime_make_popover (self);
-
-  g_signal_connect (self, "toggled", G_CALLBACK (hyscan_gtk_datetime_start_edit), NULL);
-  g_signal_connect_swapped (priv->popover, "closed",
-                            G_CALLBACK (hyscan_gtk_datetime_end_edit), self);
-}
-
-static void
 hyscan_gtk_datetime_object_finalize (GObject *object)
 {
   HyScanGtkDateTime *self = HYSCAN_GTK_DATETIME (object);
   HyScanGtkDateTimePrivate *priv = self->priv;
 
   g_clear_pointer (&priv->dt, g_date_time_unref);
-  gtk_widget_destroy (priv->popover);
 
   G_OBJECT_CLASS (hyscan_gtk_datetime_parent_class)->finalize (object);
 }
@@ -211,14 +201,14 @@ hyscan_gtk_datetime_start_edit (HyScanGtkDateTime *self)
   HyScanGtkDateTimePrivate *priv = self->priv;
 
   if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (self)))
-      return;
+    return;
 
   if (priv->mode & HYSCAN_GTK_DATETIME_DATE)
     {
       gint y, m, d;
       g_date_time_get_ymd (priv->dt, &y, &m, &d);
-      gtk_calendar_select_month (priv->calendar, m - 1, y);
-      gtk_calendar_select_day (priv->calendar, d);
+      gtk_calendar_select_month (priv->date, m - 1, y);
+      gtk_calendar_select_day (priv->date, d);
     }
 
   if (priv->mode & HYSCAN_GTK_DATETIME_TIME)
@@ -232,7 +222,7 @@ hyscan_gtk_datetime_start_edit (HyScanGtkDateTime *self)
       gtk_adjustment_set_value (priv->second, s);
     }
 
-  gtk_widget_show_all (priv->popover);
+  gtk_widget_show (priv->popover);
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self), TRUE);
 }
@@ -260,7 +250,7 @@ hyscan_gtk_datetime_end_edit (HyScanGtkDateTime *self,
     }
   if (priv->mode & HYSCAN_GTK_DATETIME_DATE)
     {
-      gtk_calendar_get_date (priv->calendar, &year, &month, &day);
+      gtk_calendar_get_date (priv->date, &year, &month, &day);
       month += 1;
     }
 
@@ -269,89 +259,6 @@ hyscan_gtk_datetime_end_edit (HyScanGtkDateTime *self,
   g_date_time_unref (dt);
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self), FALSE);
-}
-
-/* Создаем всплывающий виджет с календарем и часами. */
-static GtkWidget *
-hyscan_gtk_datetime_make_popover (HyScanGtkDateTime *self)
-{
-  HyScanGtkDateTimePrivate *priv = self->priv;
-  GtkWidget *popover, *grid;
-
-  grid = gtk_grid_new ();
-
-  popover = gtk_popover_new (GTK_WIDGET (self));
-  gtk_popover_set_modal (GTK_POPOVER (popover), TRUE);
-  gtk_container_add (GTK_CONTAINER (popover), grid);
-
-  if (priv->mode & HYSCAN_GTK_DATETIME_DATE)
-    {
-      hyscan_gtk_datetime_make_calendar (self, GTK_GRID (grid));
-
-      /* Двойное нажатие на дату приводит к закрытию всплывающего окошка. */
-      g_signal_connect_swapped (priv->calendar, "day-selected-double-click",
-                                G_CALLBACK (gtk_widget_hide), popover);
-    }
-  if (priv->mode & HYSCAN_GTK_DATETIME_TIME)
-    hyscan_gtk_datetime_make_clock (self, GTK_GRID (grid));
-
-  return popover;
-}
-
-/* Функция создает SpinButton для отображения часов, минут или секунд. */
-static GtkWidget *
-hyscan_gtk_datetime_make_time_spin (HyScanGtkDateTime *self,
-                                    GtkAdjustment     *adjustment)
-{
-  GtkWidget *spin = g_object_new (GTK_TYPE_SPIN_BUTTON,
-                                  "adjustment", adjustment,
-                                  "valign", GTK_ALIGN_CENTER, "xalign", 0.5,
-                                  "max-width-chars", 2, "wrap", TRUE,
-                                  NULL);
-
-  g_signal_connect (spin, "output",
-                    G_CALLBACK (hyscan_gtk_datetime_output), self);
-
-  return spin;
-}
-
-/* Функция создает составной виджет часов (часы, минуты и секунды). */
-static void
-hyscan_gtk_datetime_make_clock (HyScanGtkDateTime *self,
-                                GtkGrid           *grid)
-{
-  HyScanGtkDateTimePrivate *priv = self->priv;
-  GtkWidget *hour;
-  GtkWidget *min;
-  GtkWidget *sec;
-
-  priv->hour = gtk_adjustment_new (0, 0, 23, 1.0, 5.0, 0.0);
-  priv->minute = gtk_adjustment_new (0, 0, 59, 1.0, 5.0, 0.0);
-  priv->second = gtk_adjustment_new (0, 0, 59, 1.0, 5.0, 0.0);
-
-  hour = hyscan_gtk_datetime_make_time_spin (self, priv->hour);
-  min = hyscan_gtk_datetime_make_time_spin (self, priv->minute);
-  sec = hyscan_gtk_datetime_make_time_spin (self, priv->second);
-
-  gtk_grid_attach (grid, hour, 0, 1, 1, 1);
-  gtk_grid_attach (grid, min,  1, 1, 1, 1);
-  gtk_grid_attach (grid, sec,  2, 1, 1, 1);
-}
-
-/* Функция создает виджет календаря. */
-static void
-hyscan_gtk_datetime_make_calendar (HyScanGtkDateTime *self,
-                                   GtkGrid           *grid)
-{
-  HyScanGtkDateTimePrivate *priv = self->priv;
-  priv->calendar = GTK_CALENDAR (gtk_calendar_new ());
-
-  g_object_set (priv->calendar,
-                "hexpand", TRUE, "halign", GTK_ALIGN_FILL,
-                "vexpand", FALSE, "valign", GTK_ALIGN_CENTER,
-                NULL);
-
-  gtk_grid_attach (grid, GTK_WIDGET (priv->calendar), 0, 0, 3, 1);
 }
 
 /* Функция устанавливает новый GDateTime. */
@@ -364,15 +271,12 @@ hyscan_gtk_datetime_changed (HyScanGtkDateTime *self,
   gchar *date = NULL;
   gchar *time = NULL;
 
-  /* Ничего не делаю, если время не изменилось. */
-  if (priv->dt != NULL && g_date_time_equal (dt, priv->dt))
-    return;
-
-  /* Иначе обновляю datetime... */
+  /* Обновляю datetime. */
+  g_date_time_ref (dt);
   g_clear_pointer (&priv->dt, g_date_time_unref);
-  priv->dt = g_date_time_ref (dt);
+  priv->dt = dt;
 
-  /* Обновляю текст... */
+  /* Обновляю текст. */
   if (priv->mode & HYSCAN_GTK_DATETIME_TIME)
     time = g_date_time_format (dt, "%T");
   if (priv->mode & HYSCAN_GTK_DATETIME_DATE)
@@ -393,18 +297,13 @@ hyscan_gtk_datetime_changed (HyScanGtkDateTime *self,
 
 /* Функция форматирует вывод в SpinButtonы. */
 static gboolean
-hyscan_gtk_datetime_output (GtkSpinButton *button)
+hyscan_gtk_datetime_output (GtkSpinButton *spin)
 {
-  GtkAdjustment *adjustment;
-  gchar *text;
-  gint value;
+  gint value = gtk_adjustment_get_value (gtk_spin_button_get_adjustment (spin));
+  gchar text[3];
 
-  adjustment = gtk_spin_button_get_adjustment (button);
-  value = gtk_adjustment_get_value (adjustment);
-
-  text = g_strdup_printf ("%02d", value);
-  gtk_entry_set_text (GTK_ENTRY (button), text);
-  g_free (text);
+  g_snprintf (text, sizeof(text), "%02d", value);
+  gtk_entry_set_text (GTK_ENTRY (spin), text);
 
   return TRUE;
 }
@@ -426,7 +325,7 @@ hyscan_gtk_datetime_new (HyScanGtkDateTimeMode mode)
 
 /**
  * hyscan_gtk_datetime_set_time:
- * @self: Виджет #HyScanGtkDateTime
+ * @self: #HyScanGtkDateTime
  * @unixtime: временная метка UNIX-time
  *
  * Функция задает текущую отображаемую метку времени.
@@ -446,8 +345,7 @@ hyscan_gtk_datetime_set_time (HyScanGtkDateTime *self,
 
 /**
  * hyscan_gtk_datetime_get_time:
- * @self: Виджет #HyScanGtkDateTime
- * @unixtime:
+ * @self: #HyScanGtkDateTime
  *
  * Функция возвращает метку времени.
  * @Returns: временная метка UNIX-time
@@ -458,4 +356,42 @@ hyscan_gtk_datetime_get_time (HyScanGtkDateTime *self)
   g_return_val_if_fail (HYSCAN_IS_GTK_DATETIME (self), -1);
 
   return g_date_time_to_unix (self->priv->dt);
+}
+
+/**
+ * hyscan_gtk_datetime_set_time:
+ * @self: #HyScanGtkDateTime
+ * @mode: режим отображения
+ *
+ * Функция задает режим отображения
+ */
+void
+hyscan_gtk_datetime_set_mode (HyScanGtkDateTime    *self,
+                              HyScanGtkDateTimeMode mode)
+{
+  gboolean time_visible = mode & HYSCAN_GTK_DATETIME_TIME;
+  gboolean date_visible = mode & HYSCAN_GTK_DATETIME_DATE;
+
+  g_return_if_fail (HYSCAN_IS_GTK_DATETIME (self));
+  g_return_if_fail (time_visible || date_visible);
+  self->priv->mode = mode;
+
+  gtk_widget_set_visible (self->priv->time, time_visible);
+  gtk_widget_set_visible (GTK_WIDGET (self->priv->date), date_visible);
+  hyscan_gtk_datetime_changed (self, self->priv->dt);
+}
+
+/**
+ * hyscan_gtk_datetime_get_mode:
+ * @self: #HyScanGtkDateTime
+ *
+ * Функция возвращает режим отображения.
+ * @Returns: режим отображения из #HyScanGtkDateTimeMode
+ */
+HyScanGtkDateTimeMode
+hyscan_gtk_datetime_get_mode (HyScanGtkDateTime *self)
+{
+  g_return_val_if_fail (HYSCAN_IS_GTK_DATETIME (self), -1);
+
+  return self->priv->mode;
 }
