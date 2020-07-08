@@ -56,17 +56,17 @@ struct _HyScanGtkProfileHWPrivate
   gchar **drivers;
 };
 
-static void hyscan_gtk_profile_hw_set_property           (GObject      *object,
-                                                          guint         prop_id,
-                                                          const GValue *value,
-                                                          GParamSpec   *pspec);
-static void hyscan_gtk_profile_hw_object_finalize        (GObject      *object);
+static void            hyscan_gtk_profile_hw_set_property    (GObject          *object,
+                                                              guint             prop_id,
+                                                              const GValue     *value,
+                                                              GParamSpec       *pspec);
+static void            hyscan_gtk_profile_hw_object_finalize (GObject          *object);
 
-static HyScanProfile * hyscan_gtk_profile_hw_new_profile (HyScanGtkProfile *parent,
-                                                          const gchar      *filename);
+static HyScanProfile * hyscan_gtk_profile_hw_new_profile     (HyScanGtkProfile *parent,
+                                                              const gchar      *filename);
 
-static GtkWidget *     hyscan_gtk_profile_hw_editor      (HyScanGtkProfile *self,
-                                                          HyScanProfile    *profile);
+static GtkWidget *     hyscan_gtk_profile_hw_editor          (HyScanGtkProfile *self,
+                                                              HyScanProfile    *profile);
 
 G_DEFINE_TYPE_WITH_PRIVATE (HyScanGtkProfileHW, hyscan_gtk_profile_hw, HYSCAN_TYPE_GTK_PROFILE);
 
@@ -141,7 +141,7 @@ hyscan_gtk_profile_hw_editor (HyScanGtkProfile *parent,
                               HyScanProfile    *profile)
 {
   HyScanGtkProfileHW *self = HYSCAN_GTK_PROFILE_HW (parent);
-  return hyscan_gtk_profile_editor_hw_new (profile, self->priv->drivers/*, transient*/);
+  return hyscan_gtk_profile_editor_hw_new (profile, self->priv->drivers);
 }
 
 /*

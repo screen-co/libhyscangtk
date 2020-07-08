@@ -54,8 +54,8 @@ enum
 
 struct _HyScanGtkDateTimePrivate
 {
-  GDateTime       *dt;         /* Дата и время. */
   HyScanGtkDateTimeMode mode;  /* Режим отображения. */
+  GDateTime       *dt;         /* Дата и время. */
 
   GtkWidget       *popover;    /* Всплывающее окошко. */
 
@@ -78,8 +78,8 @@ static void        hyscan_gtk_datetime_object_get_property  (GObject           *
 static void        hyscan_gtk_datetime_object_finalize      (GObject           *object);
 
 static void        hyscan_gtk_datetime_start_edit           (HyScanGtkDateTime *self);
-static void        hyscan_gtk_datetime_end_edit             (HyScanGtkDateTime *self,
-                                                             GtkWidget         *popover);
+static void        hyscan_gtk_datetime_accept               (HyScanGtkDateTime *self);
+static void        hyscan_gtk_datetime_close                (HyScanGtkDateTime *self);
 
 static void        hyscan_gtk_datetime_changed              (HyScanGtkDateTime *self,
                                                              GDateTime         *dt);
@@ -109,7 +109,8 @@ hyscan_gtk_datetime_class_init (HyScanGtkDateTimeClass *klass)
 
   gtk_widget_class_bind_template_callback (wclass, hyscan_gtk_datetime_output);
   gtk_widget_class_bind_template_callback (wclass, hyscan_gtk_datetime_start_edit);
-  gtk_widget_class_bind_template_callback (wclass, hyscan_gtk_datetime_end_edit);
+  gtk_widget_class_bind_template_callback (wclass, hyscan_gtk_datetime_accept);
+  gtk_widget_class_bind_template_callback (wclass, hyscan_gtk_datetime_close);
   gtk_widget_class_bind_template_callback (wclass, gtk_widget_hide);
 
   g_object_class_install_property (oclass, PROP_MODE,
@@ -222,25 +223,19 @@ hyscan_gtk_datetime_start_edit (HyScanGtkDateTime *self)
       gtk_adjustment_set_value (priv->second, s);
     }
 
-  gtk_widget_show (priv->popover);
+  gtk_popover_popup (GTK_POPOVER (priv->popover));
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self), TRUE);
 }
 
-/* Функция вызывается, когда popover прячется. */
+/* Нажатие кнопки OK приводит к сохранению значений. */
 static void
-hyscan_gtk_datetime_end_edit (HyScanGtkDateTime *self,
-                              GtkWidget         *popover)
+hyscan_gtk_datetime_accept (HyScanGtkDateTime *self)
 {
   HyScanGtkDateTimePrivate *priv = self->priv;
   GDateTime *dt;
-  guint hour, min, sec;
-  guint day, month, year;
-
-  hour = min = sec = 0;
-  day = 1;
-  month = 1;
-  year = 1970;
+  guint hour = 0, min = 0, sec = 0;
+  guint day = 1, month = 1, year = 1970;
 
   if (priv->mode & HYSCAN_GTK_DATETIME_TIME)
     {
@@ -258,6 +253,13 @@ hyscan_gtk_datetime_end_edit (HyScanGtkDateTime *self,
   hyscan_gtk_datetime_changed (self, dt);
   g_date_time_unref (dt);
 
+  gtk_popover_popdown (GTK_POPOVER (priv->popover));
+}
+
+/* Закрытие поповера. */
+static void
+hyscan_gtk_datetime_close (HyScanGtkDateTime *self)
+{
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self), FALSE);
 }
 

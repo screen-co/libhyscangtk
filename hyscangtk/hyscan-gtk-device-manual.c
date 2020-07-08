@@ -35,8 +35,9 @@
 /**
  * SECTION: hyscan-gtk-device-manual
  * @Title HyScanGtkDeviceManual
- * @Short_description
+ * @Short_description ручной ввод устройства.
  *
+ * Виджет позволяет вручную выбрать драйвер, название устройства и uri.
  */
 
 #include "hyscan-gtk-device-manual.h"
@@ -52,11 +53,10 @@ enum
 
 struct _HyScanGtkDeviceManualPrivate
 {
-  gchar                   **paths;
-
-  GtkEntry                 *name;
-  GtkComboBoxText          *driver;
-  GtkEntry                 *uri;
+  gchar           **paths;  /* Пути к драйверам. */
+  GtkEntry         *name;   /* Название. */
+  GtkComboBoxText  *driver; /* Драйвер. */
+  GtkEntry         *uri;    /* УРИ. */
 };
 
 static void    hyscan_gtk_device_manual_set_property             (GObject               *object,
@@ -188,6 +188,7 @@ hyscan_gtk_device_manual_sane (HyScanGtkDeviceManual *self)
   return TRUE;
 }
 
+/* Обработчик пользовательского ввода. */
 static void
 hyscan_gtk_device_manual_changed (HyScanGtkDeviceManual *self)
 {
@@ -195,7 +196,13 @@ hyscan_gtk_device_manual_changed (HyScanGtkDeviceManual *self)
   gtk_dialog_set_response_sensitive (GTK_DIALOG (self), GTK_RESPONSE_OK, sane);
 }
 
-
+/**
+ * hyscan_gtk_device_manual_new:
+ * @paths: пути к драйверам.
+ *
+ * Функция создает виджет.
+ * @Returns: (transfer full) виджет.
+ */
 GtkWidget *
 hyscan_gtk_device_manual_new (gchar **paths)
 {
@@ -204,6 +211,14 @@ hyscan_gtk_device_manual_new (gchar **paths)
                        NULL);
 }
 
+/**
+ * hyscan_gtk_device_manual_get_device:
+ * @self: #HyScanGtkDeviceManual
+ *
+ * Функция возвращает устройство. У него будут заданы пути к драйверам,
+ * название, драйвер и uri.
+ * @Returns: (transfer full) свежесозданное устройство.
+ */
 HyScanProfileHWDevice *
 hyscan_gtk_device_manual_get_device (HyScanGtkDeviceManual *self)
 {
@@ -214,9 +229,6 @@ hyscan_gtk_device_manual_get_device (HyScanGtkDeviceManual *self)
   g_return_val_if_fail (HYSCAN_IS_GTK_DEVICE_MANUAL (self), NULL);
   g_return_val_if_fail (hyscan_gtk_device_manual_sane (self), NULL);
   priv = self->priv;
-
-  // if (!hyscan_gtk_device_manual_sane (self))
-    // return NULL;
 
   name = gtk_entry_get_text (priv->name);
   uri = gtk_entry_get_text (priv->uri);

@@ -35,8 +35,12 @@
 /**
  * SECTION: hyscan-gtk-device-auto
  * @Title HyScanGtkDeviceAuto
- * @Short_description
+ * @Short_description Автообнаружение устройств.
  *
+ * Виджет предназначен для автоматического обнаружения устройств, добавляемых
+ * в профиль оборудования. Важное замечание: помимо стандартных
+ * GTK_RESPONSE_OK и GTK_RESPONSE_CANCEL, есть GTK_RESPONSE_REJECT, означающий,
+ * что пользователь хочет вручную добавить устройство.
  */
 
 #include "hyscan-gtk-device-auto.h"
@@ -61,16 +65,15 @@ typedef struct
 
 struct _HyScanGtkDeviceAutoPrivate
 {
-  gchar                **paths;
+  gchar                **paths;        /* Пути с драйверами. */
 
   GHashTable            *drivs;        /* {HyScanDriver*: HyScanGtkDeviceAutoDriver*} */
-  GMutex                 lock;
+  GMutex                 lock;         /* Мьютекс. */
 
   GtkListBox            *device_list;  /* Список устройств. */
-  GtkButton             *refresh;
-  GtkButton             *stop;
+  GtkButton             *refresh;      /* Кнопка поиска.*/
+  GtkButton             *stop;         /* Кнопка остановки поиска.*/
 
-  // GList                 *devices;
   HyScanProfileHWDevice *selected_device;
 };
 
@@ -181,9 +184,6 @@ hyscan_gtk_device_auto_set_property (GObject      *object,
 static void
 hyscan_gtk_device_auto_object_constructed (GObject *object)
 {
-  // HyScanGtkDeviceAuto *self = HYSCAN_GTK_DEVICE_AUTO (object);
-  // HyScanGtkDeviceAutoPrivate *priv = self->priv;
-
   G_OBJECT_CLASS (hyscan_gtk_device_auto_parent_class)->constructed (object);
 }
 
@@ -307,8 +307,8 @@ hyscan_gtk_device_auto_make_row (HyScanProfileHWDevice *device)
 
 /* Вспомогательная функция выбора или очистки выбранного девайса. */
 static void
-hyscan_gtk_device_auto_select_helper (HyScanGtkDeviceAuto *self,
-                                                   HyScanProfileHWDevice          *device)
+hyscan_gtk_device_auto_select_helper (HyScanGtkDeviceAuto   *self,
+                                      HyScanProfileHWDevice *device)
 {
   HyScanGtkDeviceAutoPrivate *priv = self->priv;
 
@@ -323,8 +323,8 @@ hyscan_gtk_device_auto_select_helper (HyScanGtkDeviceAuto *self,
 
 static void
 hyscan_gtk_device_auto_selected (HyScanGtkDeviceAuto *self,
-                                              GtkListBoxRow                  *row,
-                                              GtkListBox                     *listbox)
+                                 GtkListBoxRow       *row,
+                                 GtkListBox          *listbox)
 {
   HyScanProfileHWDevice *device = NULL;
 
@@ -336,8 +336,8 @@ hyscan_gtk_device_auto_selected (HyScanGtkDeviceAuto *self,
 
 static void
 hyscan_gtk_device_auto_refresh_prepare (gpointer key,
-                                                     gpointer value,
-                                                     gpointer user_data)
+                                        gpointer value,
+                                        gpointer user_data)
 {
   HyScanGtkDeviceAutoDriver *info = value;
   gboolean start = GPOINTER_TO_INT (user_data);
@@ -348,8 +348,8 @@ hyscan_gtk_device_auto_refresh_prepare (gpointer key,
 
 static void
 hyscan_gtk_device_auto_refresh_helper (gpointer key,
-                                                    gpointer value,
-                                                    gpointer user_data)
+                                       gpointer value,
+                                       gpointer user_data)
 {
   HyScanDriver *driver = key;
   gboolean start = GPOINTER_TO_INT (user_data);
@@ -388,9 +388,9 @@ hyscan_gtk_device_auto_refresh_stop (HyScanGtkDeviceAuto *self)
 
 static void
 hyscan_gtk_device_auto_progress_helper (HyScanGtkDeviceAuto *self,
-                                                     HyScanDiscover                 *driver,
-                                                     gdouble                         progress,
-                                                     gboolean                        completed)
+                                        HyScanDiscover      *driver,
+                                        gdouble              progress,
+                                        gboolean             completed)
 {
   HyScanGtkDeviceAutoDriver *info;
 
@@ -406,16 +406,16 @@ hyscan_gtk_device_auto_progress_helper (HyScanGtkDeviceAuto *self,
 }
 
 static void
-hyscan_gtk_device_auto_progress (HyScanDiscover                 *driver,
-                                              gdouble                         progress,
-                                              HyScanGtkDeviceAuto *self)
+hyscan_gtk_device_auto_progress (HyScanDiscover      *driver,
+                                 gdouble              progress,
+                                 HyScanGtkDeviceAuto *self)
 {
   hyscan_gtk_device_auto_progress_helper (self, driver, progress, FALSE);
 }
 
 static void
-hyscan_gtk_device_auto_completed (HyScanDiscover                 *driver,
-                                               HyScanGtkDeviceAuto *self)
+hyscan_gtk_device_auto_completed (HyScanDiscover      *driver,
+                                  HyScanGtkDeviceAuto *self)
 {
   HyScanGtkDeviceAutoPrivate *priv = self->priv;
   HyScanGtkDeviceAutoDriver *driver_info;
@@ -449,14 +449,29 @@ hyscan_gtk_device_auto_completed (HyScanDiscover                 *driver,
   g_list_free_full (list, (GDestroyNotify)hyscan_discover_info_free);
 }
 
+/**
+ * hyscan_gtk_device_auto_new:
+ * @paths: пути к драйверам.
+ *
+ * Функция создает виджет.
+ * @Returns: (transfer full) виджет.
+ */
 GtkWidget *
-hyscan_gtk_device_auto_new (gchar **drivers)
+hyscan_gtk_device_auto_new (gchar **paths)
 {
   return g_object_new (HYSCAN_TYPE_GTK_DEVICE_AUTO,
-                       "drivers", drivers,
+                       "drivers", paths,
                        NULL);
 }
 
+/**
+ * hyscan_gtk_device_auto_get_device:
+ * @self: #HyScanGtkDeviceManual
+ *
+ * Функция возвращает устройство. У него будут заданы пути к драйверам,
+ * название, драйвер и uri.
+ * @Returns: (transfer full) свежесозданное устройство.
+ */
 HyScanProfileHWDevice *
 hyscan_gtk_device_auto_get_device (HyScanGtkDeviceAuto *self)
 {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <template class="HyScanGtkDateTime" parent="GtkToggleButton">
@@ -27,7 +27,7 @@
     <property name="can_focus">False</property>
     <property name="relative_to">HyScanGtkDateTime</property>
     <property name="position">bottom</property>
-    <signal name="closed" handler="hyscan_gtk_datetime_end_edit" swapped="yes"/>
+    <signal name="closed" handler="hyscan_gtk_datetime_close" object="HyScanGtkDateTime" swapped="yes"/>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -50,7 +50,7 @@
             <property name="year">2020</property>
             <property name="month">5</property>
             <property name="day">8</property>
-            <signal name="day-selected-double-click" handler="gtk_widget_hide" object="popover" swapped="yes"/>
+            <signal name="day-selected-double-click" handler="hyscan_gtk_datetime_accept" object="HyScanGtkDateTime" swapped="yes"/>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -152,7 +152,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <signal name="clicked" handler="gtk_widget_hide" object="popover" swapped="yes"/>
+            <signal name="clicked" handler="hyscan_gtk_datetime_accept" object="HyScanGtkDateTime" swapped="yes"/>
           </object>
           <packing>
             <property name="expand">False</property>

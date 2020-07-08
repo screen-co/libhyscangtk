@@ -91,7 +91,7 @@ struct _HyScanGtkProfileEditorHWPrivate
   GtkWidget             *dialog;       /* Диалог нового устройства. */
 
   GHashTable            *known;        /* Имеющиеся устройства {gchar *: HyScanProfileHWDevice *}. */
-  HyScanProfileHWDevice *selected_device;
+  HyScanProfileHWDevice *selected;     /* Выбранное устройство. */
 };
 
 static void           hyscan_gtk_profile_editor_hw_set_property       (GObject                  *object,
@@ -145,16 +145,6 @@ hyscan_gtk_profile_editor_hw_class_init (HyScanGtkProfileEditorHWClass *klass)
     "add_device_clicked", (GCallback)hyscan_gtk_profile_editor_hw_add);
   gtk_widget_class_bind_template_callback_full (wclass,
     "remove_device_clicked", (GCallback)hyscan_gtk_profile_editor_hw_remove);
-
-  // gtk_widget_class_bind_template_callback_full (wclass,
-  //   "new_device_name_changed", (GCallback)hyscan_gtk_profile_editor_hw_new_device_sanity);
-  // gtk_widget_class_bind_template_callback_full (wclass,
-  //   "new_device_driver_changed", (GCallback)hyscan_gtk_profile_editor_hw_new_device_sanity);
-  // gtk_widget_class_bind_template_callback_full (wclass,
-  //   "new_device_uri_changed", (GCallback)hyscan_gtk_profile_editor_hw_new_device_sanity);
-  // gtk_widget_class_bind_template_callback_full (wclass,
-  //   "new_device_add_clicked", (GCallback)hyscan_gtk_profile_editor_hw_add_ok);
-
 
   g_object_class_install_property (oclass, PROP_DRIVERS,
     g_param_spec_pointer ("drivers", "Drivers", "Drivers search paths",
@@ -270,14 +260,14 @@ hyscan_gtk_profile_editor_hw_select_helper (HyScanGtkProfileEditorHW *self,
 {
   HyScanGtkProfileEditorHWPrivate *priv = self->priv;
 
-  g_clear_object (&priv->selected_device);
+  g_clear_object (&priv->selected);
 
   gtk_widget_set_sensitive (GTK_WIDGET (priv->remove), device != NULL);
 
   if (device == NULL)
     return;
 
-  priv->selected_device = g_object_ref (device);
+  priv->selected = g_object_ref (device);
   gtk_stack_set_visible_child_name (priv->stack, hyscan_profile_hw_device_get_group (device));
 }
 
@@ -321,7 +311,7 @@ hyscan_gtk_profile_editor_hw_remove (HyScanGtkProfileEditorHW *self)
   HyScanGtkProfileEditorHWPrivate *priv = self->priv;
   const gchar *id;
 
-  id = hyscan_profile_hw_device_get_group (priv->selected_device);
+  id = hyscan_profile_hw_device_get_group (priv->selected);
 
   hyscan_profile_hw_remove (priv->profile, id);
   gtk_widget_destroy (gtk_stack_get_child_by_name (priv->stack, id));
