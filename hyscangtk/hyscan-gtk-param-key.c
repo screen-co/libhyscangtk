@@ -68,8 +68,6 @@
 #define color_view(view) ((view) == HYSCAN_DATA_SCHEMA_VIEW_RGB || \
                           (view) == HYSCAN_DATA_SCHEMA_VIEW_RGBA)
 
-typedef void (*notify_func) (GObject *, GParamSpec *, gpointer);
-
 enum
 {
   VALUE_COL,
@@ -298,7 +296,8 @@ hyscan_gtk_param_key_make_editor (HyScanGtkParamKey *self)
   HyScanDataSchema *schema = priv->schema;
   HyScanDataSchemaKey *key = priv->key;
 
-  notify_func cbk = NULL;
+  void (*cbk) (GObject *, GParamSpec *, gpointer) = NULL;
+
   GtkWidget *editor = NULL;
   const gchar *signal = NULL;
 

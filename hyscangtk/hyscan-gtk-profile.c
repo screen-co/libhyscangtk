@@ -56,6 +56,8 @@
  * |         Gtk..HWEditor        |    |  +-----------------------------+
  * |               +              |    |
  * |       Gtk..EditorHWDevice    |    |
+ * |         GtkDeviceAuto        |    |
+ * |         GtkDeviceManual      |    |
  * |                              +    |
  * |                 Gtk..EditorOffset |
  * +-----------------------------------+
