@@ -54,6 +54,7 @@ static void       hyscan_gtk_param_list_add_widgets        (HyScanGtkParamList *
                                                             const HyScanDataSchemaNode *node,
                                                             HyScanParamList    *plist,
                                                             GtkSizeGroup       *size);
+static void       hyscan_gtk_param_list_clear              (HyScanGtkParam     *gtk_param);
 static void       hyscan_gtk_param_list_update             (HyScanGtkParam     *gtk_param);
 
 G_DEFINE_TYPE_WITH_PRIVATE (HyScanGtkParamList, hyscan_gtk_param_list, HYSCAN_TYPE_GTK_PARAM);
@@ -66,8 +67,10 @@ hyscan_gtk_param_list_class_init (HyScanGtkParamListClass *klass)
 
   oclass->constructed = hyscan_gtk_param_list_object_constructed;
   oclass->finalize = hyscan_gtk_param_list_object_finalize;
+  wclass->clear = hyscan_gtk_param_list_clear;
   wclass->update = hyscan_gtk_param_list_update;
 }
+
 
 static void
 hyscan_gtk_param_list_init (HyScanGtkParamList *self)
@@ -82,21 +85,15 @@ hyscan_gtk_param_list_add_widgets (HyScanGtkParamList   *self,
                                    HyScanParamList      *plist,
                                    GtkSizeGroup         *size)
 {
-  GtkWidget *widget;
+  GtkWidget *widget, *frame, *box;
   GList *link;
   gboolean show_hidden;
   GHashTable *widgets;
+  const gchar *title;
 
   /* Текущий узел. */
   if (node == NULL)
-    {
-      node = hyscan_gtk_param_get_nodes (HYSCAN_GTK_PARAM (self));
-      if (node == NULL)
-        {
-          g_warning ("Node is NULL. Maybe you set wrong root.");
-          return;
-        }
-    }
+    return;
 
   show_hidden = hyscan_gtk_param_get_show_hidden (HYSCAN_GTK_PARAM (self));
   widgets = hyscan_gtk_param_get_widgets (HYSCAN_GTK_PARAM (self));
@@ -109,6 +106,24 @@ hyscan_gtk_param_list_add_widgets (HyScanGtkParamList   *self,
     }
 
   /* А теперь по всем ключам. */
+  if (!hyscan_gtk_param_node_has_visible_keys (node, show_hidden))
+    return;
+
+  title = node->name;
+  if (title == NULL)
+    title = node->name;
+  if (title == NULL)
+    title = node->path;
+
+  frame = gtk_expander_new_with_mnemonic (title);
+  gtk_expander_set_expanded (GTK_EXPANDER (frame), TRUE);
+  // gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_NONE);
+
+  box = gtk_list_box_new ();
+  gtk_list_box_set_selection_mode (GTK_LIST_BOX (box), GTK_SELECTION_NONE);
+
+  gtk_container_add (GTK_CONTAINER (frame), box);
+
   for (link = node->keys; link != NULL; link = link->next)
     {
       HyScanDataSchemaKey *key = link->data;
@@ -126,8 +141,11 @@ hyscan_gtk_param_list_add_widgets (HyScanGtkParamList   *self,
       /* Виджет (с твиками) в контейнер. */
       g_object_set (widget, "margin-start", 12, "margin-end", 12, "margin-bottom", 6, NULL);
       hyscan_gtk_param_key_add_to_size_group (HYSCAN_GTK_PARAM_KEY (widget), size);
-      gtk_box_pack_start (GTK_BOX (self->priv->box), widget, FALSE, TRUE, 0);
+
+      gtk_list_box_insert (GTK_LIST_BOX (box), widget, -1);
     }
+
+  gtk_box_pack_start (GTK_BOX (self->priv->box), frame, FALSE, TRUE, 0);
 }
 
 static void
@@ -156,22 +174,38 @@ hyscan_gtk_param_list_object_finalize (GObject *object)
   G_OBJECT_CLASS (hyscan_gtk_param_list_parent_class)->finalize (object);
 }
 
+/* Функция удаляет старые виджеты. */
+static void
+hyscan_gtk_param_list_clear (HyScanGtkParam *gtk_param)
+{
+  HyScanGtkParamList *self = HYSCAN_GTK_PARAM_LIST (gtk_param);
+
+  hyscan_gtk_param_clear_container (GTK_CONTAINER (self->priv->box));
+}
+
 /* Функция размещает виджеты где следует. */
 static void
 hyscan_gtk_param_list_update (HyScanGtkParam *gtk_param)
 {
   HyScanGtkParamList *self = HYSCAN_GTK_PARAM_LIST (gtk_param);
+  const HyScanDataSchemaNode *node;
   HyScanParamList *plist;
   GtkSizeGroup *size;
 
-  plist = hyscan_param_list_new ();
+  /* Проверяем, задана ли вообще схема. Если да, то пересоздаем все виджеты. */
 
-  /* Очищаем старые виджеты. */
-  hyscan_gtk_param_clear_container (GTK_CONTAINER (self->priv->box));
+  node = hyscan_gtk_param_get_nodes (HYSCAN_GTK_PARAM (self));
+  if (node == NULL)
+    {
+      g_warning ("Node is NULL. Maybe you set wrong root.");
+      return;
+    }
 
   /* Наполняем виджетами. */
   size = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
-  hyscan_gtk_param_list_add_widgets (self, NULL, plist, size);
+  plist = hyscan_param_list_new ();
+
+  hyscan_gtk_param_list_add_widgets (self, node, plist, size);
   gtk_widget_show_all (GTK_WIDGET (self));
 
   /* Устанавливаем список отслеживаемых (то есть все пути). */
@@ -182,7 +216,7 @@ hyscan_gtk_param_list_update (HyScanGtkParam *gtk_param)
 }
 
 /**
- * hyscan_gtk_param_list_new:
+ * hyscan_gtk_param_list_new_full:
  * @param param указатель на интерфейс HyScanParam
  * @root: корневой узел схемы
  * @show_hidden: показывать ли скрытые ключи
@@ -192,9 +226,9 @@ hyscan_gtk_param_list_update (HyScanGtkParam *gtk_param)
  * Returns: #HyScanGtkParamList.
  */
 GtkWidget *
-hyscan_gtk_param_list_new (HyScanParam *param,
-                           const gchar *root,
-                           gboolean     show_hidden)
+hyscan_gtk_param_list_new_full (HyScanParam *param,
+                                const gchar *root,
+                                gboolean     show_hidden)
 {
   HyScanGtkParamList *object = g_object_new (HYSCAN_TYPE_GTK_PARAM_LIST, NULL);
 
@@ -205,18 +239,13 @@ hyscan_gtk_param_list_new (HyScanParam *param,
 
 /**
  * hyscan_gtk_param_list_new_default:
- * @param param указатель на интерфейс HyScanParam
  *
- * Функция создает виджет #HyScanGtkParamList c настройками по умолчанию.
+ * Функция создает виджет #HyScanGtkParamList.
  *
  * Returns: #HyScanGtkParamList.
  */
 GtkWidget *
-hyscan_gtk_param_list_new_default (HyScanParam *param)
+hyscan_gtk_param_list_new_default (void)
 {
-  g_return_val_if_fail (HYSCAN_IS_PARAM (param), NULL);
-
-  return g_object_new (HYSCAN_TYPE_GTK_PARAM_LIST,
-                       "param", param,
-                       NULL);
+  return g_object_new (HYSCAN_TYPE_GTK_PARAM_LIST, NULL);
 }

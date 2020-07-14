@@ -56,7 +56,6 @@
 #include <math.h>
 
 #define DESCRIPTION_MARKUP "<span style=\"italic\">\%s</span>"
-#define TEXT_WIDTH 24
 #define INVALID "HyScanGtkParam: invalid key"
 
 #define time_view(view) ((view) == HYSCAN_DATA_SCHEMA_VIEW_DATE || \
@@ -68,8 +67,6 @@
                           (view) == HYSCAN_DATA_SCHEMA_VIEW_DEC)
 #define color_view(view) ((view) == HYSCAN_DATA_SCHEMA_VIEW_RGB || \
                           (view) == HYSCAN_DATA_SCHEMA_VIEW_RGBA)
-
-typedef void (*notify_func) (GObject *, GParamSpec *, gpointer);
 
 enum
 {
@@ -110,6 +107,9 @@ static void       hyscan_gtk_param_key_set_property          (GObject           
                                                               GParamSpec            *pspec);
 static void       hyscan_gtk_param_key_object_constructed    (GObject               *object);
 static void       hyscan_gtk_param_key_object_finalize       (GObject               *object);
+static void       hyscan_gtk_param_key_emit_variant          (HyScanGtkParamKey     *self,
+                                                              GVariant              *value);
+
 static gchar *    hyscan_gtk_param_key_enum_id               (gint64                 val);
 static gint64     hyscan_gtk_param_key_enum_val              (const gchar           *id);
 
@@ -217,34 +217,32 @@ static void
 hyscan_gtk_param_key_object_constructed (GObject *object)
 {
   HyScanGtkParamKey *self = HYSCAN_GTK_PARAM_KEY (object);
-  GtkGrid *grid = GTK_GRID (self);
   HyScanGtkParamKeyPrivate *priv = self->priv;
-  gboolean sensitive;
+  gboolean sensitive = (priv->key->access & HYSCAN_DATA_SCHEMA_ACCESS_WRITE);
 
   G_OBJECT_CLASS (hyscan_gtk_param_key_parent_class)->constructed (object);
 
   priv->label = gtk_label_new (priv->key->name);
   priv->value = hyscan_gtk_param_key_make_editor (self);
 
-  sensitive = (priv->key->access & HYSCAN_DATA_SCHEMA_ACCESS_WRITE);
-
   gtk_widget_set_sensitive (priv->label, sensitive);
   gtk_widget_set_sensitive (priv->value, sensitive);
 
-  if (priv->key->description != NULL)
-    gtk_widget_set_tooltip_text (priv->label, priv->key->description);
+  gtk_widget_set_tooltip_text (priv->label, priv->key->description);
 
+  gtk_label_set_xalign (GTK_LABEL (priv->label), 1.0);
   gtk_widget_set_halign (priv->label, GTK_ALIGN_END);
   gtk_widget_set_hexpand (priv->label, FALSE);
-  gtk_widget_set_halign (priv->value, GTK_ALIGN_START);
+
+  if (priv->key->type == HYSCAN_DATA_SCHEMA_KEY_BOOLEAN)
+    gtk_widget_set_halign (priv->value, GTK_ALIGN_START);
+  else
+    gtk_widget_set_halign (priv->value, GTK_ALIGN_FILL);
   gtk_widget_set_hexpand (priv->value, TRUE);
 
-  gtk_grid_set_column_homogeneous (grid, TRUE);
-  gtk_grid_set_column_spacing (grid, 12);
-  gtk_grid_attach (grid, priv->label, 0, 0, 1, 1);
-  gtk_grid_attach (grid, priv->value, 1, 0, 1, 1);
-
-  gtk_widget_set_hexpand (GTK_WIDGET (self), TRUE);
+  gtk_grid_set_column_spacing (GTK_GRID (self), 12);
+  gtk_grid_attach (GTK_GRID (self), priv->label, 0, 0, 1, 1);
+  gtk_grid_attach (GTK_GRID (self), priv->value, 1, 0, 1, 1);
 
   gtk_widget_set_name (GTK_WIDGET (self), priv->key->id);
 }
@@ -261,6 +259,19 @@ hyscan_gtk_param_key_object_finalize (GObject *object)
   g_clear_object (&priv->hsize);
 
   G_OBJECT_CLASS (hyscan_gtk_param_key_parent_class)->finalize (object);
+}
+
+/* Функция эмиттирует сигнал и очищает гвариант. */
+static void
+hyscan_gtk_param_key_emit_variant (HyScanGtkParamKey     *self,
+                                   GVariant              *variant)
+{
+  g_variant_ref_sink (variant);
+
+  g_signal_emit (self, hyscan_gtk_param_key_signals[SIGNAL_CHANGED], 0,
+                 self->priv->key->id, variant);
+
+  g_variant_unref (variant);
 }
 
 /* Генератор идентификаторов для перечислений. */
@@ -285,7 +296,8 @@ hyscan_gtk_param_key_make_editor (HyScanGtkParamKey *self)
   HyScanDataSchema *schema = priv->schema;
   HyScanDataSchemaKey *key = priv->key;
 
-  notify_func cbk = NULL;
+  void (*cbk) (GObject *, GParamSpec *, gpointer) = NULL;
+
   GtkWidget *editor = NULL;
   const gchar *signal = NULL;
 
@@ -341,13 +353,17 @@ hyscan_gtk_param_key_make_editor (HyScanGtkParamKey *self)
       break;
 
     default:
-      editor = gtk_label_new (INVALID);
-      signal = NULL;
-      cbk = NULL;
+      break;
     }
 
-  priv->handler = g_signal_connect (G_OBJECT (editor), signal,
-                                    G_CALLBACK (cbk), self);
+  if (editor == NULL)
+    editor = gtk_label_new (INVALID);
+
+  if (signal != NULL && cbk != NULL)
+    {
+      priv->handler = g_signal_connect (G_OBJECT (editor), signal,
+                                        G_CALLBACK (cbk), self);
+    }
 
   // TODO: Access_writeonly
   return editor;
@@ -417,8 +433,6 @@ hyscan_gtk_param_key_make_editor_integer (HyScanDataSchema    *schema,
                          "base", base,                  /* HyScanGtkSpinButton */
                          "adjustment", adjustment,      /* GtkSpinButton */
                          "climb-rate", 1.0,             /* GtkSpinButton */
-                         "width-chars", TEXT_WIDTH,     /* GtkEntry */
-                         "max-width-chars", TEXT_WIDTH, /* GtkEntry */
                          NULL);
 
   g_clear_pointer (&_def, g_variant_unref);
@@ -500,9 +514,6 @@ hyscan_gtk_param_key_make_editor_double (HyScanDataSchema    *schema,
   adjustment = gtk_adjustment_new (def, min, max, step, step, step);
   editor = gtk_spin_button_new (adjustment, step, digits);
 
-  gtk_entry_set_width_chars (GTK_ENTRY (editor), TEXT_WIDTH);
-  gtk_entry_set_max_width_chars (GTK_ENTRY (editor), TEXT_WIDTH);
-
   g_clear_pointer (&_def, g_variant_unref);
   g_clear_pointer (&_min, g_variant_unref);
   g_clear_pointer (&_max, g_variant_unref);
@@ -547,7 +558,6 @@ hyscan_gtk_param_key_make_editor_string (HyScanDataSchema    *schema,
   const gchar *def = "";
 
   editor = gtk_entry_new ();
-  gtk_entry_set_max_width_chars (GTK_ENTRY (editor), TEXT_WIDTH);
 
   _def = hyscan_data_schema_key_get_default (schema, key->id);
   if (_def != NULL)
@@ -618,12 +628,7 @@ hyscan_gtk_param_key_notify_boolean (GObject    *object,
 
   g_object_get (object, pspec->name, &val, NULL);
   variant = g_variant_new_boolean (val);
-  g_variant_ref_sink (variant);
-
-  g_signal_emit (self, hyscan_gtk_param_key_signals[SIGNAL_CHANGED], 0,
-                 self->priv->key->id, variant);
-
-  g_variant_unref (variant);
+  hyscan_gtk_param_key_emit_variant (self, variant);
 }
 
 /* Функция уведомления о смене целочисленного значения. */
@@ -640,12 +645,7 @@ hyscan_gtk_param_key_notify_integer (GObject    *object,
   g_object_get (object, pspec->name, &_val, NULL);
   val = (gint64) _val;
   variant = g_variant_new_int64 (val);
-  g_variant_ref_sink (variant);
-
-  g_signal_emit (self, hyscan_gtk_param_key_signals[SIGNAL_CHANGED], 0,
-                 self->priv->key->id, variant);
-
-  g_variant_unref (variant);
+  hyscan_gtk_param_key_emit_variant (self, variant);
 }
 
 /* Функция уведомления о смене целочисленного значения. */
@@ -660,12 +660,7 @@ hyscan_gtk_param_key_notify_time (GObject    *object,
 
   g_object_get (object, pspec->name, &val, NULL);
   variant = g_variant_new_int64 (val);
-  g_variant_ref_sink (variant);
-
-  g_signal_emit (self, hyscan_gtk_param_key_signals[SIGNAL_CHANGED], 0,
-                 self->priv->key->id, variant);
-
-  g_variant_unref (variant);
+  hyscan_gtk_param_key_emit_variant (self, variant);
 }
 
 /* Функция уведомления о смене double значения. */
@@ -680,12 +675,7 @@ hyscan_gtk_param_key_notify_double (GObject    *object,
 
   g_object_get (object, pspec->name, &val, NULL);
   variant = g_variant_new_double (val);
-  g_variant_ref_sink (variant);
-
-  g_signal_emit (self, hyscan_gtk_param_key_signals[SIGNAL_CHANGED], 0,
-                 self->priv->key->id, variant);
-
-  g_variant_unref (variant);
+  hyscan_gtk_param_key_emit_variant (self, variant);
 }
 
 /* Функция уведомления о смене строкового значения. */
@@ -699,14 +689,8 @@ hyscan_gtk_param_key_notify_string (GObject    *object,
   GVariant *variant;
 
   g_object_get (object, pspec->name, &val, NULL);
-  variant = g_variant_new_string (val);
-  g_variant_ref_sink (variant);
-
-  g_signal_emit (self, hyscan_gtk_param_key_signals[SIGNAL_CHANGED], 0,
-                 self->priv->key->id, variant);
-
-  g_free (val);
-  g_variant_unref (variant);
+  variant = g_variant_new_take_string (val);
+  hyscan_gtk_param_key_emit_variant (self, variant);
 }
 
 /* Функция уведомления о смене значения цвета. */
@@ -723,12 +707,7 @@ hyscan_gtk_param_key_notify_color (GObject    *object,
   gtk_color_chooser_get_rgba (GTK_COLOR_CHOOSER (object), &rgba);
   val = gdk_rgba_to_string (&rgba);
   variant = g_variant_new_take_string (val);
-  g_variant_ref_sink (variant);
-
-  g_signal_emit (self, hyscan_gtk_param_key_signals[SIGNAL_CHANGED], 0,
-                 self->priv->key->id, variant);
-
-  g_variant_unref (variant);
+  hyscan_gtk_param_key_emit_variant (self, variant);
 }
 
 /* Функция уведомления о смене перечисления. */
@@ -747,15 +726,10 @@ hyscan_gtk_param_key_notify_enum (GObject    *object,
   val = g_ascii_strtoll (_val, &check, 10);
   if (check == NULL)
     g_warning ("HyScanGtkParamKey: enum id not recognised");
+  g_free (_val);
 
   variant = g_variant_new_int64 (val);
-  g_variant_ref_sink (variant);
-
-  g_signal_emit (self, hyscan_gtk_param_key_signals[SIGNAL_CHANGED], 0,
-                 self->priv->key->id, variant);
-
-  g_free (_val);
-  g_variant_unref (variant);
+  hyscan_gtk_param_key_emit_variant (self, variant);
 }
 
 /**
@@ -783,7 +757,7 @@ hyscan_gtk_param_key_new (HyScanDataSchema    *schema,
 
 /**
  * hyscan_gtk_param_key_get_key:
- * @pkey: указатель на #HyScanGtkParamKey
+ * @self: указатель на #HyScanGtkParamKey
  *
  * Функция возвращает идентификатор ключа.
  *
@@ -799,7 +773,7 @@ hyscan_gtk_param_key_get_key (HyScanGtkParamKey *self)
 
 /**
  * hyscan_gtk_param_key_set_from_param_list:
- * @pkey: указатель на #HyScanGtkParamKey
+ * @self: указатель на #HyScanGtkParamKey
  * @plist: указатель на #HyScanParamList
  *
  * Функция позволяет задать значение из #HyScanParamList
@@ -823,7 +797,7 @@ hyscan_gtk_param_key_set_from_param_list (HyScanGtkParamKey *self,
 
 /**
  * hyscan_gtk_param_key_set:
- * @pkey: указатель на #HyScanGtkParamKey
+ * @self: указатель на #HyScanGtkParamKey
  * @value: значение
  *
  * Функция позволяет задать значение из #GVariant.
@@ -931,21 +905,21 @@ hyscan_gtk_param_key_set (HyScanGtkParamKey *self,
 
 /**
  * hyscan_gtk_param_key_get:
- * @pkey: указатель на #HyScanGtkParamKey
+ * @self: указатель на #HyScanGtkParamKey
  *
  * Функция считывает значение в #GVariant.
  *
  * Returns: (transfer full): указатель на #GVariant, для удаления g_variant_unref()
  */
 GVariant *
-hyscan_gtk_param_key_get (HyScanGtkParamKey *pkey)
+hyscan_gtk_param_key_get (HyScanGtkParamKey *self)
 {
   HyScanGtkParamKeyPrivate *priv;
   GVariant *value = NULL;
 
-  g_return_val_if_fail (HYSCAN_IS_GTK_PARAM_KEY (pkey), NULL);
+  g_return_val_if_fail (HYSCAN_IS_GTK_PARAM_KEY (self), NULL);
 
-  priv = pkey->priv;
+  priv = self->priv;
 
   switch (priv->key->type)
     {
@@ -1026,15 +1000,10 @@ hyscan_gtk_param_key_get (HyScanGtkParamKey *pkey)
 
 /**
  * hyscan_gtk_param_key_add_to_size_group:
- * @pkey: указатель на #HyScanGtkParamKey
+ * @self: указатель на #HyScanGtkParamKey
  * @group #GtkSizeGroup
 
- * Функция добавляет виджет значения к #GtkSizeGroup. Особенностью является то,
- * что в случае ключа %HYSCAN_DATA_SCHEMA_KEY_BOOLEAN горизонтальная группа
- * игнорируется. Также нужно понимать, что если #GtkSizeGroup контроллирует оба
- * размера, частично проигнорировать запросы размеров не получится. Поэтому
- * рекомендуется передавать такой #GtkSizeGroup, который не регулирует
- * вертикальный размер.
+ * Функция добавляет виджет названия к #GtkSizeGroup.
  */
 void
 hyscan_gtk_param_key_add_to_size_group (HyScanGtkParamKey *self,
@@ -1043,6 +1012,7 @@ hyscan_gtk_param_key_add_to_size_group (HyScanGtkParamKey *self,
   HyScanGtkParamKeyPrivate *priv;
 
   g_return_if_fail (HYSCAN_IS_GTK_PARAM_KEY (self));
+
   priv = self->priv;
 
   if (priv->hsize != NULL)
@@ -1051,15 +1021,16 @@ hyscan_gtk_param_key_add_to_size_group (HyScanGtkParamKey *self,
       g_clear_object (&priv->hsize);
     }
 
-  priv->hsize = g_object_ref (group);
-
-  if (priv->key->type != HYSCAN_DATA_SCHEMA_KEY_BOOLEAN)
-    gtk_size_group_add_widget (priv->hsize, priv->value);
+  if (group != NULL)
+    {
+      gtk_size_group_add_widget (group, priv->label);
+      priv->hsize = g_object_ref (group);
+    }
 }
 
 /**
  * hyscan_gtk_param_key_get_label:
- * @pkey: указатель на #HyScanGtkParamKey
+ * @self: указатель на #HyScanGtkParamKey
  *
  * Функция возвращает виджет названия.
  *
@@ -1075,7 +1046,7 @@ hyscan_gtk_param_key_get_label (HyScanGtkParamKey *self)
 
 /**
  * hyscan_gtk_param_key_get_value:
- * @pkey: указатель на #HyScanGtkParamKey
+ * @self: указатель на #HyScanGtkParamKey
  *
  * Функция возвращает виджет значения
  *

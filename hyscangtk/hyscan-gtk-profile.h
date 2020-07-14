@@ -55,7 +55,7 @@ typedef struct _HyScanGtkProfileClass HyScanGtkProfileClass;
 
 struct _HyScanGtkProfile
 {
-  GtkTreeView parent_instance;
+  GtkGrid parent_instance;
 
   HyScanGtkProfilePrivate *priv;
 };
@@ -71,19 +71,20 @@ struct _HyScanGtkProfile
  */
 struct _HyScanGtkProfileClass
 {
-  GtkTreeViewClass parent_class;
+  GtkGridClass parent_class;
 
   const gchar      *subfolder;
 
   HyScanProfile * (*new_profile) (HyScanGtkProfile *parent,
                                   const gchar      *filename);
 
-  GtkTreeModel *  (*make_model)  (HyScanGtkProfile *self);
-  void            (*make_tree)   (HyScanGtkProfile *self);
-  void            (*update_tree) (HyScanGtkProfile *self);
-
   GtkWidget *     (*make_editor) (HyScanGtkProfile *self,
                                   HyScanProfile    *profile);
+
+  void            (*update_list) (HyScanGtkProfile *self);
+  GtkWidget *     (*make_row)    (HyScanGtkProfile *self,
+                                  HyScanProfile    *profile);
+
 };
 
 HYSCAN_API

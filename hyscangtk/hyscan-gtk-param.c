@@ -350,11 +350,17 @@ hyscan_gtk_param_reinitialize (HyScanGtkParam *self)
 
   /* Получаем схему и создаем все виджеты ключей. */
   if (priv->param == NULL)
-    goto exit;
+    {
+      klass->clear (self);
+      return;
+    }
 
   priv->schema = hyscan_param_schema (priv->param);
   if (priv->schema == NULL)
-    goto exit;
+    {
+      klass->clear (self);
+      return;
+    }
 
   nodes = hyscan_data_schema_list_nodes (priv->schema);
   priv->root_node = hyscan_gtk_param_find_node (nodes, priv->root);
@@ -362,7 +368,8 @@ hyscan_gtk_param_reinitialize (HyScanGtkParam *self)
   /* Создаем виджеты. */
   hyscan_gtk_param_make_keys (self, priv->root_node, priv->widgets);
 
-exit:
+
+  klass->clear (self);
   klass->update (self);
 }
 
