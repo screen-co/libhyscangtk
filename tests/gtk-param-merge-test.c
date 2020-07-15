@@ -191,7 +191,7 @@ update_param_widget (GtkTreeSelection *selection,
   hyscan_param_merge_bind (merge);
 
   /* Добавляем виджет в контейнер. */
-  widget = hyscan_gtk_param_merge_new (merge, "/", FALSE);
+  widget = hyscan_gtk_param_merge_new_full (merge, "/", FALSE);
   action_bar = gtk_action_bar_new ();
 
   btn_apply = gtk_button_new_with_label ("Применить");

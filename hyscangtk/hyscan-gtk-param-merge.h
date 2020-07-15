@@ -3,14 +3,14 @@
  * Copyright 2018 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  * Copyright 2020 Screen LLC, Alexey Sakhnov <alexsakhnov@gmail.com>
  *
- * This file is part of HyScanGui.
+ * This file is part of HyScanGtk.
  *
- * HyScanGui is dual-licensed: you can redistribute it and/or modify
+ * HyScanGtk is dual-licensed: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * HyScanGui is distributed in the hope that it will be useful,
+ * HyScanGtk is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -22,9 +22,9 @@
  * Contact the Screen LLC in this case - <info@screen-co.ru>.
  */
 
-/* HyScanGui имеет двойную лицензию.
+/* HyScanGtk имеет двойную лицензию.
  *
- * Во-первых, вы можете распространять HyScanGui на условиях Стандартной
+ * Во-первых, вы можете распространять HyScanGtk на условиях Стандартной
  * Общественной Лицензии GNU версии 3, либо по любой более поздней версии
  * лицензии (по вашему выбору). Полные положения лицензии GNU приведены в
  * <http://www.gnu.org/licenses/>.
@@ -68,7 +68,7 @@ HYSCAN_API
 GType                  hyscan_gtk_param_merge_get_type         (void);
 
 HYSCAN_API
-GtkWidget *            hyscan_gtk_param_merge_new              (HyScanParamMerge *param,
+GtkWidget *            hyscan_gtk_param_merge_new_full         (HyScanParamMerge *param,
                                                                 const gchar      *root,
                                                                 gboolean          show_hidden);
 

@@ -3,14 +3,14 @@
  * Copyright 2018 Screen LLC, Alexander Dmitriev <m1n7@yandex.ru>
  * Copyright 2020 Screen LLC, Alexey Sakhnov <alexsakhnov@gmail.com>
  *
- * This file is part of HyScanGui.
+ * This file is part of HyScanGtk.
  *
- * HyScanGui is dual-licensed: you can redistribute it and/or modify
+ * HyScanGtk is dual-licensed: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * HyScanGui is distributed in the hope that it will be useful,
+ * HyScanGtk is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -22,9 +22,9 @@
  * Contact the Screen LLC in this case - <info@screen-co.ru>.
  */
 
-/* HyScanGui имеет двойную лицензию.
+/* HyScanGtk имеет двойную лицензию.
  *
- * Во-первых, вы можете распространять HyScanGui на условиях Стандартной
+ * Во-первых, вы можете распространять HyScanGtk на условиях Стандартной
  * Общественной Лицензии GNU версии 3, либо по любой более поздней версии
  * лицензии (по вашему выбору). Полные положения лицензии GNU приведены в
  * <http://www.gnu.org/licenses/>.
@@ -61,6 +61,7 @@ static void       hyscan_gtk_param_merge_add_widgets        (HyScanGtkParamMerge
                                                              const HyScanDataSchemaNode *node,
                                                              HyScanParamList            *plist,
                                                              GtkSizeGroup               *size);
+static void       hyscan_gtk_param_merge_clear              (HyScanGtkParam     *gtk_param);
 static void       hyscan_gtk_param_merge_update             (HyScanGtkParam             *gtk_param);
 
 G_DEFINE_TYPE_WITH_PRIVATE (HyScanGtkParamMerge, hyscan_gtk_param_merge, HYSCAN_TYPE_GTK_PARAM);
@@ -73,6 +74,7 @@ hyscan_gtk_param_merge_class_init (HyScanGtkParamMergeClass *klass)
 
   object_class->constructed = hyscan_gtk_param_merge_object_constructed;
   object_class->finalize = hyscan_gtk_param_merge_object_finalize;
+  param_class->clear = hyscan_gtk_param_merge_clear;
   param_class->update = hyscan_gtk_param_merge_update;
 }
 
@@ -162,6 +164,15 @@ hyscan_gtk_param_merge_add_widgets (HyScanGtkParamMerge       *self,
   g_object_unref (schema);
 }
 
+/* Функция удаляет старые виджеты. */
+static void
+hyscan_gtk_param_merge_clear (HyScanGtkParam *gtk_param)
+{
+  HyScanGtkParamMerge *self = HYSCAN_GTK_PARAM_MERGE (gtk_param);
+
+  hyscan_gtk_param_clear_container (GTK_CONTAINER (self->priv->box));
+}
+
 static void
 hyscan_gtk_param_merge_update (HyScanGtkParam *gtk_param)
 {
@@ -246,7 +257,7 @@ exit:
 }
 
 /**
- * hyscan_gtk_param_merge_new:
+ * hyscan_gtk_param_merge_new_full:
  * @param: указатель на интерфейс #HyScanParamMerge
  * @root: корневой узел схемы
  * @show_hidden: показывать ли скрытые ключи
@@ -256,9 +267,9 @@ exit:
  * Returns: #HyScanGtkParamMerge.
  */
 GtkWidget *
-hyscan_gtk_param_merge_new (HyScanParamMerge *param,
-                            const gchar      *root,
-                            gboolean          show_hidden)
+hyscan_gtk_param_merge_new_full (HyScanParamMerge *param,
+                                 const gchar      *root,
+                                 gboolean          show_hidden)
 {
   GtkWidget *object;
 
