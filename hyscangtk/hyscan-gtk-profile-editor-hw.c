@@ -342,31 +342,31 @@ hyscan_gtk_profile_editor_hw_add (HyScanGtkProfileEditorHW *self)
   GtkWidget *dialog;
   gint response;
 
-  if (priv->dialog == NULL)
-    {
-      dialog = hyscan_gtk_device_auto_new (priv->drivers);
-      gtk_window_set_transient_for_self (dialog, self);
+  // if (priv->dialog == NULL)
+  //   {
+  //     dialog = hyscan_gtk_device_auto_new (priv->drivers);
+  //     gtk_window_set_transient_for_self (dialog, self);
 
-      priv->dialog = dialog;
-    }
+  //     priv->dialog = dialog;
+  //   }
 
-  gtk_widget_show_all (priv->dialog);
-  response = gtk_dialog_run (GTK_DIALOG (priv->dialog));
-  gtk_widget_hide (priv->dialog);
+  // gtk_widget_show_all (priv->dialog);
+  // response = gtk_dialog_run (GTK_DIALOG (priv->dialog));
+  // gtk_widget_hide (priv->dialog);
 
-  /* Ok - добавление выбранного устройства. */
-  if (GTK_RESPONSE_OK == response)
-    {
-      HyScanGtkDeviceAuto *finder = HYSCAN_GTK_DEVICE_AUTO (priv->dialog);
-      device = hyscan_gtk_device_auto_get_device (finder);
-      hyscan_gtk_profile_editor_hw_add_helper (self, device, TRUE);
-      hyscan_gtk_profile_editor_hw_update_list (self);
-      return;
-    }
+  // /* Ok - добавление выбранного устройства. */
+  // if (GTK_RESPONSE_OK == response)
+  //   {
+  //     HyScanGtkDeviceAuto *finder = HYSCAN_GTK_DEVICE_AUTO (priv->dialog);
+  //     device = hyscan_gtk_device_auto_get_device (finder);
+  //     hyscan_gtk_profile_editor_hw_add_helper (self, device, TRUE);
+  //     hyscan_gtk_profile_editor_hw_update_list (self);
+  //     return;
+  //   }
 
-  /* Всё, что не REJECT -- отмена и выход. */
-  if (GTK_RESPONSE_REJECT != response)
-    return;
+  // /* Всё, что не REJECT -- отмена и выход. */
+  // if (GTK_RESPONSE_REJECT != response)
+  //   return;
 
   /* REJECT -- ручной ввод параметров. */
   dialog = hyscan_gtk_device_manual_new (priv->drivers);
