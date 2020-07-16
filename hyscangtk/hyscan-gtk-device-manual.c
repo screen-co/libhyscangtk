@@ -239,5 +239,6 @@ hyscan_gtk_device_manual_get_device (HyScanGtkDeviceManual *self)
   hyscan_profile_hw_device_set_uri (device, uri);
   hyscan_profile_hw_device_set_driver (device, driver);
 
+  hyscan_profile_hw_device_update (device);
   return device;
 }

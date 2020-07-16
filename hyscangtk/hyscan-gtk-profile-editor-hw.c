@@ -232,23 +232,36 @@ hyscan_gtk_profile_editor_hw_object_finalize (GObject *object)
   G_OBJECT_CLASS (hyscan_gtk_profile_editor_hw_parent_class)->finalize (object);
 }
 
+
 /* Функция создает виджет устройства. */
 static GtkWidget *
 hyscan_gtk_profile_editor_hw_make_row (HyScanProfileHWDevice *device)
 {
-  GtkWidget *row, *label;
+  GtkWidget *row, *box, *name, *info;
+  gchar *info_string;
 
   row = gtk_list_box_row_new ();
 
-  label = gtk_label_new (hyscan_profile_hw_device_get_name (device));
-  gtk_widget_set_margin_top (label, 12);
-  gtk_widget_set_margin_bottom (label, 12);
+  box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+  gtk_widget_set_margin_top (box, 12);
+  gtk_widget_set_margin_bottom (box, 12);
+
+  name = gtk_label_new (hyscan_profile_hw_device_get_name (device));
+  info_string = g_strdup_printf ("<small>%s, %s</small>",
+                                 hyscan_profile_hw_device_get_driver (device),
+                                 hyscan_profile_hw_device_get_uri (device));
+  info = gtk_label_new (NULL);
+  gtk_label_set_markup (GTK_LABEL (info), info_string);
 
   g_object_set_data_full (G_OBJECT (row), HYSCAN_GTK_PROFILE_HW_DEVICE,
                           g_object_ref (device), g_object_unref);
 
-  gtk_container_add (GTK_CONTAINER (row), label);
+  gtk_box_pack_start (GTK_BOX (box), name, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (box), info, FALSE, FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (row), box);
   gtk_widget_show_all (row);
+
+  g_free (info_string);
 
   return row;
 }
