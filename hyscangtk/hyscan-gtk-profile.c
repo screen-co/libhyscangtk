@@ -554,5 +554,4 @@ hyscan_gtk_profile_get_profile (HyScanGtkProfile *self)
     return NULL;
 
   return g_object_ref (self->priv->selected_profile);
-
 }

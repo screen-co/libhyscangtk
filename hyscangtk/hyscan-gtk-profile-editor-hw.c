@@ -298,6 +298,7 @@ hyscan_gtk_profile_editor_hw_add_helper (HyScanGtkProfileEditorHW *self,
 
   id = hyscan_profile_hw_device_get_group (device);
   param = hyscan_gtk_param_list_new_full (HYSCAN_PARAM (device), NULL, FALSE);
+  hyscan_gtk_param_set_immidiate (HYSCAN_GTK_PARAM (param), TRUE);
   gtk_widget_show_all (param);
 
   g_hash_table_insert (priv->known, g_strdup (id), g_object_ref (device));
