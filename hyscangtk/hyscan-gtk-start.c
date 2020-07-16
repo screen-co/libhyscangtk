@@ -74,7 +74,8 @@ struct _HyScanGtkStartPrivate
   GtkWidget *percentage;
   GtkWidget *cancel;
 
-
+  HyScanProfileHW *hw;
+  // HyScanProfileHW *hw;
 
 };
 
@@ -98,7 +99,7 @@ static void
 hyscan_gtk_start_class_init (HyScanGtkStartClass *klass)
 {
   GObjectClass *oclass = G_OBJECT_CLASS (klass);
-  GtkWidgetClass *oclass = GTK_WIDGET_CLASS (klass);
+  GtkWidgetClass *wclass = GTK_WIDGET_CLASS (klass);
 
   oclass->set_property = hyscan_gtk_start_set_property;
   oclass->constructed = hyscan_gtk_start_object_constructed;
@@ -125,6 +126,14 @@ hyscan_gtk_start_class_init (HyScanGtkStartClass *klass)
   gtk_widget_class_bind_template_callback (wclass, hyscan_gtk_start_view);
   gtk_widget_class_bind_template_callback (wclass, hyscan_gtk_start_scan);
   gtk_widget_class_bind_template_callback (wclass, hyscan_gtk_start_cancel);
+
+  g_object_class_install_property (oclass, PROP_FOLDERS,
+    g_param_spec_pointer ("drivers", "Drivers", "Drivers search paths",
+                          G_PARAM_CONSTRUCT | G_PARAM_WRITABLE));
+
+  g_object_class_install_property (oclass, PROP_DRIVERS,
+    g_param_spec_pointer ("drivers", "Drivers", "Drivers search paths",
+                          G_PARAM_CONSTRUCT | G_PARAM_WRITABLE));
 }
 
 static void
@@ -172,40 +181,50 @@ hyscan_gtk_start_object_finalize (GObject *object)
 static void
 hyscan_gtk_start_settings (HyScanGtkStart *self)
 {
-g_message("not implemented");
+  g_message("not implemented");
 }
 
 static void
 hyscan_gtk_start_select_project (HyScanGtkStart *self)
 {
-g_message("not implemented");
+  g_message("not implemented");
 }
 
 static void
 hyscan_gtk_start_select_hardware (HyScanGtkStart *self)
 {
+  HyScanGtkStartPrivate *priv = self->priv;
   GtkWidget *dialog, *content, *selector;
   GtkDialogFlags flags = GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT;
+  gint res;
+
   dialog = gtk_dialog_new_with_buttons (_("Select Hardware"),
-                                        gtk_widget_get_toplevel (GTK_WIDGET (self)),
-                                        flags,
-                                        _("_OK"),
-                                        GTK_RESPONSE_OK,
-                                        _("_Cancel"),
-                                        GTK_RESPONSE_CANCEL,
+                                        GTK_WINDOW (self), flags,
+                                        _("_OK"), GTK_RESPONSE_OK,
+                                        _("_Cancel"), GTK_RESPONSE_CANCEL,
                                         NULL);
 
   content = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
   selector = hyscan_gtk_profile_hw_new (priv->folders, priv->drivers, FALSE);
   gtk_container_add (GTK_CONTAINER (content), selector);
 
-  if (GTK_RESPONSE_CANCEL == gtk_dialog_run (GTK_DIALOG (dialog)))
+  res = gtk_dialog_run (GTK_DIALOG (dialog));
+  /* Если пользователь нажмёт Ок, я просто заменю профиль. Если отмена,
+   * то я попробую повторно считать профиль, на тот случай если пользователь
+   * все профили удалил, а потом нажал отмену. */
+  if (GTK_RESPONSE_CANCEL == res)
     {
-      gtk_widget_destroy (GTK_WIDGET (dialog));
-      return;
+      if (!hyscan_profile_read (HYSCAN_PROFILE (priv->hw)))
+        g_clear_object (&priv->hw);
+    }
+  else
+    {
+      g_clear_object (&priv->hw);
+      priv->hw = hyscan_gtk_profile_get_profile (HYSCAN_GTK_PROFILE (selector));
     }
 
-
+  // TODO: update ui!
+  gtk_widget_destroy (GTK_WIDGET (dialog));
 }
 
 static void

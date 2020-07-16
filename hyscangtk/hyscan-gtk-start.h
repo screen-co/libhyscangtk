@@ -37,6 +37,7 @@
 
 #include <gtk/gtk.h>
 #include <hyscan-api.h>
+#include <hyscan-param.h>
 #include <hyscan-db.h>
 #include <hyscan-control.h>
 

@@ -90,6 +90,9 @@ struct _HyScanGtkProfileClass
 HYSCAN_API
 GType                  hyscan_gtk_profile_get_type         (void);
 
+HYSCAN_API
+HyScanProfile *        hyscan_gtk_profile_get_profile      (HyScanGtkProfile *self);
+
 G_END_DECLS
 
 #endif /* __HYSCAN_GTK_PROFILE_H__ */
