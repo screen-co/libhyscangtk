@@ -544,3 +544,15 @@ hyscan_gtk_profile_sanity_check (HyScanGtkProfileEditor *editor,
   gboolean sane = hyscan_gtk_profile_editor_get_sanity (editor);
   gtk_dialog_set_response_sensitive (dialog, RESPONSE_APPLY, sane);
 }
+
+HyScanProfile *
+hyscan_gtk_profile_get_profile (HyScanGtkProfile *self)
+{
+  g_return_val_if_fail (HYSCAN_IS_GTK_PROFILE (self), NULL);
+
+  if (self->priv->selected_profile == NULL)
+    return NULL;
+
+  return g_object_ref (self->priv->selected_profile);
+
+}

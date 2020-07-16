@@ -8,5 +8,6 @@
         <file compressed="true">hyscan-gtk-device-manual.ui</file>
         <file compressed="true">hyscan-gtk-profile-editor-offset.ui</file>
         <file compressed="true">hyscan-gtk-profile-editor-offset-page.ui</file>
+        <file compressed="true">hyscan-gtk-start.ui</file>
     </gresource>
 </gresources>
