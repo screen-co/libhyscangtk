@@ -184,6 +184,27 @@ g_message("not implemented");
 static void
 hyscan_gtk_start_select_hardware (HyScanGtkStart *self)
 {
+  GtkWidget *dialog, *content, *selector;
+  GtkDialogFlags flags = GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT;
+  dialog = gtk_dialog_new_with_buttons (_("Select Hardware"),
+                                        gtk_widget_get_toplevel (GTK_WIDGET (self)),
+                                        flags,
+                                        _("_OK"),
+                                        GTK_RESPONSE_OK,
+                                        _("_Cancel"),
+                                        GTK_RESPONSE_CANCEL,
+                                        NULL);
+
+  content = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+  selector = hyscan_gtk_profile_hw_new (priv->folders, priv->drivers, FALSE);
+  gtk_container_add (GTK_CONTAINER (content), selector);
+
+  if (GTK_RESPONSE_CANCEL == gtk_dialog_run (GTK_DIALOG (dialog)))
+    {
+      gtk_widget_destroy (GTK_WIDGET (dialog));
+      return;
+    }
+
 
 }
 
