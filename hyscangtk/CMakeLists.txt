@@ -29,6 +29,7 @@ add_library (${HYSCAN_GTK_LIBRARY} SHARED
              hyscan-gtk-param-cc.c
              hyscan-gtk-param-tree.c
              hyscan-gtk-param-merge.c
+             hyscan-gtk-param-box.c
              hyscan-gtk-profile.c
              hyscan-gtk-profile-editor.c
              hyscan-gtk-profile-editor-db.c
