@@ -116,6 +116,8 @@ static gint64     hyscan_gtk_param_key_enum_val              (const gchar       
 static GtkWidget* hyscan_gtk_param_key_make_editor           (HyScanGtkParamKey     *self);
 static GtkWidget* hyscan_gtk_param_key_make_editor_boolean   (HyScanDataSchema      *schema,
                                                               HyScanDataSchemaKey   *key);
+static GtkWidget* hyscan_gtk_param_key_make_editor_btn       (HyScanDataSchema      *schema,
+                                                              HyScanDataSchemaKey   *key);
 static GtkWidget* hyscan_gtk_param_key_make_editor_integer   (HyScanDataSchema      *schema,
                                                               HyScanDataSchemaKey   *key);
 static GtkWidget* hyscan_gtk_param_key_make_editor_time      (HyScanDataSchema      *schema,
@@ -130,6 +132,8 @@ static GtkWidget* hyscan_gtk_param_key_make_editor_enum      (HyScanDataSchema  
                                                               HyScanDataSchemaKey   *key);
 static void       hyscan_gtk_param_key_notify_boolean        (GObject               *object,
                                                               GParamSpec            *pspec,
+                                                              gpointer               udata);
+static void       hyscan_gtk_param_key_notify_btn            (GObject               *object,
                                                               gpointer               udata);
 static void       hyscan_gtk_param_key_notify_integer        (GObject               *object,
                                                               GParamSpec            *pspec,
@@ -219,30 +223,36 @@ hyscan_gtk_param_key_object_constructed (GObject *object)
   HyScanGtkParamKey *self = HYSCAN_GTK_PARAM_KEY (object);
   HyScanGtkParamKeyPrivate *priv = self->priv;
   gboolean sensitive = (priv->key->access & HYSCAN_DATA_SCHEMA_ACCESS_WRITE);
+  gboolean has_label = !(priv->key->type == HYSCAN_DATA_SCHEMA_KEY_BOOLEAN &&
+                         priv->key->access == HYSCAN_DATA_SCHEMA_ACCESS_WRITE);
 
   G_OBJECT_CLASS (hyscan_gtk_param_key_parent_class)->constructed (object);
 
-  priv->label = gtk_label_new (priv->key->name);
   priv->value = hyscan_gtk_param_key_make_editor (self);
-
-  gtk_widget_set_sensitive (priv->label, sensitive);
   gtk_widget_set_sensitive (priv->value, sensitive);
 
-  gtk_widget_set_tooltip_text (priv->label, priv->key->description);
-
-  gtk_label_set_xalign (GTK_LABEL (priv->label), 1.0);
-  gtk_widget_set_halign (priv->label, GTK_ALIGN_END);
-  gtk_widget_set_hexpand (priv->label, FALSE);
-
-  if (priv->key->type == HYSCAN_DATA_SCHEMA_KEY_BOOLEAN)
+  if (priv->key->type == HYSCAN_DATA_SCHEMA_KEY_BOOLEAN && has_label)
     gtk_widget_set_halign (priv->value, GTK_ALIGN_START);
   else
     gtk_widget_set_halign (priv->value, GTK_ALIGN_FILL);
   gtk_widget_set_hexpand (priv->value, TRUE);
 
   gtk_grid_set_column_spacing (GTK_GRID (self), 12);
-  gtk_grid_attach (GTK_GRID (self), priv->label, 0, 0, 1, 1);
   gtk_grid_attach (GTK_GRID (self), priv->value, 1, 0, 1, 1);
+
+  if (has_label)
+    {
+      priv->label = gtk_label_new (priv->key->name);
+      gtk_widget_set_sensitive (priv->label, sensitive);
+
+      gtk_label_set_xalign (GTK_LABEL (priv->label), 1.0);
+      gtk_widget_set_halign (priv->label, GTK_ALIGN_END);
+      gtk_widget_set_hexpand (priv->label, FALSE);
+
+      gtk_grid_attach (GTK_GRID (self), priv->label, 0, 0, 1, 1);
+    }
+
+  gtk_widget_set_tooltip_text (has_label ? priv->label : priv->value, priv->key->description);
 
   gtk_widget_set_name (GTK_WIDGET (self), priv->key->id);
 }
@@ -304,9 +314,18 @@ hyscan_gtk_param_key_make_editor (HyScanGtkParamKey *self)
   switch (key->type)
     {
     case HYSCAN_DATA_SCHEMA_KEY_BOOLEAN:
-      editor = hyscan_gtk_param_key_make_editor_boolean (schema, key);
-      signal = "notify::active";
-      cbk = hyscan_gtk_param_key_notify_boolean;
+      if (key->access == HYSCAN_DATA_SCHEMA_ACCESS_WRITE)
+        {
+          editor = hyscan_gtk_param_key_make_editor_btn (schema, key);
+          signal = "clicked";
+          cbk = hyscan_gtk_param_key_notify_btn;
+        }
+      else
+        {
+          editor = hyscan_gtk_param_key_make_editor_boolean (schema, key);
+          signal = "notify::active";
+          cbk = hyscan_gtk_param_key_notify_boolean;
+        }
       break;
 
     case HYSCAN_DATA_SCHEMA_KEY_INTEGER:
@@ -389,6 +408,14 @@ hyscan_gtk_param_key_make_editor_boolean (HyScanDataSchema    *schema,
   g_clear_pointer (&def, g_variant_unref);
 
   return editor;
+}
+
+/* Функция создает редактор для булевых write-only значений. */
+static GtkWidget *
+hyscan_gtk_param_key_make_editor_btn (HyScanDataSchema    *schema,
+                                      HyScanDataSchemaKey *key)
+{
+  return gtk_button_new_with_label (key->name);
 }
 
 /* Функция создает редактор для целых значений. */
@@ -628,6 +655,18 @@ hyscan_gtk_param_key_notify_boolean (GObject    *object,
 
   g_object_get (object, pspec->name, &val, NULL);
   variant = g_variant_new_boolean (val);
+  hyscan_gtk_param_key_emit_variant (self, variant);
+}
+
+/* Функция уведомления о смене булева значения кнопки. */
+static void
+hyscan_gtk_param_key_notify_btn (GObject    *object,
+                                 gpointer    udata)
+{
+  HyScanGtkParamKey *self = udata;
+  GVariant *variant;
+
+  variant = g_variant_new_boolean (TRUE);
   hyscan_gtk_param_key_emit_variant (self, variant);
 }
 
@@ -1021,7 +1060,7 @@ hyscan_gtk_param_key_add_to_size_group (HyScanGtkParamKey *self,
       g_clear_object (&priv->hsize);
     }
 
-  if (group != NULL)
+  if (group != NULL && priv->label != NULL)
     {
       gtk_size_group_add_widget (group, priv->label);
       priv->hsize = g_object_ref (group);
