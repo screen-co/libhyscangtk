@@ -526,6 +526,9 @@ hyscan_gtk_param_set_watch_list (HyScanGtkParam  *self,
 
   for (; *params != NULL; ++params)
     {
+      if (!(hyscan_data_schema_key_get_access (priv->schema, *params) & HYSCAN_DATA_SCHEMA_ACCESS_READ))
+        continue;
+
       hyscan_param_list_add (priv->watch, *params);
       hyscan_param_list_add (priv->previous, *params);
     }
