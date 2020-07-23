@@ -85,7 +85,7 @@ hyscan_gtk_param_box_add_widgets (HyScanGtkParamBox   *self,
                                    HyScanParamList      *plist,
                                    GtkSizeGroup         *size)
 {
-  GtkWidget *widget, *box;
+  GtkWidget *widget, *frame, *box;
   GList *link;
   gboolean show_hidden;
   GHashTable *widgets;
@@ -113,10 +113,15 @@ hyscan_gtk_param_box_add_widgets (HyScanGtkParamBox   *self,
   if (title == NULL)
     title = node->name;
   if (title == NULL)
-    title = node->path;
+    title = g_strcmp0 (node->path, "/") == 0 ? NULL : node->path;
+
+  frame = gtk_frame_new (title);
+  gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_NONE);
 
   box = gtk_list_box_new ();
   gtk_list_box_set_selection_mode (GTK_LIST_BOX (box), GTK_SELECTION_NONE);
+
+  gtk_container_add (GTK_CONTAINER (frame), box);
 
   for (link = node->keys; link != NULL; link = link->next)
     {
@@ -139,7 +144,7 @@ hyscan_gtk_param_box_add_widgets (HyScanGtkParamBox   *self,
       gtk_list_box_insert (GTK_LIST_BOX (box), widget, -1);
     }
 
-  gtk_box_pack_start (GTK_BOX (self->priv->box), box, FALSE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (self->priv->box), frame, FALSE, TRUE, 0);
 }
 
 static void
