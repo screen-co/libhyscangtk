@@ -71,8 +71,8 @@ struct _HyScanGtkPanedPrivate
 
 static void     hyscan_gtk_paned_object_constructed       (GObject               *object);
 static void     hyscan_gtk_paned_object_finalize          (GObject               *object);
-static void     hyscan_gtk_map_kit_paned_position         (HyScanGtkPaned        *self);
-static void     hyscan_gtk_map_kit_revealer_closed        (HyScanGtkPaned        *self);
+static void     hyscan_gtk_paned_position                 (HyScanGtkPaned        *self);
+static void     hyscan_gtk_paned_revealer_closed          (HyScanGtkPaned        *self);
 static void     hyscan_gtk_paned_child_free               (HyScanGtkPanedChild   *child);
 static void     hyscan_gtk_paned_btn_active               (HyScanGtkPanedChild   *clicked_child);
 
@@ -123,9 +123,9 @@ hyscan_gtk_paned_object_constructed (GObject *object)
   gtk_container_add (GTK_CONTAINER (gtk_paned), box);
 
   g_signal_connect_swapped (priv->revealer, "notify::child-revealed",
-                            G_CALLBACK (hyscan_gtk_map_kit_revealer_closed), gtk_paned);
+                            G_CALLBACK (hyscan_gtk_paned_revealer_closed), gtk_paned);
   g_signal_connect_swapped (priv->paned, "notify::position",
-                            G_CALLBACK (hyscan_gtk_map_kit_paned_position), gtk_paned);
+                            G_CALLBACK (hyscan_gtk_paned_position), gtk_paned);
 }
 
 static void
@@ -148,7 +148,7 @@ hyscan_gtk_paned_child_free (HyScanGtkPanedChild *child)
 
 /* Управляет размером области панелей. */
 static void
-hyscan_gtk_map_kit_revealer_closed (HyScanGtkPaned *self)
+hyscan_gtk_paned_revealer_closed (HyScanGtkPaned *self)
 {
   HyScanGtkPanedPrivate *priv = self->priv;
   GtkRevealer *revealer = GTK_REVEALER (priv->revealer);
@@ -170,7 +170,7 @@ hyscan_gtk_map_kit_revealer_closed (HyScanGtkPaned *self)
 
 /* Запрещает изменять размер GtkPaned, если область панелей закрыта. */
 static void
-hyscan_gtk_map_kit_paned_position (HyScanGtkPaned *self)
+hyscan_gtk_paned_position (HyScanGtkPaned *self)
 {
   HyScanGtkPanedPrivate *priv = self->priv;
   GtkRevealer *revealer = GTK_REVEALER (priv->revealer);
