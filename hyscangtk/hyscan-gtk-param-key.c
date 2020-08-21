@@ -223,8 +223,7 @@ hyscan_gtk_param_key_object_constructed (GObject *object)
   HyScanGtkParamKey *self = HYSCAN_GTK_PARAM_KEY (object);
   HyScanGtkParamKeyPrivate *priv = self->priv;
   gboolean sensitive = (priv->key->access & HYSCAN_DATA_SCHEMA_ACCESS_WRITE);
-  gboolean has_label = !(priv->key->type == HYSCAN_DATA_SCHEMA_KEY_BOOLEAN &&
-                         priv->key->access == HYSCAN_DATA_SCHEMA_ACCESS_WRITE);
+  gboolean has_label = (priv->key->view != HYSCAN_DATA_SCHEMA_VIEW_BUTTON);
 
   G_OBJECT_CLASS (hyscan_gtk_param_key_parent_class)->constructed (object);
 
@@ -314,7 +313,7 @@ hyscan_gtk_param_key_make_editor (HyScanGtkParamKey *self)
   switch (key->type)
     {
     case HYSCAN_DATA_SCHEMA_KEY_BOOLEAN:
-      if (key->access == HYSCAN_DATA_SCHEMA_ACCESS_WRITE)
+      if (key->view == HYSCAN_DATA_SCHEMA_VIEW_BUTTON && key->access == HYSCAN_DATA_SCHEMA_ACCESS_WRITE)
         {
           editor = hyscan_gtk_param_key_make_editor_btn (schema, key);
           signal = "clicked";
@@ -401,9 +400,16 @@ hyscan_gtk_param_key_make_editor_boolean (HyScanDataSchema    *schema,
   if (def != NULL)
     active = g_variant_get_boolean (def);
 
-  editor = gtk_switch_new ();
-
-  gtk_switch_set_active (GTK_SWITCH (editor), active);
+  if (key->view == HYSCAN_DATA_SCHEMA_VIEW_BUTTON)
+    {
+      editor = gtk_toggle_button_new_with_label (key->name);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (editor), active);
+    }
+  else
+    {
+      editor = gtk_switch_new ();
+      gtk_switch_set_active (GTK_SWITCH (editor), active);
+    }
 
   g_clear_pointer (&def, g_variant_unref);
 
@@ -864,7 +870,10 @@ hyscan_gtk_param_key_set (HyScanGtkParamKey *self,
           break;
 
         val = g_variant_get_boolean (value);
-        gtk_switch_set_active (GTK_SWITCH (priv->value), val);
+        if (priv->key->view == HYSCAN_DATA_SCHEMA_VIEW_BUTTON)
+          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->value), val);
+        else
+          gtk_switch_set_active (GTK_SWITCH (priv->value), val);
         break;
       }
 

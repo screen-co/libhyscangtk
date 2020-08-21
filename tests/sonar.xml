@@ -59,6 +59,12 @@
     <key id="rgba" name="Полупрозрачный цвет" type="string" view="rgba">
       <default>rgba(0, 255, 0, 0.4)</default>
     </key>
+    <key id="button" name="Кнопка" type="boolean" view="button">
+      <default>true</default>
+    </key>
+    <key id="button-wo" name="Кнопка (write-only)" type="boolean" view="button" access="w">
+      <default>true</default>
+    </key>
   </schema>
 
   <schema id="allkeys-ro" name="All Keys Read Only"><description>Every single key in RO mode</description>
