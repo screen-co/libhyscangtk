@@ -15,9 +15,14 @@
         <file compressed="true">icons/appointment-new.png</file>
         <file compressed="true">icons/avatar-default.png</file>
         <file compressed="true">icons/content-loading-symbolic.symbolic.png</file>
+        <file compressed="true">icons/depth.png</file>
+        <file compressed="true">icons/dialog-information.png</file>
+        <file compressed="true">icons/dialog-question.png</file>
+        <file compressed="true">icons/dialog-warning.png</file>
         <file compressed="true">icons/document-open-recent.png</file>
         <file compressed="true">icons/emblem-default.png</file>
         <file compressed="true">icons/emblem-photos.png</file>
+        <file compressed="true">icons/emblem-new.png</file>
         <file compressed="true">icons/go-down.png</file>
         <file compressed="true">icons/go-next.png</file>
         <file compressed="true">icons/go-previous.png</file>
@@ -28,10 +33,13 @@
         <file compressed="true">icons/main-48x48.png</file>
         <file compressed="true">icons/main-64x64.png</file>
         <file compressed="true">icons/mark-location.png</file>
+        <file compressed="true">icons/multy-object.png</file>
         <file compressed="true">icons/network-wireless-no-route-symbolic.symbolic.png</file>
+        <file compressed="true">icons/object.png</file>
         <file compressed="true">icons/object-flip-vertical.png</file>
         <file compressed="true">icons/object-flip-horizontal.png</file>
         <file compressed="true">icons/preferences-desktop-locale.png</file>
         <file compressed="true">icons/preferences-system-sharing.png</file>
+        <file compressed="true">icons/shallow.png</file>
     </gresource>
 </gresources>
