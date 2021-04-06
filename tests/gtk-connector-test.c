@@ -19,7 +19,8 @@ main (int argc, char **argv)
 {
   gtk_init (&argc, &argv);
 
-  window = hyscan_gtk_connector_new ((gchar **)hyscan_config_get_profile_dirs (),
+  const gchar *folders[2] = {hyscan_config_get_user_dir (), NULL};
+  window = hyscan_gtk_connector_new ((gchar**)folders,
                                      (gchar**)paths);
   g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
   g_signal_connect (window, "cancel", G_CALLBACK (cancel_close), "Cancel");

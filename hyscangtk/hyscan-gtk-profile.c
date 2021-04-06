@@ -408,7 +408,7 @@ hyscan_gtk_profile_add (HyScanGtkProfile *self)
   GHashTable *files;
 
   /* Сначала сгененрируем новое уникальное имя для профиля. */
-  folder = g_build_filename (hyscan_config_get_user_files_dir(), klass->subfolder, NULL);
+  folder = g_build_filename (hyscan_config_get_user_dir(), klass->subfolder, NULL);
   files = hyscan_gtk_profile_get_files (folder, TRUE);
 
   do
